@@ -243,8 +243,14 @@ export function CranesTable({ selectedFactory, selectedCrane }: CranesTableProps
                     </Badge>
                   </TableCell>
                   <TableCell className="px-6 py-4">
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600">
-                      ⋯
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 px-3 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                      onClick={() => setLocation(`/maintenance-history/${crane.craneId}`)}
+                    >
+                      <History className="h-4 w-4 mr-1" />
+                      이력
                     </Button>
                   </TableCell>
                 </TableRow>
