@@ -13,6 +13,18 @@ export const cranes = pgTable("cranes", {
   isUrgent: boolean("is_urgent").default(false),
 });
 
+export const failureRecords = pgTable("failure_records", {
+  id: serial("id").primaryKey(),
+  craneId: text("crane_id").notNull(),
+  date: text("date").notNull(),
+  failureType: text("failure_type").notNull(), // 'hydraulic', 'electrical', 'mechanical', 'structural'
+  description: text("description").notNull(),
+  severity: text("severity").notNull(), // 'low', 'medium', 'high', 'critical'
+  downtime: integer("downtime"), // in hours
+  cause: text("cause"),
+  reportedBy: text("reported_by"),
+});
+
 export const maintenanceRecords = pgTable("maintenance_records", {
   id: serial("id").primaryKey(),
   craneId: text("crane_id").notNull(),
@@ -23,6 +35,7 @@ export const maintenanceRecords = pgTable("maintenance_records", {
   notes: text("notes"),
   duration: integer("duration"), // in hours
   cost: integer("cost"), // in cents
+  relatedFailureId: integer("related_failure_id"), // reference to failure record if applicable
 });
 
 export const alerts = pgTable("alerts", {
@@ -39,6 +52,10 @@ export const insertCraneSchema = createInsertSchema(cranes).omit({
   id: true,
 });
 
+export const insertFailureRecordSchema = createInsertSchema(failureRecords).omit({
+  id: true,
+});
+
 export const insertMaintenanceRecordSchema = createInsertSchema(maintenanceRecords).omit({
   id: true,
 });
@@ -49,6 +66,8 @@ export const insertAlertSchema = createInsertSchema(alerts).omit({
 
 export type Crane = typeof cranes.$inferSelect;
 export type InsertCrane = z.infer<typeof insertCraneSchema>;
+export type FailureRecord = typeof failureRecords.$inferSelect;
+export type InsertFailureRecord = z.infer<typeof insertFailureRecordSchema>;
 export type MaintenanceRecord = typeof maintenanceRecords.$inferSelect;
 export type InsertMaintenanceRecord = z.infer<typeof insertMaintenanceRecordSchema>;
 export type Alert = typeof alerts.$inferSelect;

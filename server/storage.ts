@@ -1,9 +1,12 @@
 import { 
   cranes, 
+  failureRecords,
   maintenanceRecords, 
   alerts,
   type Crane, 
   type InsertCrane,
+  type FailureRecord,
+  type InsertFailureRecord,
   type MaintenanceRecord,
   type InsertMaintenanceRecord,
   type Alert,
@@ -21,6 +24,12 @@ export interface IStorage {
   createCrane(crane: InsertCrane): Promise<Crane>;
   updateCrane(id: number, crane: Partial<InsertCrane>): Promise<Crane | undefined>;
   
+  // Failure record operations
+  getFailureRecords(): Promise<FailureRecord[]>;
+  getFailureRecord(id: number): Promise<FailureRecord | undefined>;
+  getFailureRecordsByCraneId(craneId: string): Promise<FailureRecord[]>;
+  createFailureRecord(record: InsertFailureRecord): Promise<FailureRecord>;
+  
   // Maintenance record operations
   getMaintenanceRecords(): Promise<MaintenanceRecord[]>;
   getMaintenanceRecord(id: number): Promise<MaintenanceRecord | undefined>;
@@ -36,25 +45,30 @@ export interface IStorage {
   // Dashboard analytics
   getDashboardSummary(): Promise<DashboardSummary>;
   getMaintenanceStats(): Promise<MaintenanceStats[]>;
+  getFailureStats(): Promise<MaintenanceStats[]>;
   getMonthlyTrends(): Promise<MonthlyTrend[]>;
   
   // Google Sheets sync
-  syncDataFromSheets(cranesData: any[], maintenanceData: any[]): Promise<void>;
+  syncDataFromSheets(cranesData: any[], failureData: any[], maintenanceData: any[]): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
   private cranes: Map<number, Crane>;
+  private failureRecords: Map<number, FailureRecord>;
   private maintenanceRecords: Map<number, MaintenanceRecord>;
   private alerts: Map<number, Alert>;
   private currentCraneId: number;
+  private currentFailureId: number;
   private currentMaintenanceId: number;
   private currentAlertId: number;
 
   constructor() {
     this.cranes = new Map();
+    this.failureRecords = new Map();
     this.maintenanceRecords = new Map();
     this.alerts = new Map();
     this.currentCraneId = 1;
+    this.currentFailureId = 1;
     this.currentMaintenanceId = 1;
     this.currentAlertId = 1;
     
@@ -109,6 +123,40 @@ export class MemStorage implements IStorage {
         lastMaintenanceDate: "2024-05-18",
         nextMaintenanceDate: "2024-06-18",
         isUrgent: false
+      }
+    ];
+
+    // Sample failure records
+    const sampleFailureRecords = [
+      {
+        craneId: "CR-002",
+        date: "2024-05-19",
+        failureType: "hydraulic",
+        description: "Hydraulic pump failure causing loss of lifting capacity",
+        severity: "high",
+        downtime: 24,
+        cause: "Seal wear and contamination",
+        reportedBy: "Operations Team"
+      },
+      {
+        craneId: "CR-004",
+        date: "2024-04-29",
+        failureType: "electrical",
+        description: "Main control circuit breaker tripped repeatedly",
+        severity: "critical",
+        downtime: 48,
+        cause: "Overload due to worn motor bearings",
+        reportedBy: "Site Supervisor"
+      },
+      {
+        craneId: "CR-003",
+        date: "2024-04-24",
+        failureType: "mechanical",
+        description: "Wire rope showing signs of wear and fraying",
+        severity: "medium",
+        downtime: 12,
+        cause: "Normal wear exceeding replacement interval",
+        reportedBy: "Safety Inspector"
       }
     ];
 
@@ -191,6 +239,11 @@ export class MemStorage implements IStorage {
       await this.createCrane(crane);
     }
 
+    // Create failure records
+    for (const record of sampleFailureRecords) {
+      await this.createFailureRecord(record);
+    }
+
     // Create maintenance records
     for (const record of sampleMaintenanceRecords) {
       await this.createMaintenanceRecord(record);
@@ -234,6 +287,32 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  async getFailureRecords(): Promise<FailureRecord[]> {
+    return Array.from(this.failureRecords.values());
+  }
+
+  async getFailureRecord(id: number): Promise<FailureRecord | undefined> {
+    return this.failureRecords.get(id);
+  }
+
+  async getFailureRecordsByCraneId(craneId: string): Promise<FailureRecord[]> {
+    return Array.from(this.failureRecords.values())
+      .filter(record => record.craneId === craneId);
+  }
+
+  async createFailureRecord(insertRecord: InsertFailureRecord): Promise<FailureRecord> {
+    const id = this.currentFailureId++;
+    const record: FailureRecord = { 
+      ...insertRecord, 
+      id,
+      downtime: insertRecord.downtime || null,
+      cause: insertRecord.cause || null,
+      reportedBy: insertRecord.reportedBy || null
+    };
+    this.failureRecords.set(id, record);
+    return record;
+  }
+
   async getMaintenanceRecords(): Promise<MaintenanceRecord[]> {
     return Array.from(this.maintenanceRecords.values());
   }
@@ -254,7 +333,8 @@ export class MemStorage implements IStorage {
       id,
       notes: insertRecord.notes || null,
       duration: insertRecord.duration || null,
-      cost: insertRecord.cost || null
+      cost: insertRecord.cost || null,
+      relatedFailureId: insertRecord.relatedFailureId || null
     };
     this.maintenanceRecords.set(id, record);
     return record;
