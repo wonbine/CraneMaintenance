@@ -50,6 +50,7 @@ export interface IStorage {
   getMaintenanceStats(): Promise<MaintenanceStats[]>;
   getFailureStats(): Promise<MaintenanceStats[]>;
   getMonthlyTrends(): Promise<MonthlyTrend[]>;
+  getMonthlyFailureStats(craneId?: string, factory?: string): Promise<MonthlyTrend[]>;
   
   // Factory and crane filters
   getUniqueFactories(): Promise<string[]>;
@@ -482,6 +483,41 @@ export class MemStorage implements IStorage {
     return Array.from(trends.entries()).map(([month, count]) => ({ month, count }));
   }
 
+  async getMonthlyFailureStats(craneId?: string, factory?: string): Promise<MonthlyTrend[]> {
+    let records = Array.from(this.failureRecords.values());
+    
+    // Filter by crane if specified
+    if (craneId && craneId !== 'all') {
+      records = records.filter(record => record.craneId === craneId);
+    }
+    
+    // Filter by factory if specified
+    if (factory && factory !== 'all') {
+      const cranesList = Array.from(this.cranes.values());
+      const factoryCranes = cranesList.filter(crane => crane.plantSection === factory);
+      const factoryCraneIds = factoryCranes.map(crane => crane.craneId);
+      records = records.filter(record => factoryCraneIds.includes(record.craneId));
+    }
+    
+    const trends = new Map<string, number>();
+    
+    records.forEach(record => {
+      const date = new Date(record.date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const count = trends.get(monthKey) || 0;
+      trends.set(monthKey, count + 1);
+    });
+    
+    // Sort by month and format for display
+    return Array.from(trends.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, count]) => {
+        const [year, monthNum] = month.split('-');
+        const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('ko-KR', { month: 'short' });
+        return { month: `${year}년 ${monthName}`, count };
+      });
+  }
+
   async getUniqueFactories(): Promise<string[]> {
     const factories = new Set<string>();
     Array.from(this.cranes.values()).forEach(crane => {
@@ -828,6 +864,8 @@ export class DatabaseStorage implements IStorage {
     return Array.from(stats.entries()).map(([type, count]) => ({ type, count }));
   }
 
+
+
   async getMonthlyTrends(): Promise<MonthlyTrend[]> {
     const records = await this.getMaintenanceRecords();
     const trends = new Map<string, number>();
@@ -840,6 +878,41 @@ export class DatabaseStorage implements IStorage {
     });
     
     return Array.from(trends.entries()).map(([month, count]) => ({ month, count }));
+  }
+
+  async getMonthlyFailureStats(craneId?: string, factory?: string): Promise<MonthlyTrend[]> {
+    let records = Array.from(this.failureRecords.values());
+    
+    // Filter by crane if specified
+    if (craneId && craneId !== 'all') {
+      records = records.filter(record => record.craneId === craneId);
+    }
+    
+    // Filter by factory if specified
+    if (factory && factory !== 'all') {
+      const cranesList = Array.from(this.cranes.values());
+      const factoryCranes = cranesList.filter(crane => crane.plantSection === factory);
+      const factoryCraneIds = factoryCranes.map(crane => crane.craneId);
+      records = records.filter(record => factoryCraneIds.includes(record.craneId));
+    }
+    
+    const trends = new Map<string, number>();
+    
+    records.forEach(record => {
+      const date = new Date(record.date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const count = trends.get(monthKey) || 0;
+      trends.set(monthKey, count + 1);
+    });
+    
+    // Sort by month and format for display
+    return Array.from(trends.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, count]) => {
+        const [year, monthNum] = month.split('-');
+        const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('ko-KR', { month: 'short' });
+        return { month: `${year}년 ${monthName}`, count };
+      });
   }
 
   async getUniqueFactories(): Promise<string[]> {

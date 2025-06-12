@@ -230,6 +230,25 @@ export default function Dashboard() {
     enabled: !!filters.selectedCrane && filters.selectedCrane !== 'all'
   });
 
+  // Fetch monthly failure statistics data
+  const { data: monthlyFailureData = [] } = useQuery({
+    queryKey: ['/api/analytics/monthly-failure-stats', filters.selectedCrane, filters.selectedFactory],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.selectedCrane && filters.selectedCrane !== 'all') {
+        params.append('craneId', crane?.craneId || '');
+      }
+      if (filters.selectedFactory && filters.selectedFactory !== 'all') {
+        params.append('factory', filters.selectedFactory);
+      }
+
+      const response = await fetch(`/api/analytics/monthly-failure-stats?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch monthly failure data');
+      return response.json();
+    },
+    enabled: !!filters.selectedCrane && filters.selectedCrane !== 'all'
+  });
+
   const DonutChart = ({ data, title, total }: { data: any[], title: string, total: number }) => {
     if (!data || data.length === 0 || total === 0) {
       return (

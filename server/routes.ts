@@ -391,6 +391,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get monthly failure statistics
+  app.get("/api/analytics/monthly-failure-stats", async (req, res) => {
+    try {
+      const { craneId, factory } = req.query;
+      const stats = await storage.getMonthlyFailureStats(
+        craneId as string,
+        factory as string
+      );
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching monthly failure stats:", error);
+      res.status(500).json({ message: "Failed to fetch monthly failure stats" });
+    }
+  });
+
   // Get active alerts
   app.get("/api/alerts", async (req, res) => {
     try {
