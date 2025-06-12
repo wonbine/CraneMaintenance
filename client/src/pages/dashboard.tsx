@@ -17,6 +17,7 @@ import type { DashboardSummary } from "@shared/schema";
 
 export default function Dashboard() {
   const [cranesUrl, setCranesUrl] = useState("");
+  const [failureUrl, setFailureUrl] = useState("");
   const [maintenanceUrl, setMaintenanceUrl] = useState("");
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>("Never");
@@ -29,7 +30,7 @@ export default function Dashboard() {
   });
 
   const refreshMutation = useMutation({
-    mutationFn: async (urls?: { cranesUrl: string; maintenanceUrl: string }) => {
+    mutationFn: async (urls?: { cranesUrl: string; failureUrl: string; maintenanceUrl: string }) => {
       const response = await apiRequest("POST", "/api/refresh-data", urls);
       return response.json();
     },
@@ -51,7 +52,7 @@ export default function Dashboard() {
   });
 
   const syncMutation = useMutation({
-    mutationFn: async (urls: { cranesUrl: string; maintenanceUrl: string }) => {
+    mutationFn: async (urls: { cranesUrl: string; failureUrl: string; maintenanceUrl: string }) => {
       const response = await apiRequest("POST", "/api/sync-sheets", urls);
       return response.json();
     },
@@ -74,8 +75,8 @@ export default function Dashboard() {
   });
 
   const handleRefresh = () => {
-    if (cranesUrl && maintenanceUrl) {
-      refreshMutation.mutate({ cranesUrl, maintenanceUrl });
+    if (cranesUrl && failureUrl && maintenanceUrl) {
+      refreshMutation.mutate({ cranesUrl, failureUrl, maintenanceUrl });
     } else {
       refreshMutation.mutate();
     }

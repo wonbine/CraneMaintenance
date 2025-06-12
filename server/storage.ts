@@ -389,6 +389,18 @@ export class MemStorage implements IStorage {
     return Array.from(stats.entries()).map(([type, count]) => ({ type, count }));
   }
 
+  async getFailureStats(): Promise<MaintenanceStats[]> {
+    const records = Array.from(this.failureRecords.values());
+    const stats = new Map<string, number>();
+    
+    records.forEach(record => {
+      const count = stats.get(record.failureType) || 0;
+      stats.set(record.failureType, count + 1);
+    });
+    
+    return Array.from(stats.entries()).map(([type, count]) => ({ type, count }));
+  }
+
   async getMonthlyTrends(): Promise<MonthlyTrend[]> {
     const records = Array.from(this.maintenanceRecords.values());
     const trends = new Map<string, number>();
@@ -403,14 +415,16 @@ export class MemStorage implements IStorage {
     return Array.from(trends.entries()).map(([month, count]) => ({ month, count }));
   }
 
-  async syncDataFromSheets(cranesData: any[], maintenanceData: any[]): Promise<void> {
+  async syncDataFromSheets(cranesData: any[], failureData: any[], maintenanceData: any[]): Promise<void> {
     // Clear existing data
     this.cranes.clear();
+    this.failureRecords.clear();
     this.maintenanceRecords.clear();
     this.alerts.clear();
     
     // Reset counters
     this.currentCraneId = 1;
+    this.currentFailureId = 1;
     this.currentMaintenanceId = 1;
     this.currentAlertId = 1;
     
@@ -429,6 +443,22 @@ export class MemStorage implements IStorage {
       }
     }
     
+    // Process failure records
+    for (const data of failureData) {
+      if (data.crane_id && data.date) {
+        await this.createFailureRecord({
+          craneId: data.crane_id,
+          date: data.date,
+          failureType: data.failure_type || 'mechanical',
+          description: data.description || '',
+          severity: data.severity || 'medium',
+          downtime: data.downtime ? parseInt(data.downtime) : null,
+          cause: data.cause || null,
+          reportedBy: data.reported_by || null,
+        });
+      }
+    }
+    
     // Process maintenance records
     for (const data of maintenanceData) {
       if (data.crane_id && data.date) {
@@ -441,6 +471,7 @@ export class MemStorage implements IStorage {
           notes: data.notes || null,
           duration: data.duration ? parseInt(data.duration) : null,
           cost: data.cost ? parseInt(data.cost) : null,
+          relatedFailureId: data.related_failure_id ? parseInt(data.related_failure_id) : null,
         });
       }
     }

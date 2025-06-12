@@ -49,6 +49,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get failure statistics
+  app.get("/api/analytics/failure-stats", async (req, res) => {
+    try {
+      const stats = await storage.getFailureStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching failure stats:", error);
+      res.status(500).json({ message: "Failed to fetch failure statistics" });
+    }
+  });
+
+  // Get failure records
+  app.get("/api/failure-records", async (req, res) => {
+    try {
+      const records = await storage.getFailureRecords();
+      res.json(records);
+    } catch (error) {
+      console.error("Error fetching failure records:", error);
+      res.status(500).json({ message: "Failed to fetch failure records" });
+    }
+  });
+
   // Get monthly trends
   app.get("/api/analytics/monthly-trends", async (req, res) => {
     try {
@@ -74,15 +96,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Sync data from Google Sheets
   app.post("/api/sync-sheets", async (req, res) => {
     try {
-      const { cranesUrl, maintenanceUrl } = req.body;
+      const { cranesUrl, failureUrl, maintenanceUrl } = req.body;
       
-      if (!cranesUrl || !maintenanceUrl) {
-        return res.status(400).json({ message: "Both cranes and maintenance URLs are required" });
+      if (!cranesUrl || !failureUrl || !maintenanceUrl) {
+        return res.status(400).json({ message: "All three URLs are required: cranes, failures, and maintenance" });
       }
 
       // Fetch cranes data
       const cranesResponse = await fetch(cranesUrl);
       const cranesText = await cranesResponse.text();
+      
+      // Fetch failure data
+      const failureResponse = await fetch(failureUrl);
+      const failureText = await failureResponse.text();
       
       // Fetch maintenance data
       const maintenanceResponse = await fetch(maintenanceUrl);
@@ -90,10 +116,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Parse CSV data
       const cranesData = Papa.parse(cranesText, { header: true }).data;
+      const failureData = Papa.parse(failureText, { header: true }).data;
       const maintenanceData = Papa.parse(maintenanceText, { header: true }).data;
       
       // Sync to storage
-      await storage.syncDataFromSheets(cranesData, maintenanceData);
+      await storage.syncDataFromSheets(cranesData, failureData, maintenanceData);
       
       res.json({ message: "Data synced successfully" });
     } catch (error) {
@@ -107,11 +134,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // These would typically come from environment variables
       const cranesUrl = process.env.GOOGLE_SHEETS_CRANES_URL || req.body.cranesUrl;
+      const failureUrl = process.env.GOOGLE_SHEETS_FAILURE_URL || req.body.failureUrl;
       const maintenanceUrl = process.env.GOOGLE_SHEETS_MAINTENANCE_URL || req.body.maintenanceUrl;
       
-      if (!cranesUrl || !maintenanceUrl) {
+      if (!cranesUrl || !failureUrl || !maintenanceUrl) {
         return res.status(400).json({ 
-          message: "Google Sheets URLs not configured. Please provide URLs in request body or set environment variables." 
+          message: "Google Sheets URLs not configured. Please provide all three URLs in request body or set environment variables." 
         });
       }
 
@@ -119,13 +147,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cranesResponse = await fetch(cranesUrl);
       const cranesText = await cranesResponse.text();
       
+      const failureResponse = await fetch(failureUrl);
+      const failureText = await failureResponse.text();
+      
       const maintenanceResponse = await fetch(maintenanceUrl);
-      const maintelanceText = await maintenanceResponse.text();
+      const maintenanceText = await maintenanceResponse.text();
       
       const cranesData = Papa.parse(cranesText, { header: true }).data;
-      const maintenanceData = Papa.parse(maintelanceText, { header: true }).data;
+      const failureData = Papa.parse(failureText, { header: true }).data;
+      const maintenanceData = Papa.parse(maintenanceText, { header: true }).data;
       
-      await storage.syncDataFromSheets(cranesData, maintenanceData);
+      await storage.syncDataFromSheets(cranesData, failureData, maintenanceData);
       
       res.json({ 
         message: "Data refreshed successfully",
