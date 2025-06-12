@@ -406,18 +406,18 @@ export default function Dashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-80">
+                    <div className="h-96">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
                             data={failureCauseChartData}
                             cx="50%"
-                            cy="50%"
-                            outerRadius={100}
+                            cy="45%"
+                            innerRadius={60}
+                            outerRadius={110}
                             paddingAngle={2}
                             dataKey="value"
-                            label={({ name, value, percentage }) => `${name}\n${value}건\n${percentage}%`}
-                            labelLine={false}
+                            label={false}
                           >
                             {failureCauseChartData.map((entry: any, index: number) => (
                               <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -428,6 +428,31 @@ export default function Dashboard() {
                               `${value}건 (${failureCauseChartData.find((d: any) => d.name === name)?.percentage}%)`,
                               name
                             ]}
+                            contentStyle={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                              border: '1px solid #e5e7eb',
+                              borderRadius: '8px',
+                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                              fontSize: '14px'
+                            }}
+                          />
+                          <Legend 
+                            verticalAlign="bottom"
+                            height={60}
+                            wrapperStyle={{ 
+                              paddingTop: '20px',
+                              fontSize: '13px'
+                            }}
+                            iconType="circle"
+                            formatter={(value: string) => (
+                              <span style={{ 
+                                color: '#374151',
+                                fontSize: '13px',
+                                fontWeight: '500'
+                              }}>
+                                {value}
+                              </span>
+                            )}
                           />
                         </PieChart>
                       </ResponsiveContainer>
