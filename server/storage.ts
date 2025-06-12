@@ -1498,6 +1498,8 @@ export class DatabaseStorage implements IStorage {
 
   async getRecentMaintenanceStats(): Promise<{ month: string; failureCount: number; maintenanceCount: number; total: number }[]> {
     const cacheKey = 'recent-maintenance-stats';
+    // Clear cache to ensure fresh data with current date logic
+    cache.clearKey(cacheKey);
     const cached = cache.get<{ month: string; failureCount: number; maintenanceCount: number; total: number }[]>(cacheKey);
     if (cached) return cached;
 
@@ -1505,26 +1507,16 @@ export class DatabaseStorage implements IStorage {
     const failureRecords = await this.getFailureRecords();
     const maintenanceRecords = await this.getMaintenanceRecords();
 
-    // Find the date range where we have actual data
-    const allDates = [
-      ...failureRecords.filter(r => r.date).map(r => new Date(r.date!)),
-      ...maintenanceRecords.filter(r => r.date).map(r => new Date(r.date!))
-    ].sort((a, b) => b.getTime() - a.getTime());
-
-    if (allDates.length === 0) {
-      return [];
-    }
-
-    // Use the most recent 6 months that have data, starting from the latest date
-    const latestDate = allDates[0];
-    const startDate = new Date(latestDate.getFullYear(), latestDate.getMonth() - 5, 1);
+    // Use current date as reference point for recent 6 months
+    const currentDate = new Date();
+    const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 5, 1);
 
     // Create map for monthly stats
     const monthlyStats = new Map<string, { failureCount: number; maintenanceCount: number }>();
 
-    // Initialize the 6 months based on actual data range
+    // Initialize the 6 months from current date going back
     for (let i = 0; i < 6; i++) {
-      const date = new Date(latestDate.getFullYear(), latestDate.getMonth() - i, 1);
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       monthlyStats.set(monthKey, { failureCount: 0, maintenanceCount: 0 });
     }
@@ -1533,7 +1525,7 @@ export class DatabaseStorage implements IStorage {
     failureRecords.forEach(record => {
       if (record.date) {
         const recordDate = new Date(record.date);
-        if (recordDate >= startDate && recordDate <= latestDate) {
+        if (recordDate >= startDate && recordDate <= currentDate) {
           const monthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
           const stats = monthlyStats.get(monthKey);
           if (stats) {
@@ -1547,7 +1539,7 @@ export class DatabaseStorage implements IStorage {
     maintenanceRecords.forEach(record => {
       if (record.date) {
         const recordDate = new Date(record.date);
-        if (recordDate >= startDate && recordDate <= latestDate) {
+        if (recordDate >= startDate && recordDate <= currentDate) {
           const monthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
           const stats = monthlyStats.get(monthKey);
           if (stats) {
