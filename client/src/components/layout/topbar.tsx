@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { Crane } from "@shared/schema";
+import { FactoryCraneSelector } from "@/components/dashboard/factory-crane-selector";
 
 export function Topbar() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,7 +39,6 @@ export function Topbar() {
     <div className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6">
       {/* Left side - Page title and filters */}
       <div className="flex items-center space-x-6">
-        <h1 className="text-xl font-semibold text-gray-900">대시보드</h1>
         <div className="flex items-center space-x-4">
           <Button variant="outline" size="sm" className="text-gray-600 border-gray-200">
             <span className="mr-2">표시 중</span>
@@ -119,8 +119,9 @@ export function Topbar() {
         )}
       </div>
 
-      {/* Right side - Add New Product and Profile */}
+      {/* Right side - Factory/Crane Selector, Add New Product and Profile */}
       <div className="flex items-center space-x-4">
+        <FactoryCraneSelector onSelectionChange={() => {}} />
         <Button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
           + 새 크레인 추가
         </Button>
