@@ -1,30 +1,51 @@
-# Sample Google Sheets Setup
+# 크레인 관리 대시보드 - 구글 스프레드시트 연동 가이드
 
-## Crane Data Sheet Structure
+3개의 구글 스프레드시트 파일이 필요합니다:
+
+## 1. 크레인 목록 시트 구조
 | crane_id | status | location | model | last_maintenance_date | next_maintenance_date | is_urgent |
 |----------|--------|----------|--------|----------------------|----------------------|-----------|
-| CR-001 | operating | Warehouse A | Liebherr LTM 1030 | 2024-05-15 | 2024-06-15 | false |
-| CR-002 | maintenance | Dock B | Manitowoc 18000 | 2024-05-20 | 2024-06-10 | false |
-| CR-003 | operating | Yard C | Terex RT780 | 2024-05-10 | 2024-06-05 | true |
-| CR-004 | urgent | Storage D | Liebherr LTM 1055 | 2024-04-30 | 2024-05-30 | true |
-| CR-005 | operating | Port E | Grove GMK4100L | 2024-05-18 | 2024-06-18 | false |
+| CR-001 | operating | 창고 A | Liebherr LTM 1030 | 2024-05-15 | 2024-06-15 | false |
+| CR-002 | maintenance | 부두 B | Manitowoc 18000 | 2024-05-20 | 2024-06-10 | false |
+| CR-003 | operating | 야드 C | Terex RT780 | 2024-05-10 | 2024-06-05 | true |
+| CR-004 | urgent | 저장소 D | Liebherr LTM 1055 | 2024-04-30 | 2024-05-30 | true |
+| CR-005 | operating | 항구 E | Grove GMK4100L | 2024-05-18 | 2024-06-18 | false |
 
-## Maintenance Records Sheet Structure
-| crane_id | date | type | technician | status | notes | duration | cost |
-|----------|------|------|------------|--------|-------|----------|------|
-| CR-001 | 2024-05-15 | routine | John Smith | completed | Regular inspection and lubrication | 4 | 25000 |
-| CR-002 | 2024-05-20 | repair | Mike Johnson | in_progress | Hydraulic system repair | 8 | 75000 |
-| CR-003 | 2024-05-10 | preventive | Sarah Wilson | completed | Brake system check | 2 | 15000 |
-| CR-004 | 2024-04-30 | emergency | Tom Brown | completed | Emergency cable replacement | 12 | 120000 |
-| CR-005 | 2024-05-18 | inspection | Lisa Davis | completed | Safety inspection | 3 | 18000 |
+## 2. 고장 이력 시트 구조
+| crane_id | date | failure_type | description | severity | downtime | cause | reported_by |
+|----------|------|--------------|-------------|----------|----------|-------|-------------|
+| CR-002 | 2024-05-19 | hydraulic | 유압 펌프 고장으로 인한 리프팅 능력 상실 | high | 24 | 씰 마모 및 오염 | 운영팀 |
+| CR-004 | 2024-04-29 | electrical | 메인 제어 회로 차단기 반복 작동 | critical | 48 | 모터 베어링 마모로 인한 과부하 | 현장 감독관 |
+| CR-003 | 2024-04-24 | mechanical | 와이어 로프의 마모 및 해어짐 징후 | medium | 12 | 교체 주기 초과로 인한 정상 마모 | 안전 검사관 |
 
-## Google Sheets CSV Export URLs
-To use with real Google Sheets:
-1. Create a Google Sheet with the above structure
-2. Make it publicly viewable
-3. Get the CSV export URL: `https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/export?format=csv&gid=SHEET_ID`
-4. Use these URLs in the dashboard configuration
+## 3. 수리 이력 시트 구조
+| crane_id | date | type | technician | status | notes | duration | cost | related_failure_id |
+|----------|------|------|------------|--------|-------|----------|------|-------------------|
+| CR-001 | 2024-05-15 | routine | 김철수 | completed | 정기 점검 및 윤활 | 4 | 25000 | |
+| CR-002 | 2024-05-20 | repair | 이영희 | in_progress | 유압 시스템 수리 | 8 | 75000 | 1 |
+| CR-003 | 2024-05-10 | preventive | 박민수 | completed | 브레이크 시스템 점검 | 2 | 15000 | |
+| CR-004 | 2024-04-30 | emergency | 최정우 | completed | 비상 케이블 교체 | 12 | 120000 | 2 |
+| CR-005 | 2024-05-18 | inspection | 정미경 | completed | 안전 점검 | 3 | 18000 | |
 
-Example URLs (replace with your actual spreadsheet):
-- Cranes: `https://docs.google.com/spreadsheets/d/1abc123/export?format=csv&gid=0`
-- Maintenance: `https://docs.google.com/spreadsheets/d/1abc123/export?format=csv&gid=1234567890`
+## 구글 스프레드시트 설정 방법
+
+1. **스프레드시트 생성**: 각각의 시트를 별도 파일로 생성하거나, 하나의 파일에 3개 탭으로 생성
+2. **공개 설정**: 파일을 "링크가 있는 모든 사용자"로 공유 설정
+3. **CSV URL 생성**: 
+   - 단일 파일인 경우: `https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/export?format=csv&gid=SHEET_GID`
+   - 별도 파일인 경우: `https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/export?format=csv`
+
+## 대시보드 설정
+1. 대시보드에서 "Configure" 버튼 클릭
+2. 3개의 CSV URL 입력:
+   - 크레인 목록 시트 URL
+   - 고장 이력 시트 URL  
+   - 수리 이력 시트 URL
+3. "Sync Data" 버튼으로 데이터 동기화
+
+## 예시 URL 형식
+```
+크레인 목록: https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/export?format=csv&gid=0
+고장 이력: https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/export?format=csv&gid=123456789
+수리 이력: https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/export?format=csv&gid=987654321
+```
