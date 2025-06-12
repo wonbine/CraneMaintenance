@@ -225,6 +225,197 @@ export default function Dashboard() {
   // Check if we should show overview dashboard (no specific crane selected)
   const showOverview = !filters.selectedCrane || filters.selectedCrane === 'all';
 
+  // Crane details component for when a specific crane is selected
+  const CraneDetails = ({ selectedCraneId }: { selectedCraneId: string }) => {
+    // Fetch specific crane data
+    const { data: craneData } = useQuery({
+      queryKey: ['/api/cranes', selectedCraneId],
+      queryFn: async () => {
+        const response = await fetch(`/api/cranes/by-crane-id/${selectedCraneId}`);
+        if (!response.ok) throw new Error('Failed to fetch crane data');
+        return response.json();
+      },
+      enabled: !!selectedCraneId && selectedCraneId !== 'all'
+    });
+
+    // Fetch failure records for the selected crane
+    const { data: failureRecords = [] } = useQuery({
+      queryKey: ['/api/failure-records', selectedCraneId],
+      queryFn: async () => {
+        const response = await fetch(`/api/failure-records/${selectedCraneId}`);
+        if (!response.ok) throw new Error('Failed to fetch failure records');
+        return response.json();
+      },
+      enabled: !!selectedCraneId && selectedCraneId !== 'all'
+    });
+
+    // Fetch maintenance records for the selected crane
+    const { data: maintenanceRecords = [] } = useQuery({
+      queryKey: ['/api/maintenance-records', selectedCraneId],
+      queryFn: async () => {
+        const response = await fetch(`/api/maintenance-records/${selectedCraneId}`);
+        if (!response.ok) throw new Error('Failed to fetch maintenance records');
+        return response.json();
+      },
+      enabled: !!selectedCraneId && selectedCraneId !== 'all'
+    });
+
+    if (!craneData) {
+      return (
+        <div className="text-center py-12">
+          <Factory className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-600 mb-2">크레인 데이터를 불러오는 중...</h3>
+        </div>
+      );
+    }
+
+    // Calculate statistics
+    const totalFailures = failureRecords.length;
+    const totalMaintenance = maintenanceRecords.length;
+    const recentFailures = failureRecords.filter((record: any) => {
+      const recordDate = new Date(record.failureDate);
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      return recordDate >= oneMonthAgo;
+    }).length;
+
+    // Calculate operational status
+    const getOperationalStatus = () => {
+      if (recentFailures > 3) return { status: '주의', color: 'text-red-600', bgColor: 'bg-red-100', icon: AlertCircle };
+      if (recentFailures > 1) return { status: '점검필요', color: 'text-yellow-600', bgColor: 'bg-yellow-100', icon: Clock };
+      return { status: '정상', color: 'text-green-600', bgColor: 'bg-green-100', icon: CheckCircle };
+    };
+
+    const operationalStatus = getOperationalStatus();
+    const StatusIcon = operationalStatus.icon;
+
+    return (
+      <div className="space-y-6">
+        {/* Crane Information Header */}
+        <Card className="shadow-lg border-0 rounded-xl bg-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">{craneData.craneName}</h2>
+                <p className="text-gray-600">크레인 ID: {craneData.craneId}</p>
+                <p className="text-sm text-gray-500">{craneData.factory} | {craneData.operationType} | {craneData.grade}급</p>
+              </div>
+              <div className="text-right">
+                <div className={`inline-flex items-center px-3 py-1 rounded-full ${operationalStatus.bgColor}`}>
+                  <StatusIcon className={`w-4 h-4 mr-2 ${operationalStatus.color}`} />
+                  <span className={`text-sm font-medium ${operationalStatus.color}`}>
+                    {operationalStatus.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Statistics Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100">
+            <CardContent className="p-6 text-center">
+              <div className="text-3xl font-bold text-blue-600">{totalFailures}</div>
+              <div className="text-sm text-gray-600">총 고장 건수</div>
+            </CardContent>
+          </Card>
+          <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-green-50 to-green-100">
+            <CardContent className="p-6 text-center">
+              <div className="text-3xl font-bold text-green-600">{totalMaintenance}</div>
+              <div className="text-sm text-gray-600">총 정비 건수</div>
+            </CardContent>
+          </Card>
+          <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100">
+            <CardContent className="p-6 text-center">
+              <div className="text-3xl font-bold text-orange-600">{recentFailures}</div>
+              <div className="text-sm text-gray-600">최근 1개월 고장</div>
+            </CardContent>
+          </Card>
+          <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100">
+            <CardContent className="p-6 text-center">
+              <div className="text-3xl font-bold text-purple-600">{craneData.grade}</div>
+              <div className="text-sm text-gray-600">크레인 등급</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Records */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Failure Records */}
+          <Card className="shadow-lg border-0 rounded-xl bg-white">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-800 flex items-center">
+                <AlertCircle className="w-5 h-5 mr-2 text-red-500" />
+                최근 고장 기록
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 max-h-80 overflow-y-auto">
+                {failureRecords.slice(0, 10).map((record: any) => (
+                  <div key={record.id} className="p-3 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-gray-800">{record.byDevice || '알 수 없음'}</p>
+                        <p className="text-sm text-gray-600">{record.category || '기타'}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">{new Date(record.failureDate).toLocaleDateString()}</p>
+                        {record.repairTime && (
+                          <p className="text-xs text-blue-600">{record.repairTime}시간</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {failureRecords.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    고장 기록이 없습니다
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Maintenance Records */}
+          <Card className="shadow-lg border-0 rounded-xl bg-white">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-800 flex items-center">
+                <Settings className="w-5 h-5 mr-2 text-green-500" />
+                최근 정비 기록
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 max-h-80 overflow-y-auto">
+                {maintenanceRecords.slice(0, 10).map((record: any) => (
+                  <div key={record.id} className="p-3 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-gray-800">{record.workType || '정비'}</p>
+                        <p className="text-sm text-gray-600">{record.description || '정비 작업'}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">{new Date(record.maintenanceDate).toLocaleDateString()}</p>
+                        {record.workers && (
+                          <p className="text-xs text-green-600">{record.workers}명</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {maintenanceRecords.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    정비 기록이 없습니다
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <div className="container mx-auto p-6 space-y-6">
@@ -470,7 +661,7 @@ export default function Dashboard() {
             </div>
           </div>
         ) : (
-          <CraneSpecificDashboard selectedCrane={filters.selectedCrane} />
+          <CraneDetails selectedCraneId={filters.selectedCrane} />
         )}
       </div>
     </div>
