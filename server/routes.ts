@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import Papa from "papaparse";
+import OpenAI from "openai";
 
 // Helper function to clean spreadsheet ID from URL fragments
 function cleanSpreadsheetId(id: string): string {
@@ -962,6 +963,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Force sync error:', error);
       res.status(500).json({ error: 'Failed to force sync' });
+    }
+  });
+
+  // AI Dashboard Analysis endpoint
+  app.post("/api/ai/analyze-dashboard", async (req, res) => {
+    try {
+      const { dashboardSummary, systemOverview, maintenanceStats, failureCauses } = req.body;
+      
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ 
+          message: "OpenAI API 키가 설정되지 않았습니다." 
+        });
+      }
+
+      const openai = new OpenAI({ apiKey });
+
+      // Prepare data for analysis
+      const analysisData = {
+        대시보드_요약: dashboardSummary,
+        시스템_현황: systemOverview,
+        정비_통계: maintenanceStats,
+        고장_원인_분포: failureCauses
+      };
+
+      const prompt = `다음은 산업용 크레인 관리 시스템의 실시간 데이터입니다. 이 데이터를 분석하여 한국어로 종합적인 요약 보고서를 작성해주세요:
+
+${JSON.stringify(analysisData, null, 2)}
+
+다음 항목들을 포함한 상세 분석 보고서를 작성해주세요:
+
+1. 📊 전체 시스템 현황 요약
+2. 🏭 공장별 운영 현황 분석
+3. 🔧 정비 및 고장 트렌드 분석
+4. ⚠️ 주요 위험 요소 및 우선순위
+5. 💡 개선 권장사항
+6. 📈 향후 예측 및 대응 방안
+
+각 섹션은 구체적인 수치와 함께 명확하고 실용적인 통찰을 제공해주세요. 경영진이 이해하기 쉽도록 핵심 포인트를 강조해주세요.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: "당신은 산업용 크레인 관리 전문가입니다. 데이터를 분석하여 실용적이고 통찰력 있는 보고서를 작성합니다."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 2000,
+        temperature: 0.7
+      });
+
+      const summary = response.choices[0].message.content;
+
+      res.json({ summary });
+    } catch (error) {
+      console.error("Error generating AI analysis:", error);
+      res.status(500).json({ 
+        message: "AI 분석 생성 중 오류가 발생했습니다: " + (error instanceof Error ? error.message : "알 수 없는 오류")
+      });
     }
   });
 
