@@ -1498,6 +1498,8 @@ export class DatabaseStorage implements IStorage {
 
   async getRecentMaintenanceStats(): Promise<{ month: string; failureCount: number; maintenanceCount: number; total: number }[]> {
     const cacheKey = 'recent-maintenance-stats';
+    // Clear cache to refresh data
+    cache.clearKey(cacheKey);
     const cached = cache.get<{ month: string; failureCount: number; maintenanceCount: number; total: number }[]>(cacheKey);
     if (cached) return cached;
 
@@ -1515,7 +1517,7 @@ export class DatabaseStorage implements IStorage {
       return [];
     }
 
-    // Use the most recent 6 months that have data, starting from the latest date
+    // Use the latest date from data, going back 6 months
     const latestDate = allDates[0];
     const startDate = new Date(latestDate.getFullYear(), latestDate.getMonth() - 5, 1);
 
