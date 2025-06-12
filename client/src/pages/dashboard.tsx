@@ -15,6 +15,7 @@ import { FailureTable } from "@/components/dashboard/failure-table";
 import { MaintenanceTable } from "@/components/dashboard/maintenance-table";
 import { AlertsTab } from "@/components/dashboard/alerts-tab";
 import { EmptyState } from "@/components/dashboard/empty-state";
+import { FactoryCraneSelector } from "@/components/dashboard/factory-crane-selector";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { DashboardSummary } from "@shared/schema";
@@ -22,6 +23,8 @@ import type { DashboardSummary } from "@shared/schema";
 export default function Dashboard() {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>();
+  const [selectedFactory, setSelectedFactory] = useState<string>();
+  const [selectedCrane, setSelectedCrane] = useState<string>();
   
   // Google Sheets configuration
   const [cranesSpreadsheetId, setCranesSpreadsheetId] = useState("");
@@ -36,6 +39,13 @@ export default function Dashboard() {
   const { data: summary, isLoading: summaryLoading } = useQuery<DashboardSummary>({
     queryKey: ["/api/dashboard/summary"],
   });
+
+  const handleFactoryCraneSelection = (factory?: string, craneName?: string) => {
+    setSelectedFactory(factory);
+    setSelectedCrane(craneName);
+    // Invalidate cranes cache to refetch with new filters
+    queryClient.invalidateQueries({ queryKey: ["/api/cranes"] });
+  };
 
   const refreshMutation = useMutation({
     mutationFn: async (config: { 
@@ -334,6 +344,9 @@ export default function Dashboard() {
         isLoading={summaryLoading} 
       />
 
+      {/* Factory and Crane Selection */}
+      <FactoryCraneSelector onSelectionChange={handleFactoryCraneSelection} />
+
       {/* Main Content */}
       {showEmptyState ? (
         <EmptyState type="general" />
@@ -367,7 +380,7 @@ export default function Dashboard() {
             
             <div className="p-0">
               <TabsContent value="cranes" className="mt-0">
-                <CranesTable />
+                <CranesTable selectedFactory={selectedFactory} selectedCrane={selectedCrane} />
               </TabsContent>
               
               <TabsContent value="analytics" className="mt-0 p-6">

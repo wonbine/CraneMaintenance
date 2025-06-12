@@ -12,14 +12,32 @@ import type { Crane } from "@shared/schema";
 type SortField = keyof Crane;
 type SortOrder = 'asc' | 'desc';
 
-export function CranesTable() {
+interface CranesTableProps {
+  selectedFactory?: string;
+  selectedCrane?: string;
+}
+
+export function CranesTable({ selectedFactory, selectedCrane }: CranesTableProps = {}) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortField, setSortField] = useState<SortField>('craneId');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
   const { data: cranes = [], isLoading } = useQuery<Crane[]>({
-    queryKey: ["/api/cranes"],
+    queryKey: ["/api/cranes", selectedFactory, selectedCrane],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (selectedFactory) params.append('factory', selectedFactory);
+      if (selectedCrane) params.append('craneName', selectedCrane);
+      
+      const url = params.toString() 
+        ? `/api/cranes/filtered?${params.toString()}`
+        : '/api/cranes';
+        
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch cranes');
+      return response.json();
+    },
   });
 
   const handleSort = (field: SortField) => {
