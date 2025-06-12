@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Factory } from 'lucide-react';
+import { Factory, Settings, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { useSearch } from '../contexts/SearchContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line } from 'recharts';
 
@@ -240,9 +240,6 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="bg-green-100 px-3 py-1 rounded-full">
-                <span className="text-green-800 text-sm font-medium">실시간 연결됨</span>
-              </div>
               {showOverview && systemOverviewData && (
                 <div className="text-right">
                   <div className="text-2xl font-bold text-blue-600">{systemOverviewData.totalFactories}</div>
@@ -473,11 +470,7 @@ export default function Dashboard() {
             </div>
           </div>
         ) : (
-          <div className="text-center py-12">
-            <Factory className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">크레인을 선택해주세요</h3>
-            <p className="text-gray-500">특정 크레인을 선택하면 상세 분석 정보가 표시됩니다.</p>
-          </div>
+          <CraneSpecificDashboard selectedCrane={filters.selectedCrane} />
         )}
       </div>
     </div>
