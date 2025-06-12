@@ -305,7 +305,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-2xl font-bold text-purple-600">{averageRepairTime}h</div>
-                <div className="text-xs text-gray-500">총 {totalRepairHours}시간</div>
+                <div className="text-xs text-gray-500">총 시간</div>
               </div>
               <div className="w-16 h-16">
                 <CircularProgressbar
