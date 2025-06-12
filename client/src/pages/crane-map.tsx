@@ -195,7 +195,7 @@ export default function CraneMap() {
                     <div className="relative">
                       {/* Crane Marker */}
                       <div
-                        className={`w-4 h-4 rounded-full border-2 border-white shadow-lg transition-all duration-200 group-hover:scale-125 ${getStatusColor(
+                        className={`w-6 h-6 rounded-full border-2 border-white shadow-lg transition-all duration-200 group-hover:scale-125 ${getStatusColor(
                           crane.status
                         )}`}
                       />
