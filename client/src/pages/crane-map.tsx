@@ -84,9 +84,9 @@ export default function CraneMap() {
       lastMaintenanceDate: null,
       nextMaintenanceDate: null,
       isUrgent: false,
-      grade: "N/A",
-      driveType: "N/A",
-      unmannedOperation: "N/A",
+      grade: "무인",
+      driveType: "무인",
+      unmannedOperation: "무인",
       installationDate: null,
       inspectionReferenceDate: null,
       inspectionCycle: null,
@@ -434,7 +434,7 @@ export default function CraneMap() {
                 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">운전방식(DriveType)</span>
-                  <span className="font-medium">{selectedCrane.driveType || "정보 없음"}</span>
+                  <span className="font-medium">{selectedCrane.driveType || "무인"}</span>
                 </div>
                 
                 {/* Unmanned Operation - Enhanced Visual Display */}
