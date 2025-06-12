@@ -53,7 +53,14 @@ export default function Dashboard() {
 
   // Chart colors
   const OPERATION_COLORS = ['#22c55e', '#ef4444']; // Green for manned, Red for unmanned
-  const GRADE_COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#10b981', '#f97316', '#6366f1', '#ec4899'];
+  const GRADE_COLORS = {
+    'A': '#22c55e', // Bright green for A grade (best)
+    'B': '#3b82f6', // Blue for B grade  
+    'C': '#f59e0b', // Orange for C grade
+    'D': '#ef4444', // Red for D grade (worst)
+    'E': '#8b5cf6', // Purple for E grade
+    'F': '#f97316'  // Dark orange for F grade
+  };
 
   // Prepare operation type chart data
   const operationChartData = operationTypeData ? [
@@ -129,23 +136,29 @@ export default function Dashboard() {
             <div className="text-sm font-semibold text-gray-700">등급 분포</div>
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
-                {factoryGradeData.slice(0, 4).map((grade: any, index: number) => (
-                  <span key={grade.grade} className="font-semibold" style={{ color: GRADE_COLORS[index] }}>
-                    {grade.grade}급 {grade.percentage}%
-                  </span>
-                ))}
+                {factoryGradeData
+                  .sort((a: any, b: any) => a.grade.localeCompare(b.grade)) // Sort A, B, C, D
+                  .slice(0, 4)
+                  .map((grade: any) => (
+                    <span key={grade.grade} className="font-semibold" style={{ color: GRADE_COLORS[grade.grade as keyof typeof GRADE_COLORS] || '#6b7280' }}>
+                      {grade.grade}급 {grade.percentage}%
+                    </span>
+                  ))}
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3 flex overflow-hidden">
-                {factoryGradeData.slice(0, 4).map((grade: any, index: number) => (
-                  <div 
-                    key={grade.grade}
-                    className="h-3 transition-all duration-300" 
-                    style={{ 
-                      width: `${grade.percentage}%`,
-                      backgroundColor: GRADE_COLORS[index] 
-                    }}
-                  ></div>
-                ))}
+                {factoryGradeData
+                  .sort((a: any, b: any) => a.grade.localeCompare(b.grade)) // Sort A, B, C, D
+                  .slice(0, 4)
+                  .map((grade: any) => (
+                    <div 
+                      key={grade.grade}
+                      className="h-3 transition-all duration-300" 
+                      style={{ 
+                        width: `${grade.percentage}%`,
+                        backgroundColor: GRADE_COLORS[grade.grade as keyof typeof GRADE_COLORS] || '#6b7280'
+                      }}
+                    ></div>
+                  ))}
               </div>
             </div>
           </div>
