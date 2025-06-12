@@ -413,19 +413,19 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-sm text-gray-500">장비코드</div>
+                  <div className="text-sm text-gray-500">크레인명</div>
+                  <div className="font-medium">{craneData.craneName || '정보 없음'}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">설비코드</div>
                   <div className="font-medium">{craneData.craneId}</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500">등급</div>
-                  <div className="font-medium">{craneData.grade}</div>
+                  <div className="font-medium">{craneData.grade || '정보 없음'}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-500">모델</div>
-                  <div className="font-medium">{craneData.model || '정보 없음'}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">운전방식</div>
+                  <div className="text-sm text-gray-500">유인/무인</div>
                   <div className="font-medium">{craneData.unmannedOperation || '정보 없음'}</div>
                 </div>
                 <div>
@@ -433,8 +433,15 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                   <div className="font-medium">{craneData.driveType || '정보 없음'}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-500">현재 상태</div>
-                  <div className="font-medium">{craneData.status || '정보 없음'}</div>
+                  <div className="text-sm text-gray-500">설치위치</div>
+                  <div className="font-medium">{craneData.location || '정보 없음'}</div>
+                </div>
+              </div>
+              
+              {/* Note about missing manager fields */}
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="text-sm text-yellow-800">
+                  <strong>알림:</strong> 전기담당자와 기계담당자 정보는 현재 데이터베이스에 없습니다.
                 </div>
               </div>
             </div>
