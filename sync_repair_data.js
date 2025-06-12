@@ -55,7 +55,7 @@ async function syncRepairData() {
               work_order, task_name, actual_start_date_time, actual_end_date_time,
               total_workers, total_work_time, area_name, equipment_name
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-            ON CONFLICT (crane_id, date, work_order) DO NOTHING
+
           `, [
             equipmentCode,
             actualStartDateTime,
