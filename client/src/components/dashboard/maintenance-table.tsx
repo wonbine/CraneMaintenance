@@ -171,7 +171,7 @@ export function MaintenanceTable() {
                           <Clock className="h-4 w-4 text-gray-400" />
                           {record.actualStartDateTime 
                             ? new Date(record.actualStartDateTime).toLocaleDateString('ko-KR')
-                            : '-'}
+                            : new Date(record.date).toLocaleDateString('ko-KR')}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -179,7 +179,7 @@ export function MaintenanceTable() {
                           <Clock className="h-4 w-4 text-gray-400" />
                           {record.actualEndDateTime 
                             ? new Date(record.actualEndDateTime).toLocaleDateString('ko-KR')
-                            : '-'}
+                            : new Date(record.date).toLocaleDateString('ko-KR')}
                         </div>
                       </TableCell>
                       <TableCell className="text-center">
