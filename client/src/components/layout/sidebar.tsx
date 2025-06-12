@@ -31,9 +31,9 @@ export function Sidebar() {
           const isActive = location === item.href;
           return (
             <Link key={item.name} href={item.href}>
-              <a
+              <div
                 className={cn(
-                  "group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                  "group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer",
                   isActive
                     ? "bg-teal-700 text-white shadow-lg"
                     : "text-teal-100 hover:bg-teal-700/50 hover:text-white"
@@ -46,7 +46,7 @@ export function Sidebar() {
                   )}
                 />
                 {item.name}
-              </a>
+              </div>
             </Link>
           );
         })}
