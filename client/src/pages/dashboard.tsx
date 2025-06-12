@@ -82,15 +82,27 @@ export default function Dashboard() {
     'F': '#f97316'  // Dark orange for F grade
   };
   const FAILURE_CAUSE_COLORS = {
-    '모터': '#ef4444', // Red for motor
-    '기어박스/감속기': '#3b82f6', // Blue for gearbox
-    '센서': '#f59e0b', // Orange for sensor
-    '와이어로프': '#8b5cf6', // Purple for wire rope
-    '제어장치': '#22c55e', // Green for control device
-    '베어링': '#f97316', // Orange for bearing
-    '브레이크': '#6b7280', // Gray for brake
-    '정기점검': '#14b8a6', // Teal for regular inspection
-    '기타': '#9ca3af' // Light gray for others
+    '전장품': '#ef4444', // Red for electrical components (most common)
+    'Coil Lifter': '#3b82f6', // Blue for coil lifter
+    '안전장치': '#f59e0b', // Orange for safety devices
+    'Brake': '#8b5cf6', // Purple for brake
+    'Magnet': '#22c55e', // Green for magnet
+    '기타': '#f97316', // Orange for others
+    'Inverter': '#06b6d4', // Cyan for inverter
+    '전원': '#8b5cf6', // Purple for power supply
+    'Motor': '#ef4444', // Red for motor
+    'Tong': '#10b981', // Emerald for tong
+    'Wheel': '#f59e0b', // Orange for wheel
+    '무인': '#6b7280', // Gray for unmanned
+    'PC': '#3b82f6', // Blue for PC
+    '주행거리계': '#14b8a6', // Teal for distance meter
+    '감속기': '#8b5cf6', // Purple for reducer
+    'LOAD CELL': '#f97316', // Orange for load cell
+    'Gear Coupling': '#06b6d4', // Cyan for gear coupling
+    '거리계': '#22c55e', // Green for distance meter
+    '통신장치': '#f59e0b', // Orange for communication device
+    'Wire Rope': '#8b5cf6', // Purple for wire rope
+    '정기점검': '#14b8a6' // Teal for regular inspection
   };
 
   // Prepare operation type chart data

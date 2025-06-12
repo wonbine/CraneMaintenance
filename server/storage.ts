@@ -1573,12 +1573,12 @@ export class DatabaseStorage implements IStorage {
 
   async getFailureCauseDistribution(): Promise<{ cause: string; count: number; percentage: number }[]> {
     const cacheKey = 'failure-cause-distribution';
-    const cached = cache.get<{ cause: string; count: number; percentage: number }[]>(cacheKey);
-    if (cached) return cached;
+    // Clear cache to force refresh with new byDevice mapping
+    cache.delete(cacheKey);
 
     const failureRecords = await this.getFailureRecords();
     
-    // Count by device from byDevice column (extract from description if byDevice is empty)
+    // Count by device using actual byDevice categories from Excel FailureReport
     const causeCount = new Map<string, number>();
     let totalCount = 0;
 
@@ -1589,17 +1589,22 @@ export class DatabaseStorage implements IStorage {
       if (record.byDevice && record.byDevice.trim() !== '') {
         device = record.byDevice.trim();
       } 
-      // If byDevice is empty, extract device from description
+      // If byDevice is empty, extract device from description using Excel categories
       else if (record.description && record.description.trim() !== '') {
         const desc = record.description.trim();
-        // Extract device/component from description
-        if (desc.includes('모터')) device = '모터';
-        else if (desc.includes('기어박스') || desc.includes('감속기')) device = '기어박스/감속기';
-        else if (desc.includes('센서')) device = '센서';
-        else if (desc.includes('와이어로프')) device = '와이어로프';
-        else if (desc.includes('제어판') || desc.includes('접촉기')) device = '제어장치';
-        else if (desc.includes('베어링')) device = '베어링';
-        else if (desc.includes('브레이크')) device = '브레이크';
+        // Map to actual byDevice categories from Excel: 전장품, Coil Lifter, 안전장치, Brake, Magnet, etc.
+        if (desc.includes('모터') || desc.includes('Motor')) device = 'Motor';
+        else if (desc.includes('기어박스') || desc.includes('감속기') || desc.includes('Gear')) device = '감속기';
+        else if (desc.includes('센서') || desc.includes('LOAD CELL')) device = 'LOAD CELL';
+        else if (desc.includes('와이어로프') || desc.includes('Wire Rope')) device = 'Wire Rope';
+        else if (desc.includes('제어판') || desc.includes('접촉기') || desc.includes('Inverter')) device = 'Inverter';
+        else if (desc.includes('베어링') || desc.includes('Wheel')) device = 'Wheel';
+        else if (desc.includes('브레이크') || desc.includes('Brake')) device = 'Brake';
+        else if (desc.includes('안전') || desc.includes('Safety')) device = '안전장치';
+        else if (desc.includes('전장') || desc.includes('전기')) device = '전장품';
+        else if (desc.includes('Magnet')) device = 'Magnet';
+        else if (desc.includes('Coil')) device = 'Coil Lifter';
+        else if (desc.includes('Tong')) device = 'Tong';
         else if (desc.includes('정기점검')) device = '정기점검';
         else device = '기타';
       }
