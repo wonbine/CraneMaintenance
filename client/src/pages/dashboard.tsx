@@ -346,7 +346,7 @@ export default function Dashboard() {
               )}
 
               {/* Recent Maintenance Statistics */}
-              <Card className="col-span-2">
+              <Card>
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold text-gray-800">최근 6개월 정비 통계</CardTitle>
                 </CardHeader>
@@ -378,6 +378,45 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Failure Cause Distribution Chart */}
+              {failureCauseChartData.length > 0 && (
+                <Card className="shadow-lg border-0 rounded-xl bg-white">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold text-gray-800 text-center">
+                      고장 원인 분포
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-80">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={failureCauseChartData}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={100}
+                            paddingAngle={2}
+                            dataKey="value"
+                            label={({ name, value, percentage }) => `${name}\n${value}건\n${percentage}%`}
+                            labelLine={false}
+                          >
+                            {failureCauseChartData.map((entry: any, index: number) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Pie>
+                          <Tooltip 
+                            formatter={(value: any, name: string) => [
+                              `${value}건 (${failureCauseChartData.find((d: any) => d.name === name)?.percentage}%)`,
+                              name
+                            ]}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* Factory Cards Grid */}
