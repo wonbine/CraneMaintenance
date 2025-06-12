@@ -133,7 +133,7 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    // Sample failure records
+    // Sample failure records with device information
     const sampleFailureRecords = [
       {
         craneId: "CR-002",
@@ -143,7 +143,8 @@ export class MemStorage implements IStorage {
         severity: "high",
         downtime: 24,
         cause: "Seal wear and contamination",
-        reportedBy: "Operations Team"
+        reportedBy: "Operations Team",
+        byDevice: "유압펌프"
       },
       {
         craneId: "CR-004",
@@ -153,7 +154,8 @@ export class MemStorage implements IStorage {
         severity: "critical",
         downtime: 48,
         cause: "Overload due to worn motor bearings",
-        reportedBy: "Site Supervisor"
+        reportedBy: "Site Supervisor",
+        byDevice: "제어회로"
       },
       {
         craneId: "CR-003",
@@ -163,7 +165,41 @@ export class MemStorage implements IStorage {
         severity: "medium",
         downtime: 12,
         cause: "Normal wear exceeding replacement interval",
-        reportedBy: "Safety Inspector"
+        reportedBy: "Safety Inspector",
+        byDevice: "와이어로프"
+      },
+      {
+        craneId: "CR-002",
+        date: "2024-05-10",
+        failureType: "electrical",
+        description: "Motor overheating during operation",
+        severity: "high",
+        downtime: 18,
+        cause: "Insufficient cooling system maintenance",
+        reportedBy: "Operations Team",
+        byDevice: "구동모터"
+      },
+      {
+        craneId: "CR-003",
+        date: "2024-05-05",
+        failureType: "hydraulic",
+        description: "Hydraulic fluid leak in main cylinder",
+        severity: "medium",
+        downtime: 6,
+        cause: "Worn seal in hydraulic cylinder",
+        reportedBy: "Maintenance Team",
+        byDevice: "유압실린더"
+      },
+      {
+        craneId: "CR-004",
+        date: "2024-04-20",
+        failureType: "mechanical",
+        description: "Brake system malfunction",
+        severity: "critical",
+        downtime: 36,
+        cause: "Brake pad wear beyond safety limits",
+        reportedBy: "Safety Inspector",
+        byDevice: "브레이크시스템"
       }
     ];
 
