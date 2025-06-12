@@ -16,37 +16,53 @@ interface CraneDetailKPIProps {
 }
 
 export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
-  // Fetch crane details
-  const { data: craneData, isLoading: craneLoading } = useQuery({
-    queryKey: ['/api/cranes/by-crane-id', selectedCraneId],
+  // First, get all cranes to find the matching crane by name or ID
+  const { data: allCranes = [] } = useQuery({
+    queryKey: ['/api/cranes'],
     queryFn: async () => {
-      const response = await fetch(`/api/cranes/by-crane-id/${selectedCraneId}`);
+      const response = await fetch('/api/cranes');
+      if (!response.ok) throw new Error('Failed to fetch cranes');
+      return response.json();
+    }
+  });
+
+  // Find the actual crane ID - selectedCraneId might be a crane name
+  const actualCrane = allCranes.find((crane: any) => 
+    crane.craneId === selectedCraneId || crane.craneName === selectedCraneId
+  );
+  const actualCraneId = actualCrane?.craneId;
+
+  // Fetch crane details using the actual crane ID
+  const { data: craneData, isLoading: craneLoading } = useQuery({
+    queryKey: ['/api/cranes/by-crane-id', actualCraneId],
+    queryFn: async () => {
+      const response = await fetch(`/api/cranes/by-crane-id/${actualCraneId}`);
       if (!response.ok) throw new Error('Failed to fetch crane data');
       return response.json();
     },
-    enabled: !!selectedCraneId && selectedCraneId !== 'all'
+    enabled: !!actualCraneId && actualCraneId !== 'all'
   });
 
   // Fetch failure records
   const { data: failureRecords = [] } = useQuery({
-    queryKey: ['/api/failure-records', selectedCraneId],
+    queryKey: ['/api/failure-records', actualCraneId],
     queryFn: async () => {
-      const response = await fetch(`/api/failure-records/${selectedCraneId}`);
+      const response = await fetch(`/api/failure-records/${actualCraneId}`);
       if (!response.ok) throw new Error('Failed to fetch failure records');
       return response.json();
     },
-    enabled: !!selectedCraneId && selectedCraneId !== 'all'
+    enabled: !!actualCraneId && actualCraneId !== 'all'
   });
 
   // Fetch maintenance records
   const { data: maintenanceRecords = [] } = useQuery({
-    queryKey: ['/api/maintenance-records', selectedCraneId],
+    queryKey: ['/api/maintenance-records', actualCraneId],
     queryFn: async () => {
-      const response = await fetch(`/api/maintenance-records/${selectedCraneId}`);
+      const response = await fetch(`/api/maintenance-records/${actualCraneId}`);
       if (!response.ok) throw new Error('Failed to fetch maintenance records');
       return response.json();
     },
-    enabled: !!selectedCraneId && selectedCraneId !== 'all'
+    enabled: !!actualCraneId && actualCraneId !== 'all'
   });
 
   if (craneLoading) {
