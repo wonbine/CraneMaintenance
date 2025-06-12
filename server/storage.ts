@@ -792,6 +792,9 @@ export class DatabaseStorage implements IStorage {
           lastMaintenanceDate: data.LastMaintenanceDate || data.last_maintenance_date || null,
           nextMaintenanceDate: data.NextMaintenanceDate || data.next_maintenance_date || null,
           isUrgent: (data.IsUrgent || data.is_urgent) === 'true' || (data.IsUrgent || data.is_urgent) === true,
+          grade: data.Grade || data.grade || null,
+          driveType: data.DriveType || data.drive_type || data['운전방식'] || null,
+          unmannedOperation: data.UnmannedOperation || data.unmanned_operation || data['유무인'] || null,
         });
       }
     }
