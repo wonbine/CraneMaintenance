@@ -427,14 +427,14 @@ export default function CraneMap() {
                           : "bg-gray-100 text-gray-800 border-gray-200"
                       }`}
                     >
-                      {selectedCrane.grade || "B"}
+                      {selectedCrane.grade?.replace('급', '') || "B"}
                     </Badge>
                   </div>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">운전방식(DriveType)</span>
-                  <span className="font-medium">{selectedCrane.driveType || "무인"}</span>
+                  <span className="font-medium">{selectedCrane.driveType || "정보 없음"}</span>
                 </div>
                 
                 {/* Unmanned Operation - Enhanced Visual Display */}
