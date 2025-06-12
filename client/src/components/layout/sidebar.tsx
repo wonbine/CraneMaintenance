@@ -22,14 +22,14 @@ export function Sidebar() {
     <div className="flex h-screen w-96 flex-col bg-white border-r border-gray-200">
       {/* Header */}
       <div className="flex h-24 items-center px-10 border-b border-gray-100">
-        <div className="flex flex-col items-start space-y-1 w-full">
+        <Link href="/" className="flex flex-col items-start space-y-1 w-full cursor-pointer hover:opacity-80 transition-opacity">
           <img 
             src="/src/assets/pocrane-logo.png" 
             alt="PoCRANE Logo" 
             className="h-14 w-auto max-w-[280px] object-contain"
           />
           <p className="text-gray-500 font-medium text-[18px]">스마트 크레인 정비 모니터링 시스템</p>
-        </div>
+        </Link>
       </div>
 
       {/* Navigation */}
