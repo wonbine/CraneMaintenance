@@ -260,6 +260,43 @@ export default function Dashboard() {
       enabled: !!selectedCraneId && selectedCraneId !== 'all'
     });
 
+    // Fetch maintenance statistics for charts
+    const { data: recentMaintenanceData = [] } = useQuery({
+      queryKey: ['/api/analytics/recent-maintenance-stats'],
+      queryFn: async () => {
+        const response = await fetch('/api/analytics/recent-maintenance-stats');
+        if (!response.ok) throw new Error('Failed to fetch recent maintenance stats');
+        return response.json();
+      }
+    });
+
+    // Fetch failure cause distribution for charts
+    const { data: failureCauseData = [] } = useQuery({
+      queryKey: ['/api/analytics/failure-cause-distribution'],
+      queryFn: async () => {
+        const response = await fetch('/api/analytics/failure-cause-distribution');
+        if (!response.ok) throw new Error('Failed to fetch failure cause distribution');
+        return response.json();
+      }
+    });
+
+    // Process maintenance chart data
+    const maintenanceChartData = recentMaintenanceData.map((item: any) => ({
+      month: item.month,
+      돌발작업: item.failureCount || 0,
+      일상수리: item.maintenanceCount || 0,
+      total: (item.failureCount || 0) + (item.maintenanceCount || 0)
+    }));
+
+    // Process failure cause chart data
+    const failureCauseChartData = failureCauseData.map((item: any, index: number) => ({
+      name: item.cause,
+      value: item.count,
+      percentage: item.percentage,
+      fill: FAILURE_CAUSE_COLORS[item.cause as keyof typeof FAILURE_CAUSE_COLORS] || 
+            `hsl(${(index * 137.5) % 360}, 70%, 50%)`
+    }));
+
     if (!craneData) {
       return (
         <div className="text-center py-12">
@@ -338,6 +375,110 @@ export default function Dashboard() {
               <div className="text-sm text-gray-600">크레인 등급</div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Analytics Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Maintenance Statistics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-gray-800">최근 6개월 정비 통계</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={maintenanceChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip 
+                      formatter={(value: any, name: string) => [value, name]}
+                      labelFormatter={(label) => `${label}`}
+                    />
+                    <Bar dataKey="돌발작업" stackId="a" fill="#ef4444" />
+                    <Bar dataKey="일상수리" stackId="a" fill="#22c55e">
+                      <LabelList dataKey="total" position="top" />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-4 flex justify-center space-x-6">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-red-500 rounded mr-2"></div>
+                  <span className="text-sm text-gray-600">돌발작업</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-green-500 rounded mr-2"></div>
+                  <span className="text-sm text-gray-600">일상수리</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Failure Cause Distribution Chart */}
+          {failureCauseChartData.length > 0 && (
+            <Card className="shadow-lg border-0 rounded-xl bg-white">
+              <CardHeader>
+                <CardTitle className="text-lg font-bold text-gray-800 text-center">
+                  고장 원인 분포
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-96">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={failureCauseChartData}
+                        cx="50%"
+                        cy="45%"
+                        innerRadius={60}
+                        outerRadius={110}
+                        paddingAngle={2}
+                        dataKey="value"
+                        label={({ name, percentage, value }) => `${name}\n${percentage}% (${value}건)`}
+                        labelLine={false}
+                      >
+                        {failureCauseChartData.map((entry: any, index: number) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(value: any, name: string) => [
+                          `${value}건 (${failureCauseChartData.find((d: any) => d.name === name)?.percentage}%)`,
+                          name
+                        ]}
+                        contentStyle={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                          fontSize: '14px'
+                        }}
+                      />
+                      <Legend 
+                        verticalAlign="bottom"
+                        height={60}
+                        wrapperStyle={{ 
+                          paddingTop: '20px',
+                          fontSize: '13px'
+                        }}
+                        iconType="circle"
+                        formatter={(value: string) => (
+                          <span style={{ 
+                            color: '#374151',
+                            fontSize: '13px',
+                            fontWeight: '500'
+                          }}>
+                            {value}
+                          </span>
+                        )}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Recent Records */}
