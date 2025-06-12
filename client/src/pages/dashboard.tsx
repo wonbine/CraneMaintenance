@@ -209,6 +209,27 @@ export default function Dashboard() {
     enabled: !!filters.selectedCrane && filters.selectedCrane !== 'all'
   });
 
+  // Fetch failure type classification data
+  const { data: failureTypeData = [] } = useQuery({
+    queryKey: ['/api/failure-type-classification', filters.selectedCrane, filters.selectedFactory, startDate, endDate],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.selectedCrane && filters.selectedCrane !== 'all') {
+        params.append('craneName', filters.selectedCrane);
+      }
+      if (filters.selectedFactory && filters.selectedFactory !== 'all') {
+        params.append('factory', filters.selectedFactory);
+      }
+      params.append('startDate', startDate);
+      params.append('endDate', endDate);
+
+      const response = await fetch(`/api/failure-type-classification?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch failure type data');
+      return response.json();
+    },
+    enabled: !!filters.selectedCrane && filters.selectedCrane !== 'all'
+  });
+
   const DonutChart = ({ data, title, total }: { data: any[], title: string, total: number }) => {
     if (!data || data.length === 0 || total === 0) {
       return (
@@ -799,25 +820,20 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Inspection Cycle */}
+        {/* Failure Type Classification */}
         <Card className="shadow-lg border-0 rounded-xl">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center space-x-2 text-lg">
-              <Clock className="w-5 h-5 text-blue-600" />
-              <span>점검주기</span>
+              <TrendingUp className="w-5 h-5 text-orange-600" />
+              <span>고장 유형별 분류</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">{crane?.inspectionCycle || '-'}일</div>
-              <p className="text-sm text-gray-500 mt-2">정기점검 주기</p>
-              {crane?.leadTime && (
-                <div className="mt-4 pt-4 border-t">
-                  <div className="text-xl font-semibold">{crane.leadTime}일</div>
-                  <p className="text-xs text-gray-500">리드타임</p>
-                </div>
-              )}
-            </div>
+            <BarChart data={failureTypeData.map(item => ({
+              category: item.type,
+              value: item.count,
+              color: '#f97316'
+            }))} />
           </CardContent>
         </Card>
 

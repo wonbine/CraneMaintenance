@@ -323,6 +323,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get failure type classification data
+  app.get("/api/failure-type-classification", async (req, res) => {
+    try {
+      const { craneName, factory, startDate, endDate } = req.query;
+      let records = await storage.getFailureRecords();
+      
+      // Filter by crane name if specified
+      if (craneName && craneName !== 'all') {
+        const cranes = await storage.getCranes();
+        const targetCranes = cranes.filter(c => c.craneName === craneName);
+        const craneIds = targetCranes.map(c => c.craneId);
+        records = records.filter(r => craneIds.includes(r.craneId));
+      }
+      
+      // Filter by factory if specified
+      if (factory && factory !== 'all') {
+        const cranes = await storage.getCranes();
+        const factoryCranes = cranes.filter(c => c.plantSection === factory);
+        const craneIds = factoryCranes.map(c => c.craneId);
+        records = records.filter(r => craneIds.includes(r.craneId));
+      }
+      
+      // Filter by date range if specified
+      if (startDate && endDate) {
+        records = records.filter(r => {
+          if (!r.date) return false;
+          const recordDate = new Date(r.date);
+          const start = new Date(startDate as string);
+          const end = new Date(endDate as string);
+          return recordDate >= start && recordDate <= end;
+        });
+      }
+      
+      // Group by failure type (from "type" column)
+      const typeGroups: { [type: string]: number } = {};
+      
+      records.forEach(record => {
+        // Use the failureType field which maps to the "type" column from FailureReport
+        const type = record.failureType || '기타';
+        typeGroups[type] = (typeGroups[type] || 0) + 1;
+      });
+      
+      // Convert to array format for bar chart visualization
+      const result = Object.entries(typeGroups)
+        .map(([type, count]) => ({
+          type,
+          count
+        }))
+        .sort((a, b) => b.count - a.count);
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching failure type classification:", error);
+      res.status(500).json({ message: "Failed to fetch failure type classification" });
+    }
+  });
+
   // Get monthly trends
   app.get("/api/analytics/monthly-trends", async (req, res) => {
     try {
