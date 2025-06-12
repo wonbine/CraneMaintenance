@@ -81,6 +81,18 @@ export function Topbar() {
               placeholder="종료일자"
               className="h-9 w-[140px] text-sm rounded-lg"
             />
+            {/* All Period Indicator */}
+            {filters.dateMode === "period" && (!filters.selectedPeriod || filters.selectedPeriod === "") && (
+              <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg border border-blue-200">
+                <span className="text-xs font-medium">전체기간 조회중</span>
+              </div>
+            )}
+            {/* Custom Date Range Indicator */}
+            {filters.dateMode === "range" && filters.startDate && filters.endDate && (
+              <div className="bg-green-50 text-green-700 px-3 py-1 rounded-lg border border-green-200">
+                <span className="text-xs font-medium">사용자 지정</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -88,6 +100,14 @@ export function Topbar() {
         <div className="flex items-center space-x-3">
           <Calendar className="w-5 h-5 text-gray-500" />
           <div className="flex space-x-2">
+            <Button
+              variant={filters.dateMode === "period" && (!filters.selectedPeriod || filters.selectedPeriod === "") ? "default" : "outline"}
+              size="sm"
+              onClick={() => handlePeriodSelect("")}
+              className="h-9 px-4 text-sm"
+            >
+              전체기간
+            </Button>
             <Button
               variant={filters.dateMode === "period" && filters.selectedPeriod === "1개월" ? "default" : "outline"}
               size="sm"
