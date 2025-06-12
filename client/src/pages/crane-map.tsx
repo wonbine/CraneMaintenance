@@ -36,8 +36,8 @@ export default function CraneMap() {
     }
     
     // Scale coordinates to fit in a reasonable map size
-    const x = (column - 1) * 15; // 15px per column
-    const y = (numbers - 1) * 15; // 15px per row
+    const x = (column - 1) * 25; // 25px per column for better spacing
+    const y = (numbers - 1) * 20; // 20px per row for better spacing
     
     return { x, y };
   };
@@ -49,14 +49,41 @@ export default function CraneMap() {
     coordinateMap.set(coord.크레인코드, position);
   });
 
-  // Find matching crane data for coordinates
-  const cranesWithPositions = cranes.map(crane => {
-    const position = coordinateMap.get(crane.craneId);
+  // Create crane markers from coordinate data, matching with existing crane data where possible
+  const cranesWithPositions = Array.from(coordinateMap.entries()).map(([craneCode, position], index) => {
+    // Try to find matching crane in database
+    const matchingCrane = cranes.find(crane => 
+      crane.craneId === craneCode || 
+      crane.craneName === craneCode ||
+      crane.craneId?.includes(craneCode) ||
+      craneCode.includes(crane.craneId || '')
+    );
+
+    if (matchingCrane) {
+      return {
+        ...matchingCrane,
+        position
+      };
+    }
+
+    // Create a placeholder crane object for coordinate data without matching database entry
     return {
-      ...crane,
-      position: position || { x: Math.random() * 800, y: Math.random() * 600 }
+      id: index + 10000, // Use high numbers to avoid conflicts
+      craneId: craneCode,
+      craneName: craneCode,
+      plantSection: "공장",
+      status: "operating" as const,
+      location: "공장",
+      model: "정보 없음",
+      lastMaintenanceDate: null,
+      nextMaintenanceDate: null,
+      isUrgent: false,
+      grade: "N/A",
+      driveType: "N/A",
+      unmannedOperation: "N/A",
+      position
     };
-  }).filter(crane => coordinateMap.has(crane.craneId));
+  });
 
   const handleCraneClick = (crane: Crane) => {
     setSelectedCrane(crane);
@@ -132,7 +159,7 @@ export default function CraneMap() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="relative w-full h-[600px] bg-gray-50 border rounded-lg overflow-auto">
+          <div className="relative w-full h-[700px] bg-gray-50 border rounded-lg overflow-auto">
             {/* Map Legend */}
             <div className="absolute top-4 right-4 z-10 bg-white p-3 rounded-lg shadow-md border">
               <h4 className="text-sm font-medium mb-2">범례</h4>
@@ -153,7 +180,7 @@ export default function CraneMap() {
             </div>
 
             {/* Crane Position Markers */}
-            <div className="relative w-full h-full min-w-[1200px] min-h-[800px]">
+            <div className="relative w-full h-full min-w-[1800px] min-h-[1600px]">
               {cranesWithPositions.map((crane) => (
                 <button
                   key={crane.id}
@@ -241,7 +268,7 @@ export default function CraneMap() {
                 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">설비코드</span>
-                  <span className="font-medium">{selectedCrane.equipmentCode || "N/A"}</span>
+                  <span className="font-medium">{selectedCrane.craneId || "N/A"}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
