@@ -168,6 +168,16 @@ export default function Dashboard() {
 
   const failureStats = calculateFailureStats();
 
+  // Get repair statistics from RepairReport
+  const { data: repairStats = { totalRepairs: 0, averageWorkers: 0, averageWorkTime: 0 } } = useQuery({
+    queryKey: ['/api/analytics/repair-stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/analytics/repair-stats');
+      if (!response.ok) throw new Error('Failed to fetch repair stats');
+      return response.json();
+    },
+  });
+
   // Get list of cranes with failure data for user guidance
   const { data: cranesWithData = [] } = useQuery({
     queryKey: ['/api/cranes-with-failure-data'],
@@ -638,6 +648,38 @@ export default function Dashboard() {
                 <span className="text-xs text-gray-500">평균 작업시간</span>
                 <span className="text-sm font-bold text-orange-600">
                   {failureStats.averageWorkTime > 0 ? `${failureStats.averageWorkTime}시간` : '-'}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Maintenance/Repair Statistics */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-sm">
+              <Wrench className="w-5 h-5 text-blue-600" />
+              <span>일상수리 이력</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center mb-4">
+              <div className="text-2xl font-bold text-blue-600">{repairStats.totalRepairs}</div>
+              <div className="text-xs text-gray-500">총 건수</div>
+            </div>
+            
+            {/* Repair Statistics */}
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">평균 작업자 수</span>
+                <span className="text-sm font-bold text-blue-600">
+                  {repairStats.averageWorkers > 0 ? `${repairStats.averageWorkers}명` : '-'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">평균 작업시간</span>
+                <span className="text-sm font-bold text-green-600">
+                  {repairStats.averageWorkTime > 0 ? `${repairStats.averageWorkTime}시간` : '-'}
                 </span>
               </div>
             </div>

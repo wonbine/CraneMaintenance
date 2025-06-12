@@ -177,6 +177,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get repair statistics
+  app.get("/api/analytics/repair-stats", async (req, res) => {
+    try {
+      const stats = await storage.getRepairStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching repair stats:", error);
+      res.status(500).json({ message: "Failed to fetch repair statistics" });
+    }
+  });
+
   // Get failure records with filtering
   app.get("/api/failure-records", async (req, res) => {
     try {
