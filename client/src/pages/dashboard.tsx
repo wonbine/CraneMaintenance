@@ -327,12 +327,36 @@ export default function Dashboard() {
   // Show message when no crane is selected
   if (!filters.selectedCrane || filters.selectedCrane === 'all') {
     return (
-      <div className="min-h-screen bg-gray-50 p-6 font-['IBM_Plex_Sans'] flex items-center justify-center">
-        <Card className="shadow-lg border-0 rounded-xl p-8 text-center">
-          <Activity className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">크레인을 선택해 주세요</h2>
-          <p className="text-gray-500">상단에서 공장과 크레인을 선택한 후 조회 버튼을 클릭하세요.</p>
-        </Card>
+      <div className="min-h-screen bg-gray-50 p-6 font-['IBM_Plex_Sans']">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="shadow-lg border-0 rounded-xl p-8 text-center max-w-md">
+            <Activity className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">크레인을 선택해 주세요</h2>
+            <p className="text-gray-500 mb-4">상단에서 공장과 크레인을 선택한 후 조회 버튼을 클릭하세요.</p>
+            
+            {/* Data availability notice */}
+            {cranesWithData && cranesWithData.length > 0 && (
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-left">
+                <h3 className="text-sm font-medium text-blue-800 mb-2">돌발수리 데이터 보유 크레인</h3>
+                <div className="text-sm text-blue-700">
+                  <p className="mb-2">{cranesWithData.length}개 크레인의 데이터 이용 가능:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {cranesWithData.slice(0, 4).map((crane: any) => (
+                      <span key={crane.craneId} className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                        {crane.craneName}
+                      </span>
+                    ))}
+                    {cranesWithData.length > 4 && (
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                        +{cranesWithData.length - 4}개
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
+        </div>
       </div>
     );
   }
@@ -588,7 +612,7 @@ export default function Dashboard() {
               total={failureStats.totalFailures} 
             />
             <div className="mt-4 space-y-2">
-              {failureStats.chartData.map((item, index) => (
+              {failureStats.chartData.map((item: any, index: number) => (
                 <div key={index} className="flex justify-between items-center">
                   <div className="flex items-center space-x-2">
                     <div 

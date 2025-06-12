@@ -214,6 +214,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get cranes with failure data
+  app.get("/api/cranes-with-failure-data", async (req, res) => {
+    try {
+      const cranes = await storage.getCranes();
+      const failureRecords = await storage.getFailureRecords();
+      
+      const cranesWithData = cranes
+        .map(crane => {
+          const failureCount = failureRecords.filter(record => record.craneId === crane.craneId).length;
+          return {
+            craneId: crane.craneId,
+            craneName: crane.craneName,
+            plantSection: crane.plantSection,
+            failureCount,
+            hasData: failureCount > 0
+          };
+        })
+        .filter(crane => crane.hasData)
+        .sort((a, b) => b.failureCount - a.failureCount);
+      
+      res.json(cranesWithData);
+    } catch (error) {
+      console.error("Error fetching cranes with failure data:", error);
+      res.status(500).json({ message: "Failed to fetch cranes with failure data" });
+    }
+  });
+
   // Get monthly trends
   app.get("/api/analytics/monthly-trends", async (req, res) => {
     try {
