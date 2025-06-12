@@ -47,6 +47,14 @@ export const maintenanceRecords = pgTable("maintenance_records", {
   duration: integer("duration"), // in hours
   cost: integer("cost"), // in cents
   relatedFailureId: integer("related_failure_id"), // reference to failure record if applicable
+  workOrder: text("work_order"),
+  taskName: text("task_name"),
+  actualStartDateTime: text("actual_start_date_time"),
+  actualEndDateTime: text("actual_end_date_time"),
+  totalWorkers: integer("total_workers"),
+  totalWorkTime: numeric("total_work_time"),
+  areaName: text("area_name"),
+  equipmentName: text("equipment_name"),
 });
 
 export const alerts = pgTable("alerts", {
@@ -69,6 +77,15 @@ export const insertFailureRecordSchema = createInsertSchema(failureRecords).omit
 
 export const insertMaintenanceRecordSchema = createInsertSchema(maintenanceRecords).omit({
   id: true,
+}).extend({
+  workOrder: z.string().optional(),
+  taskName: z.string().optional(),
+  actualStartDateTime: z.string().optional(),
+  actualEndDateTime: z.string().optional(),
+  totalWorkers: z.number().optional(),
+  totalWorkTime: z.number().optional(),
+  areaName: z.string().optional(),
+  equipmentName: z.string().optional(),
 });
 
 export const insertAlertSchema = createInsertSchema(alerts).omit({

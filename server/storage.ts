@@ -713,6 +713,33 @@ export class DatabaseStorage implements IStorage {
     return Array.from(stats.entries()).map(([type, count]) => ({ type, count }));
   }
 
+  async getRepairStats(): Promise<{ totalRepairs: number; averageWorkers: number; averageWorkTime: number }> {
+    const records = await this.getMaintenanceRecords();
+    
+    const totalRepairs = records.length;
+    let totalWorkers = 0;
+    let totalWorkTime = 0;
+    let workersCount = 0;
+    let workTimeCount = 0;
+    
+    records.forEach(record => {
+      if (record.totalWorkers && record.totalWorkers > 0) {
+        totalWorkers += record.totalWorkers;
+        workersCount++;
+      }
+      if (record.totalWorkTime && record.totalWorkTime > 0) {
+        totalWorkTime += parseFloat(record.totalWorkTime.toString());
+        workTimeCount++;
+      }
+    });
+    
+    return {
+      totalRepairs,
+      averageWorkers: workersCount > 0 ? Math.round((totalWorkers / workersCount) * 10) / 10 : 0,
+      averageWorkTime: workTimeCount > 0 ? Math.round((totalWorkTime / workTimeCount) * 10) / 10 : 0,
+    };
+  }
+
   async getFailureStats(): Promise<MaintenanceStats[]> {
     const records = await this.getFailureRecords();
     const stats = new Map<string, number>();
@@ -843,23 +870,50 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    // Process maintenance records - handle EquipmentCode field
-    for (const data of maintenanceData) {
-      const equipmentCode = data.EquipmentCode || data.crane_id || data.CraneID || data.equipment_code;
-      const date = data.Date || data.date || data.MaintenanceDate || data.maintenance_date;
-      if (equipmentCode && date) {
-        console.log('Processing maintenance record:', equipmentCode, date);
-        await this.createMaintenanceRecord({
-          craneId: equipmentCode,
-          date: date,
-          type: data.Type || data.type || 'routine',
-          technician: data.Technician || data.technician || '',
-          status: data.Status || data.status || 'completed',
-          notes: data.Notes || data.notes || null,
-          duration: data.Duration ? parseInt(data.Duration) : (data.duration ? parseInt(data.duration) : null),
-          cost: data.Cost ? parseInt(data.Cost) : (data.cost ? parseInt(data.cost) : null),
-          relatedFailureId: data.RelatedFailureId ? parseInt(data.RelatedFailureId) : (data.related_failure_id ? parseInt(data.related_failure_id) : null),
-        });
+    // Process maintenance records - handle EquipmentCode field from RepairReport
+    console.log(`Processing ${maintenanceData.length} maintenance records...`);
+    for (let i = 0; i < maintenanceData.length; i++) {
+      const data = maintenanceData[i];
+      // Skip header row
+      if (i === 0) continue;
+      
+      // Map array indices to field names based on RepairReport header structure
+      // ["workOrder", "taskName", "actualStartDateTime", "actualEndDateTime", "totalWorkers", "totalWorkTime", "areaName", "EquipmentCode", "EquipmentName"]
+      const workOrder = Array.isArray(data) ? data[0] : (data.workOrder || data.WorkOrder);
+      const taskName = Array.isArray(data) ? data[1] : (data.taskName || data.TaskName);
+      const actualStartDateTime = Array.isArray(data) ? data[2] : (data.actualStartDateTime || data.ActualStartDateTime);
+      const actualEndDateTime = Array.isArray(data) ? data[3] : (data.actualEndDateTime || data.ActualEndDateTime);
+      const totalWorkers = Array.isArray(data) ? data[4] : (data.totalWorkers || data.TotalWorkers);
+      const totalWorkTime = Array.isArray(data) ? data[5] : (data.totalWorkTime || data.TotalWorkTime);
+      const areaName = Array.isArray(data) ? data[6] : (data.areaName || data.AreaName);
+      const equipmentCode = Array.isArray(data) ? data[7] : (data.EquipmentCode || data.equipment_code);
+      const equipmentName = Array.isArray(data) ? data[8] : (data.EquipmentName || data.equipment_name);
+      
+      if (equipmentCode && actualStartDateTime) {
+        console.log('Processing maintenance record:', equipmentCode, actualStartDateTime);
+        try {
+          await this.createMaintenanceRecord({
+            craneId: equipmentCode,
+            date: actualStartDateTime,
+            type: 'repair',
+            technician: '',
+            status: 'completed',
+            notes: taskName || null,
+            duration: null,
+            cost: null,
+            relatedFailureId: null,
+            workOrder: workOrder || null,
+            taskName: taskName || null,
+            actualStartDateTime: actualStartDateTime || null,
+            actualEndDateTime: actualEndDateTime || null,
+            totalWorkers: totalWorkers ? parseInt(totalWorkers) : null,
+            totalWorkTime: totalWorkTime ? parseFloat(totalWorkTime) : null,
+            areaName: areaName || null,
+            equipmentName: equipmentName || null,
+          });
+        } catch (error) {
+          console.error(`Error creating maintenance record for ${equipmentCode}:`, error);
+        }
       }
     }
     
