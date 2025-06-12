@@ -235,7 +235,7 @@ export default function Dashboard() {
     const selectedCraneId = craneId;
 
     // Fetch crane data
-    const { data: craneData } = useQuery({
+    const { data: craneData, isLoading: craneLoading } = useQuery({
       queryKey: ['/api/cranes/by-crane-id', selectedCraneId],
       queryFn: async () => {
         const response = await fetch(`/api/cranes/by-crane-id/${selectedCraneId}`);
@@ -267,11 +267,21 @@ export default function Dashboard() {
       enabled: !!selectedCraneId && selectedCraneId !== 'all'
     });
 
-    if (!craneData) {
+    if (craneLoading) {
       return (
         <div className="text-center py-12">
           <Factory className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-600 mb-2">크레인 데이터를 불러오는 중...</h3>
+        </div>
+      );
+    }
+
+    if (!craneData) {
+      return (
+        <div className="text-center py-12">
+          <Factory className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-600 mb-2">선택한 크레인 데이터를 찾을 수 없습니다</h3>
+          <p className="text-gray-500">다른 크레인을 선택해 보세요.</p>
         </div>
       );
     }
