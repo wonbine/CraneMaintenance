@@ -69,6 +69,26 @@ export default function Dashboard() {
   }));
 
   const FactoryOverviewCard = ({ factory }: { factory: any }) => {
+    // Fetch factory-specific operation type stats
+    const { data: factoryOperationData } = useQuery({
+      queryKey: [`/api/analytics/factory-operation-stats/${factory.factoryName}`],
+      queryFn: async () => {
+        const response = await fetch(`/api/analytics/factory-operation-stats/${encodeURIComponent(factory.factoryName)}`);
+        if (!response.ok) throw new Error('Failed to fetch factory operation stats');
+        return response.json();
+      }
+    });
+
+    // Fetch factory-specific grade stats
+    const { data: factoryGradeData = [] } = useQuery({
+      queryKey: [`/api/analytics/factory-grade-stats/${factory.factoryName}`],
+      queryFn: async () => {
+        const response = await fetch(`/api/analytics/factory-grade-stats/${encodeURIComponent(factory.factoryName)}`);
+        if (!response.ok) throw new Error('Failed to fetch factory grade stats');
+        return response.json();
+      }
+    });
+
     return (
       <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
         <CardHeader className="pb-3">
@@ -81,31 +101,41 @@ export default function Dashboard() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Manned Progress Bar */}
+          {/* Operation Type Ratio - Single Combined Bar */}
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">유인 {factory.mannedCranes}</span>
-              <span className="font-semibold text-green-600">{factory.mannedPercentage}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div 
-                className="bg-green-500 h-3 rounded-full transition-all duration-300" 
-                style={{ width: `${factory.mannedPercentage}%` }}
-              ></div>
-            </div>
+            <div className="text-sm font-semibold text-gray-700">운전방식 비율</div>
+            {factoryOperationData && (
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-green-600">유인 {factoryOperationData.mannedPercentage}%</span>
+                  <span className="text-orange-600">무인 {factoryOperationData.unmannedPercentage}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3 flex overflow-hidden">
+                  <div 
+                    className="bg-green-500 h-3 transition-all duration-300" 
+                    style={{ width: `${factoryOperationData.mannedPercentage}%` }}
+                  ></div>
+                  <div 
+                    className="bg-orange-500 h-3 transition-all duration-300" 
+                    style={{ width: `${factoryOperationData.unmannedPercentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Unmanned Progress Bar */}
+          {/* Grade Distribution */}
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">무인 {factory.unmannedCranes}</span>
-              <span className="font-semibold text-orange-600">{factory.unmannedPercentage}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div 
-                className="bg-orange-500 h-3 rounded-full transition-all duration-300" 
-                style={{ width: `${factory.unmannedPercentage}%` }}
-              ></div>
+            <div className="text-sm font-semibold text-gray-700">등급 분포</div>
+            <div className="grid grid-cols-2 gap-1 text-xs">
+              {factoryGradeData.slice(0, 4).map((grade: any, index: number) => (
+                <div key={grade.grade} className="flex justify-between">
+                  <span className="text-gray-600">{grade.grade}급</span>
+                  <span className="font-semibold" style={{ color: GRADE_COLORS[index] }}>
+                    {grade.percentage}%
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </CardContent>

@@ -465,6 +465,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get factory-specific operation type stats
+  app.get("/api/analytics/factory-operation-stats/:factoryName", async (req, res) => {
+    try {
+      const { factoryName } = req.params;
+      const cranes = await storage.getCranes();
+      const factoryCranes = cranes.filter(c => c.plantSection === factoryName);
+      
+      const mannedCount = factoryCranes.filter(c => c.unmannedOperation === '유인').length;
+      const unmannedCount = factoryCranes.filter(c => c.unmannedOperation === '무인').length;
+      const total = factoryCranes.length;
+      
+      const stats = {
+        manned: mannedCount,
+        unmanned: unmannedCount,
+        mannedPercentage: total > 0 ? Math.round((mannedCount / total) * 100) : 0,
+        unmannedPercentage: total > 0 ? Math.round((unmannedCount / total) * 100) : 0
+      };
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching factory operation stats:", error);
+      res.status(500).json({ message: "Failed to fetch factory operation stats" });
+    }
+  });
+
+  // Get factory-specific grade stats
+  app.get("/api/analytics/factory-grade-stats/:factoryName", async (req, res) => {
+    try {
+      const { factoryName } = req.params;
+      const cranes = await storage.getCranes();
+      const factoryCranes = cranes.filter(c => c.plantSection === factoryName);
+      
+      const gradeStats: { [grade: string]: number } = {};
+      const total = factoryCranes.length;
+      
+      factoryCranes.forEach(crane => {
+        const grade = crane.grade || '미분류';
+        gradeStats[grade] = (gradeStats[grade] || 0) + 1;
+      });
+      
+      const statsArray = Object.entries(gradeStats).map(([grade, count]) => ({
+        grade,
+        count,
+        percentage: total > 0 ? Math.round((count / total) * 100) : 0
+      })).sort((a, b) => b.count - a.count);
+      
+      res.json(statsArray);
+    } catch (error) {
+      console.error("Error fetching factory grade stats:", error);
+      res.status(500).json({ message: "Failed to fetch factory grade stats" });
+    }
+  });
+
   // Get active alerts
   app.get("/api/alerts", async (req, res) => {
     try {
