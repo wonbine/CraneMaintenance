@@ -133,8 +133,9 @@ export default function CraneMap() {
 
   const handleViewDetails = () => {
     if (selectedCrane) {
-      // Navigate to dashboard with selected crane
-      setLocation(`/dashboard?crane=${encodeURIComponent(selectedCrane.craneId)}`);
+      // Navigate to dashboard with selected crane's equipment code
+      const craneId = selectedCrane.craneId || selectedCrane.craneName || '';
+      setLocation(`/?crane=${encodeURIComponent(craneId)}`);
       setIsModalOpen(false);
     }
   };
@@ -302,9 +303,9 @@ export default function CraneMap() {
 
               {/* Crane Position Markers */}
               <div className="relative w-full h-full min-w-[2400px] min-h-[2000px]">
-                {cranesWithPositions.map((crane) => (
+                {cranesWithPositions.map((crane, index) => (
                   <button
-                    key={crane.id}
+                    key={`crane-${crane.id}-${index}-${crane.position.x}-${crane.position.y}`}
                     onClick={() => handleCraneClick(crane)}
                     className="absolute transform -translate-x-1/2 -translate-y-1/2 group"
                     style={{
