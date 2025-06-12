@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Loader2, MapPin, Wrench, AlertTriangle } from "lucide-react";
 import type { Crane } from "@shared/schema";
-import craneCoordinates from "../data/crane-coordinates.json";
+import craneCoordinates from "../data/crane-coordinates-complete.json";
 
 interface CraneCoordinate {
   크레인코드: string;
@@ -42,15 +42,10 @@ export default function CraneMap() {
     return { x, y };
   };
 
-  // Create a map of crane codes to coordinates
-  const coordinateMap = new Map<string, { x: number; y: number }>();
-  (craneCoordinates as CraneCoordinate[]).forEach(coord => {
+  // Create crane markers from all coordinate data, handling duplicates
+  const cranesWithPositions = (craneCoordinates as CraneCoordinate[]).map((coord, index) => {
     const position = convertCoordinateToPosition(coord.좌표);
-    coordinateMap.set(coord.크레인코드, position);
-  });
-
-  // Create crane markers from coordinate data, matching with existing crane data where possible
-  const cranesWithPositions = Array.from(coordinateMap.entries()).map(([craneCode, position], index) => {
+    const craneCode = coord.크레인코드;
     // Try to find matching crane in database
     const matchingCrane = cranes.find(crane => 
       crane.craneId === craneCode || 
@@ -69,11 +64,11 @@ export default function CraneMap() {
     // Create a placeholder crane object for coordinate data without matching database entry
     return {
       id: index + 10000, // Use high numbers to avoid conflicts
-      craneId: craneCode,
+      craneId: `${craneCode}-${index}`, // Make unique with index
       craneName: craneCode,
       plantSection: "공장",
       status: "operating" as const,
-      location: "공장",
+      location: `좌표: ${coord.좌표}`,
       model: "정보 없음",
       lastMaintenanceDate: null,
       nextMaintenanceDate: null,
@@ -145,7 +140,7 @@ export default function CraneMap() {
             전체 크레인: {cranes.length}대
           </Badge>
           <Badge variant="outline" className="bg-blue-50">
-            지도에 표시: {cranesWithPositions.length}대
+            지도에 표시: {cranesWithPositions.length}대 (좌표 데이터)
           </Badge>
         </div>
       </div>
