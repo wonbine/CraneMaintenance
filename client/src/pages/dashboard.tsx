@@ -408,7 +408,7 @@ export default function Dashboard() {
                 <span className="text-sm font-medium">{crane?.craneId || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">등급(Grade)</span>
+                <span className="text-sm text-gray-600">등급</span>
                 <span className="text-sm font-medium">{crane?.grade || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
@@ -456,7 +456,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
       {/* Row 2: 일상수리 이력, 돌발수리 이력, 점검주기, 주요 지표 */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
         {/* Daily Repair History */}
@@ -576,7 +575,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
       {/* Row 3: 고장유형 히트맵, 고장 분류 차트, 월별 정비 이력 추이 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Failure Type Heatmap */}
