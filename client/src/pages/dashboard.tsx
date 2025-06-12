@@ -1,7 +1,9 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Factory, Settings, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Factory, Settings, AlertCircle, CheckCircle, Clock, MapPin, Calendar, Activity, AlertTriangle, Wrench, TrendingUp } from 'lucide-react';
 import { useSearch } from '../contexts/SearchContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line } from 'recharts';
 import { AISummaryButton } from '../components/dashboard/ai-summary-button';
@@ -311,245 +313,312 @@ export default function Dashboard() {
             `hsl(${(index * 137.5) % 360}, 70%, 50%)`
     }));
 
+    // Format date helper function
+    const formatDate = (dateString: string) => {
+      return new Date(dateString).toLocaleDateString('ko-KR');
+    };
+
     return (
-      <div className="space-y-6">
-        {/* Top Row - KPI Cards Following Exact UI Design */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* 크레인 개요 */}
-          <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-blue-700 flex items-center">
-                <div className="w-4 h-4 rounded-full bg-blue-500 mr-2"></div>
-                크레인 개요
+      <div className="min-h-screen bg-gray-50 p-6 font-['IBM_Plex_Sans']">
+        {/* Row 1: 위치 개요, 크레인 상세정보, 설치 및 점검일자 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Location Overview */}
+          <Card className="shadow-lg border-0 rounded-xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center space-x-2 text-lg">
+                <MapPin className="w-5 h-5 text-blue-600" />
+                <span>위치 개요</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Status indicator and crane icon */}
-              <div className="relative w-full h-24 bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
-                <Settings className="w-8 h-8 text-blue-600" />
-                <div className="absolute top-2 right-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
+            <CardContent>
+              <div className="space-y-4">
+                <div className="bg-gray-100 rounded-lg h-32 flex items-center justify-center">
+                  <div className="text-center">
+                    <MapPin className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                    <p className="text-sm font-medium">{craneData.factory || '공장 정보 없음'}</p>
+                    <p className="text-xs text-gray-500">{craneData.location || '위치 정보 없음'}</p>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">크레인명:</span>
-                  <span className="font-medium text-gray-800">{craneData.craneId}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">공장:</span>
-                  <span className="font-medium text-gray-800">정보 없음</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">등급:</span>
-                  <span className="font-medium text-gray-800">N/A급</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">운전방식:</span>
-                  <span className="font-medium text-gray-800">정보 없음</span>
+                <div className="flex items-center justify-between">
+                  <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${operationalStatus.bgColor}`}>
+                    <StatusIcon className={`w-3 h-3 mr-1 ${operationalStatus.color}`} />
+                    <span className={`font-medium ${operationalStatus.color}`}>
+                      {operationalStatus.status}
+                    </span>
+                  </div>
+                  <Button size="sm" variant="ghost">
+                    <Settings className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* 크레인 상세정보 */}
-          <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-green-50 to-green-100">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-green-700 flex items-center">
-                <div className="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
-                크레인 상세정보
+          {/* Crane Details */}
+          <Card className="shadow-lg border-0 rounded-xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center space-x-2 text-lg">
+                <Activity className="w-5 h-5 text-purple-600" />
+                <span>크레인 상세정보</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">제조사:</span>
-                <span className="font-medium text-green-700">정보 없음</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">용량:</span>
-                <span className="font-medium text-green-700">정보 없음</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">위치:</span>
-                <span className="font-medium text-green-700">정보 없음</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">상태:</span>
-                <div className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
-                  <span className="font-medium">정상</span>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">크레인명</span>
+                  <span className="text-sm font-medium">{craneData.craneName || 'N/A'}</span>
                 </div>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">총 고장 건수:</span>
-                <span className="font-bold text-red-600 text-lg">3</span>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">설비코드</span>
+                  <span className="text-sm font-medium">{craneData.craneId || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">등급</span>
+                  <span className="text-sm font-medium">{craneData.grade || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">운전방식</span>
+                  <span className="text-sm font-medium">{craneData.operationType || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">유/무인</span>
+                  <span className="text-sm font-medium">{craneData.unmannedOperation || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">총 고장 건수</span>
+                  <span className="text-sm font-bold text-red-600">{totalFailures}</span>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* 설치 및 점검정보 */}
-          <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-purple-700 flex items-center">
-                <div className="w-4 h-4 rounded-full bg-purple-500 mr-2"></div>
-                설치 및 점검정보
+          {/* Installation and Inspection Dates */}
+          <Card className="shadow-lg border-0 rounded-xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center space-x-2 text-lg">
+                <Calendar className="w-5 h-5 text-orange-600" />
+                <span>설치 및 점검일자</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">설치일자:</span>
-                <span className="font-medium text-purple-700">2023년 1월 1일</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">최근점검:</span>
-                <span className="font-medium text-purple-700">2024년 3월 15일</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">다음점검:</span>
-                <span className="font-medium text-purple-700">2025. 3. 3.</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">점검주기:</span>
-                <span className="font-medium text-purple-700">6개월</span>
+            <CardContent>
+              <div className="space-y-3">
+                {craneData.installationDate && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">설치일자</span>
+                    <span className="text-sm font-medium">{formatDate(craneData.installationDate)}</span>
+                  </div>
+                )}
+                
+                {craneData.inspectionReferenceDate && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">점검기준일</span>
+                    <span className="text-sm font-medium">{formatDate(craneData.inspectionReferenceDate)}</span>
+                  </div>
+                )}
+                
+                {craneData.inspectionCycle && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">정비주기</span>
+                    <span className="text-sm font-medium">{craneData.inspectionCycle}일</span>
+                  </div>
+                )}
+                
+                {craneData.leadTime && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">리드타임</span>
+                    <span className="text-sm font-medium">{craneData.leadTime}일</span>
+                  </div>
+                )}
+
+                {/* Next Inspection Calculation */}
+                {(() => {
+                  if (!craneData.inspectionReferenceDate || !craneData.inspectionCycle) {
+                    return (
+                      <div className="bg-gray-50 p-3 rounded-lg text-center">
+                        <p className="text-sm text-gray-500">점검 정보가 없습니다</p>
+                      </div>
+                    );
+                  }
+
+                  const referenceDate = new Date(craneData.inspectionReferenceDate);
+                  const nextInspectionDate = new Date(referenceDate);
+                  nextInspectionDate.setDate(referenceDate.getDate() + craneData.inspectionCycle);
+                  
+                  const today = new Date();
+                  const timeDiff = nextInspectionDate.getTime() - today.getTime();
+                  const daysUntilInspection = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                  
+                  const isOverdue = daysUntilInspection < 0;
+                  const isUrgent = daysUntilInspection <= 7 && !isOverdue;
+
+                  return (
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm text-gray-600">다음 점검일</span>
+                        <span className="text-sm font-medium">{formatDate(nextInspectionDate.toISOString())}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">점검까지</span>
+                        <span className={`text-sm font-bold ${
+                          isOverdue ? 'text-red-600' : 
+                          isUrgent ? 'text-orange-600' : 'text-green-600'
+                        }`}>
+                          {isOverdue ? `D+${Math.abs(daysUntilInspection)}` : `D-${daysUntilInspection}`}
+                        </span>
+                      </div>
+                      <div className="mt-2">
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          isOverdue ? 'bg-red-100 text-red-700' : 
+                          isUrgent ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'
+                        }`}>
+                          {isOverdue ? '점검 지연' : 
+                           isUrgent ? '점검 임박' : '점검 일정 양호'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Second Row - Circular Progress Charts and KPI Metrics */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* 점검수리 이력 */}
-          <Card className="shadow-lg border-0 rounded-xl bg-white">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-gray-800">점검수리 이력</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <div className="relative w-20 h-20 mx-auto mb-3">
-                <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
-                  <path
-                    d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
-                    fill="none"
-                    stroke="#fef3c7"
-                    strokeWidth="3"
-                  />
-                  <path
-                    d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
-                    fill="none"
-                    stroke="#f59e0b"
-                    strokeWidth="3"
-                    strokeDasharray="30, 100"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-orange-600">3</div>
-                    <div className="text-xs text-gray-500">돌발수리</div>
-                  </div>
-                </div>
-              </div>
-              <div className="text-xs text-gray-500">
-                <div>현재 건수: 60740회</div>
-                <div>평균 수리시간: NaN시간</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 일상수리 이력 */}
-          <Card className="shadow-lg border-0 rounded-xl bg-white">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-gray-800">일상수리 이력</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <div className="relative w-20 h-20 mx-auto mb-3">
-                <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
-                  <path
-                    d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
-                    fill="none"
-                    stroke="#dcfce7"
-                    strokeWidth="3"
-                  />
-                  <path
-                    d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
-                    fill="none"
-                    stroke="#22c55e"
-                    strokeWidth="3"
-                    strokeDasharray="85, 100"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-green-600">27</div>
-                    <div className="text-xs text-gray-500">일상수리</div>
-                  </div>
-                </div>
-              </div>
-              <div className="text-xs text-gray-500">
-                <div>현재 건수: 1.1회</div>
-                <div>평균 작업시간: 8시간</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 작업자 정보 */}
-          <Card className="shadow-lg border-0 rounded-xl bg-white">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-gray-800">작업자 정보</CardTitle>
+        {/* Row 2: Device Heatmap and Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+          {/* Device Failure Heatmap */}
+          <Card className="shadow-lg border-0 rounded-xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center space-x-2 text-lg">
+                <Activity className="w-5 h-5 text-purple-600" />
+                <span>장치별 고장유형 히트맵</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <div className="text-xs text-gray-600 mb-2">작업자</div>
-                <div className="text-xs text-gray-600 mb-2">등급별 작업자 분포</div>
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <div className="text-xs w-8 text-gray-600">A급</div>
-                    <div className="flex-1 bg-gray-200 rounded-full h-3">
-                      <div className="bg-green-500 h-3 rounded-full" style={{width: '60%'}}></div>
+              <div className="text-center text-gray-500 py-8">
+                충분한 고장 데이터가 없어 히트맵을 생성할 수 없습니다
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Daily Repair History */}
+          <Card className="shadow-lg border-0 rounded-xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center space-x-2 text-lg">
+                <Wrench className="w-5 h-5 text-green-600" />
+                <span>일상수리 이력</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center mb-4">
+                <div className="text-2xl font-bold text-green-600">{totalMaintenance}</div>
+                <div className="text-xs text-gray-500">총 건수</div>
+              </div>
+              
+              <div className="space-y-2">
+                {maintenanceRecords.slice(0, 3).map((record: any, index: number) => (
+                  <div key={index} className="flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500" />
+                      <span className="text-xs">{record.type || '일상점검'}</span>
                     </div>
-                    <div className="text-xs text-gray-500 w-8">3명</div>
+                    <span className="text-xs font-medium">1</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="text-xs w-8 text-gray-600">B급</div>
-                    <div className="flex-1 bg-gray-200 rounded-full h-3">
-                      <div className="bg-blue-500 h-3 rounded-full" style={{width: '40%'}}></div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Emergency Repair History */}
+          <Card className="shadow-lg border-0 rounded-xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center space-x-2 text-lg">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <span>돌발수리 이력</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center mb-4">
+                <div className="text-2xl font-bold text-red-600">{totalFailures}</div>
+                <div className="text-xs text-gray-500">총 건수</div>
+              </div>
+              
+              <div className="space-y-2">
+                {failureRecords.slice(0, 3).map((record: any, index: number) => (
+                  <div key={index} className="flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500" />
+                      <span className="text-xs">{record.category || '돌발고장'}</span>
                     </div>
-                    <div className="text-xs text-gray-500 w-8">2명</div>
+                    <span className="text-xs font-medium">1</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="text-xs w-8 text-gray-600">C급</div>
-                    <div className="flex-1 bg-gray-200 rounded-full h-3">
-                      <div className="bg-yellow-500 h-3 rounded-full" style={{width: '20%'}}></div>
-                    </div>
-                    <div className="text-xs text-gray-500 w-8">1명</div>
-                  </div>
+                ))}
+              </div>
+              
+              {/* Average Statistics */}
+              <div className="mt-4 pt-4 border-t space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">평균 돌발주기</span>
+                  <span className="text-sm font-bold text-red-600">
+                    {totalFailures > 0 ? `${Math.floor(365 / totalFailures)}일` : '-'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">평균 작업시간</span>
+                  <span className="text-sm font-bold text-orange-600">
+                    2.5시간
+                  </span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* 추가 지표 */}
-          <Card className="shadow-lg border-0 rounded-xl bg-white">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-gray-800">추가 지표</CardTitle>
+          {/* Maintenance/Repair Statistics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-sm">
+                <Wrench className="w-5 h-5 text-blue-600" />
+                <span>정비 통계</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center mb-4">
+                <div className="text-2xl font-bold text-blue-600">{totalMaintenance}</div>
+                <div className="text-xs text-gray-500">총 정비 건수</div>
+              </div>
+              
+              {/* Repair Statistics */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">평균 작업자 수</span>
+                  <span className="text-sm font-bold text-blue-600">2명</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">평균 작업시간</span>
+                  <span className="text-sm font-bold text-green-600">3시간</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Key Metrics */}
+          <Card className="shadow-lg border-0 rounded-xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center space-x-2 text-lg">
+                <TrendingUp className="w-5 h-5 text-purple-600" />
+                <span>주요 지표</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">2.5시간</div>
-                  <div className="text-xs text-gray-600">평균 수리시간</div>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {totalFailures > 0 ? Math.floor(8760 / totalFailures) : 0}h
+                  </div>
+                  <p className="text-xs text-gray-500">MTBF (평균고장간격)</p>
                 </div>
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">가동률:</span>
-                    <span className="font-medium">95%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">효율성:</span>
-                    <span className="font-medium">양호</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">다음정비:</span>
-                    <span className="font-medium">2일후</span>
-                  </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600">2.5h</div>
+                  <p className="text-xs text-gray-500">MTTR (평균수리시간)</p>
                 </div>
               </div>
             </CardContent>

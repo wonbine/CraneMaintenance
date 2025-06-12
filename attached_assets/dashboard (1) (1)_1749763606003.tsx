@@ -1,0 +1,361 @@
+
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6 font-['IBM_Plex_Sans']">
+      {/* Row 1: 위치 개요, 크레인 상세정보, 설치 및 점검일자 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Location Overview */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <MapPin className="w-5 h-5 text-blue-600" />
+              <span>위치 개요</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="bg-gray-100 rounded-lg h-32 flex items-center justify-center">
+                <div className="text-center">
+                  <MapPin className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                  <p className="text-sm font-medium">{crane?.plantSection || '공장 정보 없음'}</p>
+                  <p className="text-xs text-gray-500">{crane?.location || '위치 정보 없음'}</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <Badge variant="outline" className={
+                  crane?.status === 'operating' ? "bg-green-50 text-green-700 border-green-200" :
+                  crane?.status === 'maintenance' ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
+                  "bg-red-50 text-red-700 border-red-200"
+                }>
+                  {crane?.status === 'operating' ? '정상 운영중' :
+                   crane?.status === 'maintenance' ? '정비중' : '점검 필요'}
+                </Badge>
+                <Button size="sm" variant="ghost">
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Crane Details */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <Activity className="w-5 h-5 text-purple-600" />
+              <span>크레인 상세정보</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">크레인명</span>
+                <span className="text-sm font-medium">{crane?.craneName || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">설비코드</span>
+                <span className="text-sm font-medium">{crane?.craneId || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">등급</span>
+                <span className="text-sm font-medium">{crane?.grade || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">운전방식</span>
+                <span className="text-sm font-medium">{crane?.driveType || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">유/무인</span>
+                <span className="text-sm font-medium">{crane?.unmannedOperation || 'N/A'}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Installation and Inspection Dates */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <Calendar className="w-5 h-5 text-orange-600" />
+              <span>설치 및 점검일자</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {crane?.installationDate && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">설치일자</span>
+                  <span className="text-sm font-medium">{formatDate(crane.installationDate)}</span>
+                </div>
+              )}
+              
+              {crane?.inspectionReferenceDate && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">점검기준일</span>
+                  <span className="text-sm font-medium">{formatDate(crane.inspectionReferenceDate)}</span>
+                </div>
+              )}
+              
+              {crane?.inspectionCycle && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">정비주기</span>
+                  <span className="text-sm font-medium">{crane.inspectionCycle}일</span>
+                </div>
+              )}
+              
+              {crane?.leadTime && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">리드타임</span>
+                  <span className="text-sm font-medium">{crane.leadTime}일</span>
+                </div>
+              )}
+
+              {/* Next Inspection Calculation */}
+              {(() => {
+                if (!crane?.inspectionReferenceDate || !crane?.inspectionCycle) {
+                  return (
+                    <div className="bg-gray-50 p-3 rounded-lg text-center">
+                      <p className="text-sm text-gray-500">점검 정보가 없습니다</p>
+                    </div>
+                  );
+                }
+
+                const referenceDate = new Date(crane.inspectionReferenceDate);
+                const nextInspectionDate = new Date(referenceDate);
+                nextInspectionDate.setDate(referenceDate.getDate() + crane.inspectionCycle);
+                
+                const today = new Date();
+                const timeDiff = nextInspectionDate.getTime() - today.getTime();
+                const daysUntilInspection = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                
+                const isOverdue = daysUntilInspection < 0;
+                const isUrgent = daysUntilInspection <= 7 && !isOverdue;
+
+                return (
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-600">다음 점검일</span>
+                      <span className="text-sm font-medium">{formatDate(nextInspectionDate.toISOString())}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">점검까지</span>
+                      <span className={`text-sm font-bold ${
+                        isOverdue ? 'text-red-600' : 
+                        isUrgent ? 'text-orange-600' : 'text-green-600'
+                      }`}>
+                        {isOverdue ? `D+${Math.abs(daysUntilInspection)}` : `D-${daysUntilInspection}`}
+                      </span>
+                    </div>
+                    <div className="mt-2">
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        isOverdue ? 'bg-red-100 text-red-700' : 
+                        isUrgent ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'
+                      }`}>
+                        {isOverdue ? '점검 지연' : 
+                         isUrgent ? '점검 임박' : '점검 일정 양호'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Row 2: Device Heatmap and Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+        {/* Device Failure Heatmap */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <Activity className="w-5 h-5 text-purple-600" />
+              <span>장치별 고장유형 히트맵</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <HeatmapChart data={deviceHeatmapData} />
+          </CardContent>
+        </Card>
+        {/* Daily Repair History */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <Wrench className="w-5 h-5 text-green-600" />
+              <span>일상수리 이력</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DonutChart 
+              data={dailyRepairData} 
+              title="총 건수" 
+              total={craneDetails?.dailyRepairTotal || 0} 
+            />
+            <div className="mt-4 space-y-2">
+              {dailyRepairData.map((item, index) => (
+                <div key={index} className="flex justify-between items-center">
+                  <div className="flex items-center space-x-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="text-xs">{item.type}</span>
+                  </div>
+                  <span className="text-xs font-medium">{item.count}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Emergency Repair History */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+              <span>돌발수리 이력</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DonutChart 
+              data={failureStats.chartData} 
+              title="총 건수" 
+              total={failureStats.totalFailures} 
+            />
+            <div className="mt-4 space-y-2">
+              {failureStats.chartData.map((item: any, index: number) => (
+                <div key={index} className="flex justify-between items-center">
+                  <div className="flex items-center space-x-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="text-xs">{item.type}</span>
+                  </div>
+                  <span className="text-xs font-medium">{item.count}</span>
+                </div>
+              ))}
+            </div>
+            
+            {/* Average Statistics */}
+            <div className="mt-4 pt-4 border-t space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">평균 돌발주기</span>
+                <span className="text-sm font-bold text-red-600">
+                  {failureStats.averageInterval > 0 ? `${failureStats.averageInterval}일` : '-'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">평균 작업시간</span>
+                <span className="text-sm font-bold text-orange-600">
+                  {failureStats.averageWorkTime > 0 ? `${failureStats.averageWorkTime}시간` : '-'}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Maintenance/Repair Statistics */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-sm">
+              <Wrench className="w-5 h-5 text-blue-600" />
+              <span>일상수리 이력</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center mb-4">
+              <div className="text-2xl font-bold text-blue-600">{repairStats.totalRepairs}</div>
+              <div className="text-xs text-gray-500">총 건수</div>
+            </div>
+            
+            {/* Repair Statistics */}
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">평균 작업자 수</span>
+                <span className="text-sm font-bold text-blue-600">
+                  {repairStats.averageWorkers > 0 ? `${repairStats.averageWorkers}명` : '-'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">평균 작업시간</span>
+                <span className="text-sm font-bold text-green-600">
+                  {repairStats.averageWorkTime > 0 ? `${repairStats.averageWorkTime}시간` : '-'}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Failure Type Classification */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <TrendingUp className="w-5 h-5 text-orange-600" />
+              <span>고장 유형별 분류</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <BarChart data={failureTypeData.map((item: any) => ({
+              category: item.type,
+              value: item.count,
+              color: '#f97316'
+            }))} />
+          </CardContent>
+        </Card>
+
+        {/* Monthly Failure Count */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+              <span>고장발생 건수</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FailureLineChart data={monthlyFailureData} />
+          </CardContent>
+        </Card>
+
+        {/* Average Repair Time */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <Clock className="w-5 h-5 text-blue-600" />
+              <span>평균 수리시간</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RepairTimeLineChart data={monthlyRepairTimeData} />
+          </CardContent>
+        </Card>
+
+        {/* Key Metrics */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <TrendingUp className="w-5 h-5 text-purple-600" />
+              <span>주요 지표</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  {craneDetails?.mtbfHours || 0}h
+                </div>
+                <p className="text-xs text-gray-500">MTBF (평균고장간격)</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">
+                  {craneDetails?.mttrHours || 0}h
+                </div>
+                <p className="text-xs text-gray-500">MTTR (평균수리시간)</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
