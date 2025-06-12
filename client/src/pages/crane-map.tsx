@@ -281,28 +281,7 @@ export default function CraneMap() {
           </CardHeader>
           <CardContent className="p-6 h-full">
             <div className="relative w-full h-full bg-gray-50 border rounded-lg overflow-auto">
-              {/* Map Legend */}
-              <div className="absolute top-4 right-4 z-10 bg-white p-3 rounded-lg shadow-md border">
-                <h4 className="text-sm font-medium mb-2">크레인 등급 범례</h4>
-                <div className="space-y-1 text-xs">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-blue-600 border border-blue-800 rounded-full"></div>
-                    <span className="font-medium">A급 (최고등급)</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-green-600 border border-green-800 rounded-full"></div>
-                    <span className="font-medium">B급 (중간등급)</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-orange-600 border border-orange-800 rounded-full"></div>
-                    <span className="font-medium">C급 (기본등급)</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-gray-500 border border-gray-700 rounded-full"></div>
-                    <span>등급 미분류</span>
-                  </div>
-                </div>
-              </div>
+
 
               {/* Crane Position Markers */}
               <div className="relative w-full h-full min-w-[2400px] min-h-[2000px]">
