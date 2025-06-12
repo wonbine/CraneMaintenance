@@ -6,9 +6,11 @@ import { useToast } from '../../hooks/use-toast';
 
 interface AISummaryButtonProps {
   className?: string;
+  craneId?: string; // Optional crane ID for crane-specific reports
+  mode?: 'dashboard' | 'crane'; // Mode to determine which endpoint to use
 }
 
-export function AISummaryButton({ className }: AISummaryButtonProps) {
+export function AISummaryButton({ className, craneId, mode = 'dashboard' }: AISummaryButtonProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [summary, setSummary] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false);
@@ -17,31 +19,46 @@ export function AISummaryButton({ className }: AISummaryButtonProps) {
   const generateSummary = async () => {
     setIsGenerating(true);
     try {
-      // Fetch dashboard data for analysis
-      const responses = await Promise.all([
-        fetch('/api/dashboard/summary'),
-        fetch('/api/analytics/system-overview'),
-        fetch('/api/analytics/recent-maintenance-stats'),
-        fetch('/api/analytics/failure-cause-distribution')
-      ]);
+      let analysisResponse;
 
-      const [dashboardData, systemData, maintenanceData, failureData] = await Promise.all(
-        responses.map(r => r.json())
-      );
+      if (mode === 'crane' && craneId) {
+        // Call crane-specific AI analysis endpoint
+        analysisResponse = await fetch('/api/ai/crane-summary', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            craneId: craneId
+          })
+        });
+      } else {
+        // Fetch dashboard data for analysis
+        const responses = await Promise.all([
+          fetch('/api/dashboard/summary'),
+          fetch('/api/analytics/system-overview'),
+          fetch('/api/analytics/recent-maintenance-stats'),
+          fetch('/api/analytics/failure-cause-distribution')
+        ]);
 
-      // Call AI analysis endpoint
-      const analysisResponse = await fetch('/api/ai/analyze-dashboard', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          dashboardSummary: dashboardData,
-          systemOverview: systemData,
-          maintenanceStats: maintenanceData,
-          failureCauses: failureData
-        })
-      });
+        const [dashboardData, systemData, maintenanceData, failureData] = await Promise.all(
+          responses.map(r => r.json())
+        );
+
+        // Call dashboard AI analysis endpoint
+        analysisResponse = await fetch('/api/ai/analyze-dashboard', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            dashboardSummary: dashboardData,
+            systemOverview: systemData,
+            maintenanceStats: maintenanceData,
+            failureCauses: failureData
+          })
+        });
+      }
 
       if (!analysisResponse.ok) {
         throw new Error('AI 분석 요청이 실패했습니다');

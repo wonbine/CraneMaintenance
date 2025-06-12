@@ -10,6 +10,7 @@ import {
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import { AISummaryButton } from './ai-summary-button';
 
 interface CraneDetailKPIProps {
   selectedCraneId: string;
@@ -190,11 +191,16 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
               </span>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right flex flex-col items-end space-y-3">
             <div className="text-4xl font-bold mb-1">{craneData.craneId}</div>
             <Badge className={`${getGradeColor(craneData.grade)} text-white`}>
               등급 {craneData.grade}
             </Badge>
+            <AISummaryButton 
+              craneId={craneData.craneId} 
+              mode="crane" 
+              className="bg-white/20 hover:bg-white/30 border-white/30"
+            />
           </div>
         </div>
       </div>

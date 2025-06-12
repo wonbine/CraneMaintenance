@@ -1045,6 +1045,129 @@ ${JSON.stringify(analysisData, null, 2)}
     }
   });
 
+  // AI Crane-specific Summary Report endpoint
+  app.post("/api/ai/crane-summary", async (req, res) => {
+    try {
+      const { craneId } = req.body;
+      
+      if (!craneId) {
+        return res.status(400).json({ 
+          message: "크레인 ID가 필요합니다." 
+        });
+      }
+
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ 
+          message: "OpenAI API 키가 설정되지 않았습니다." 
+        });
+      }
+
+      const openai = new OpenAI({ apiKey });
+
+      // Get crane data
+      const crane = await storage.getCraneByCraneId(craneId);
+      if (!crane) {
+        return res.status(404).json({ 
+          message: "크레인을 찾을 수 없습니다." 
+        });
+      }
+
+      // Get failure and maintenance records for this crane
+      const failureRecords = await storage.getFailureRecordsByCraneId(craneId);
+      const maintenanceRecords = await storage.getMaintenanceRecordsByCraneId(craneId);
+
+      // Prepare crane data for analysis
+      const craneData = {
+        기본정보: {
+          크레인명: crane.craneName,
+          설비코드: crane.craneId,
+          공장: crane.plantSection,
+          위치: crane.location,
+          모델: crane.model,
+          등급: crane.grade,
+          운전방식: crane.driveType,
+          유무인운전: crane.unmannedOperation,
+          전기담당자: crane.electricalManager,
+          기계담당자: crane.mechanicalManager,
+          상태: crane.status
+        },
+        고장이력: failureRecords.map(f => ({
+          날짜: f.date,
+          고장유형: f.failureType,
+          설명: f.description,
+          심각도: f.severity,
+          중단시간: f.downtime,
+          원인: f.cause,
+          부위: f.byDevice,
+          작업시간: f.worktime
+        })),
+        수리이력: maintenanceRecords.map(m => ({
+          날짜: m.actualStartDateTime || m.date,
+          작업종류: m.type,
+          작업명: m.taskName,
+          상태: m.status,
+          작업자수: m.totalWorkers,
+          작업시간: m.totalWorkTime,
+          작업지시서: m.workOrder,
+          설비명: m.equipmentName,
+          지역명: m.areaName
+        }))
+      };
+
+      const prompt = `당신은 산업 장비 유지보수 전문가입니다. 아래는 [${crane.plantSection}] 공장의 [${craneId}] 크레인에 대한 상세 이력 데이터입니다. 이 데이터를 바탕으로 다음 항목을 포함한 요약 보고서를 작성하세요:
+
+**크레인의 기본 정보**
+- 크레인 명칭
+- EquipmentCode
+- 유/무인 여부
+- 달기기구 종류 (예: Tong, Coil Lifter 등)
+- Electrical Manager
+- Mechanical Manager
+- 설치일자 (Installation Date)
+
+**최근 6개월~1년 사이 고장 발생 현황**
+- 고장 횟수 및 주요 발생 시기
+- 반복적으로 발생한 고장 유형 또는 문제 패턴
+
+**수리 이력 요약**
+- 총 수리 횟수
+- 주요 수리 항목
+- 수리 빈도가 높은 항목 또는 부품
+
+요약보고서는 각 항목에 제목을 붙여 정리하며, 표 없이 서술형으로 작성하세요. 기술적인 표현을 사용하되, 관리자나 유지보수팀이 이해하기 쉽도록 명확하고 간결하게 작성해 주세요.
+
+해당 크레인의 데이터는 다음과 같습니다:
+
+${JSON.stringify(craneData, null, 2)}`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: "당신은 산업 장비 유지보수 전문가입니다. 크레인 데이터를 분석하여 실용적이고 통찰력 있는 보고서를 작성합니다."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 2500,
+        temperature: 0.7
+      });
+
+      const summary = response.choices[0].message.content;
+
+      res.json({ summary });
+    } catch (error) {
+      console.error("Error generating crane summary:", error);
+      res.status(500).json({ 
+        message: "크레인 요약 생성 중 오류가 발생했습니다: " + (error instanceof Error ? error.message : "알 수 없는 오류")
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
