@@ -29,6 +29,45 @@ export default function Dashboard() {
     enabled: !filters.selectedCrane || filters.selectedCrane === 'all'
   });
 
+  // Fetch operation type statistics
+  const { data: operationTypeData } = useQuery({
+    queryKey: ['/api/analytics/operation-type-stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/analytics/operation-type-stats');
+      if (!response.ok) throw new Error('Failed to fetch operation type stats');
+      return response.json();
+    },
+    enabled: !filters.selectedCrane || filters.selectedCrane === 'all'
+  });
+
+  // Fetch crane grade statistics
+  const { data: craneGradeData = [] } = useQuery({
+    queryKey: ['/api/analytics/crane-grade-stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/analytics/crane-grade-stats');
+      if (!response.ok) throw new Error('Failed to fetch crane grade stats');
+      return response.json();
+    },
+    enabled: !filters.selectedCrane || filters.selectedCrane === 'all'
+  });
+
+  // Chart colors
+  const OPERATION_COLORS = ['#22c55e', '#ef4444']; // Green for manned, Red for unmanned
+  const GRADE_COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#10b981', '#f97316', '#6366f1', '#ec4899'];
+
+  // Prepare operation type chart data
+  const operationChartData = operationTypeData ? [
+    { name: '유인', value: operationTypeData.manned, percentage: operationTypeData.mannedPercentage },
+    { name: '무인', value: operationTypeData.unmanned, percentage: operationTypeData.unmannedPercentage }
+  ] : [];
+
+  // Prepare crane grade chart data
+  const gradeChartData = craneGradeData.map((item: any) => ({
+    name: item.grade,
+    value: item.count,
+    percentage: item.percentage
+  }));
+
   const FactoryOverviewCard = ({ factory }: { factory: any }) => {
     return (
       <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -131,6 +170,107 @@ export default function Dashboard() {
                 </Card>
               </div>
             )}
+
+            {/* Statistics Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Unified Operation Type Chart */}
+              {operationTypeData && (
+                <Card className="shadow-lg border-0 rounded-xl bg-white">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold text-gray-800 text-center">
+                      유인/무인 크레인 비율
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={operationChartData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={100}
+                            paddingAngle={5}
+                            dataKey="value"
+                          >
+                            {operationChartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={OPERATION_COLORS[index % OPERATION_COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip 
+                            formatter={(value: any, name: string) => [
+                              `${value}대 (${operationChartData.find(d => d.name === name)?.percentage}%)`,
+                              name
+                            ]}
+                          />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="mt-4 flex justify-center space-x-6">
+                      <div className="flex items-center">
+                        <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
+                        <span className="text-sm">유인: {operationTypeData.manned}대 ({operationTypeData.mannedPercentage}%)</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-4 h-4 bg-red-500 rounded mr-2"></div>
+                        <span className="text-sm">무인: {operationTypeData.unmanned}대 ({operationTypeData.unmannedPercentage}%)</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Crane Grade Distribution Chart */}
+              {gradeChartData.length > 0 && (
+                <Card className="shadow-lg border-0 rounded-xl bg-white">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold text-gray-800 text-center">
+                      크레인 등급별 분포
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={gradeChartData}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={100}
+                            paddingAngle={2}
+                            dataKey="value"
+                          >
+                            {gradeChartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={GRADE_COLORS[index % GRADE_COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip 
+                            formatter={(value: any, name: string) => [
+                              `${value}대 (${gradeChartData.find(d => d.name === name)?.percentage}%)`,
+                              name
+                            ]}
+                          />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                      {gradeChartData.map((item, index) => (
+                        <div key={item.name} className="flex items-center">
+                          <div 
+                            className="w-3 h-3 rounded mr-2" 
+                            style={{ backgroundColor: GRADE_COLORS[index % GRADE_COLORS.length] }}
+                          ></div>
+                          <span>{item.name}: {item.value}대 ({item.percentage}%)</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
 
             {/* Factory Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
