@@ -177,10 +177,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get failure records
+  // Get failure records with filtering
   app.get("/api/failure-records", async (req, res) => {
     try {
-      const records = await storage.getFailureRecords();
+      const { craneName, startDate, endDate } = req.query;
+      let records = await storage.getFailureRecords();
+      
+      // Filter by crane name if provided
+      if (craneName && craneName !== 'all') {
+        const cranes = await storage.getCranes();
+        const targetCrane = cranes.find(c => c.craneName === craneName);
+        if (targetCrane) {
+          records = records.filter(r => r.craneId === targetCrane.craneId);
+        }
+      }
+      
+      // Filter by date range if provided
+      if (startDate && endDate) {
+        records = records.filter(r => {
+          if (!r.failureDate) return false;
+          const recordDate = new Date(r.failureDate);
+          const start = new Date(startDate as string);
+          const end = new Date(endDate as string);
+          return recordDate >= start && recordDate <= end;
+        });
+      }
+      
       res.json(records);
     } catch (error) {
       console.error("Error fetching failure records:", error);

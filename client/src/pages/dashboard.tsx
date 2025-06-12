@@ -89,12 +89,84 @@ export default function Dashboard() {
     enabled: !!filters.selectedCrane && filters.selectedCrane !== 'all'
   });
 
+  // Fetch failure records for the selected crane
+  const { data: failureRecords = [] } = useQuery({
+    queryKey: ['/api/failure-records', filters.selectedCrane, startDate, endDate],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.selectedCrane && filters.selectedCrane !== 'all') {
+        params.append('craneName', filters.selectedCrane);
+      }
+      params.append('startDate', startDate);
+      params.append('endDate', endDate);
+
+      const response = await fetch(`/api/failure-records?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch failure records');
+      return response.json();
+    },
+    enabled: !!filters.selectedCrane && filters.selectedCrane !== 'all'
+  });
+
   // Trigger refetch when search is triggered
   useEffect(() => {
     if (searchTrigger > 0) {
       refetch();
     }
   }, [searchTrigger, refetch]);
+
+  // Calculate failure statistics from actual data
+  const calculateFailureStats = () => {
+    if (!failureRecords || failureRecords.length === 0) {
+      return {
+        totalFailures: 0,
+        averageInterval: 0,
+        averageWorkTime: 0,
+        chartData: []
+      };
+    }
+
+    // Calculate total failures
+    const totalFailures = failureRecords.length;
+
+    // Calculate average failure interval (from 'data' column in days)
+    const intervals = failureRecords
+      .map((record: any) => record.data)
+      .filter((data: any) => data !== null && data !== undefined && !isNaN(data));
+    const averageInterval = intervals.length > 0 
+      ? intervals.reduce((sum: number, val: number) => sum + val, 0) / intervals.length 
+      : 0;
+
+    // Calculate average work time (from 'worktime' column in hours)
+    const workTimes = failureRecords
+      .map((record: any) => record.worktime)
+      .filter((time: any) => time !== null && time !== undefined && !isNaN(time));
+    const averageWorkTime = workTimes.length > 0 
+      ? workTimes.reduce((sum: number, val: number) => sum + val, 0) / workTimes.length 
+      : 0;
+
+    // Group failures by type for chart (using failureType field)
+    const typeGroups = failureRecords.reduce((acc: any, record: any) => {
+      const type = record.failureType || '기타';
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {});
+
+    const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e'];
+    const chartData = Object.entries(typeGroups).map(([type, count], index) => ({
+      type,
+      count,
+      color: colors[index % colors.length]
+    }));
+
+    return {
+      totalFailures,
+      averageInterval: Math.round(averageInterval * 10) / 10, // Round to 1 decimal
+      averageWorkTime: Math.round(averageWorkTime * 10) / 10, // Round to 1 decimal
+      chartData
+    };
+  };
+
+  const failureStats = calculateFailureStats();
 
   const DonutChart = ({ data, title, total }: { data: any[], title: string, total: number }) => {
     if (!data || data.length === 0 || total === 0) {
@@ -501,12 +573,12 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <DonutChart 
-              data={emergencyRepairData} 
+              data={failureStats.chartData} 
               title="총 건수" 
-              total={craneDetails?.emergencyRepairTotal || 0} 
+              total={failureStats.totalFailures} 
             />
             <div className="mt-4 space-y-2">
-              {emergencyRepairData.map((item, index) => (
+              {failureStats.chartData.map((item, index) => (
                 <div key={index} className="flex justify-between items-center">
                   <div className="flex items-center space-x-2">
                     <div 
@@ -518,6 +590,22 @@ export default function Dashboard() {
                   <span className="text-xs font-medium">{item.count}</span>
                 </div>
               ))}
+            </div>
+            
+            {/* Average Statistics */}
+            <div className="mt-4 pt-4 border-t space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">평균 돌발주기</span>
+                <span className="text-sm font-bold text-red-600">
+                  {failureStats.averageInterval > 0 ? `${failureStats.averageInterval}일` : '-'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">평균 작업시간</span>
+                <span className="text-sm font-bold text-orange-600">
+                  {failureStats.averageWorkTime > 0 ? `${failureStats.averageWorkTime}시간` : '-'}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>
