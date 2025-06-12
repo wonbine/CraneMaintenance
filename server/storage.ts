@@ -1573,8 +1573,8 @@ export class DatabaseStorage implements IStorage {
 
   async getFailureCauseDistribution(): Promise<{ cause: string; count: number; percentage: number }[]> {
     const cacheKey = 'failure-cause-distribution';
-    // Clear cache to apply new simplified display
-    cache.delete(cacheKey);
+    const cached = cache.get<{ cause: string; count: number; percentage: number }[]>(cacheKey);
+    if (cached) return cached;
 
     const failureRecords = await this.getFailureRecords();
     
