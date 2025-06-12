@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useSearch } from "@/contexts/SearchContext";
 import { 
   MapPin, 
   Settings, 
@@ -88,6 +90,69 @@ const craneData = {
 
 export default function Dashboard() {
   const [selectedPart, setSelectedPart] = useState<string | null>(null);
+  const { filters, searchTrigger } = useSearch();
+
+  // Calculate date range based on period selection
+  const getDateRange = () => {
+    if (filters.dateMode === 'range' && filters.startDate && filters.endDate) {
+      return { startDate: filters.startDate, endDate: filters.endDate };
+    }
+    
+    const today = new Date();
+    const startDate = new Date();
+    
+    switch (filters.selectedPeriod) {
+      case '1개월':
+        startDate.setMonth(today.getMonth() - 1);
+        break;
+      case '3개월':
+        startDate.setMonth(today.getMonth() - 3);
+        break;
+      case '6개월':
+        startDate.setMonth(today.getMonth() - 6);
+        break;
+      case '1년':
+        startDate.setFullYear(today.getFullYear() - 1);
+        break;
+      default:
+        startDate.setMonth(today.getMonth() - 1);
+    }
+    
+    return {
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: today.toISOString().split('T')[0]
+    };
+  };
+
+  const { startDate, endDate } = getDateRange();
+
+  // Fetch crane details based on selections
+  const { data: craneDetails, isLoading, refetch } = useQuery({
+    queryKey: ['/api/crane-details', filters.selectedCrane, filters.selectedFactory, startDate, endDate],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.selectedCrane && filters.selectedCrane !== 'all') {
+        params.append('craneName', filters.selectedCrane);
+      }
+      if (filters.selectedFactory && filters.selectedFactory !== 'all') {
+        params.append('factory', filters.selectedFactory);
+      }
+      params.append('startDate', startDate);
+      params.append('endDate', endDate);
+
+      const response = await fetch(`/api/crane-details?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch crane details');
+      return response.json();
+    },
+    enabled: !!filters.selectedCrane && filters.selectedCrane !== 'all'
+  });
+
+  // Trigger refetch when search is triggered
+  useEffect(() => {
+    if (searchTrigger > 0) {
+      refetch();
+    }
+  }, [searchTrigger, refetch]);
 
   const DonutChart = ({ data, title, total }: { data: any[], title: string, total: number }) => (
     <div className="relative w-24 h-24 mx-auto">
@@ -198,6 +263,45 @@ export default function Dashboard() {
     );
   };
 
+  // Show message when no crane is selected
+  if (!filters.selectedCrane || filters.selectedCrane === 'all') {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6 font-['IBM_Plex_Sans'] flex items-center justify-center">
+        <Card className="shadow-lg border-0 rounded-xl p-8 text-center">
+          <Activity className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">크레인을 선택해 주세요</h2>
+          <p className="text-gray-500">상단에서 공장과 크레인을 선택한 후 조회 버튼을 클릭하세요.</p>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6 font-['IBM_Plex_Sans'] flex items-center justify-center">
+        <Card className="shadow-lg border-0 rounded-xl p-8 text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600">크레인 정보를 불러오는 중...</p>
+        </Card>
+      </div>
+    );
+  }
+
+  const crane = craneDetails?.crane;
+  const dailyRepairData = craneDetails ? [
+    { type: "정기점검", count: craneDetails.dailyRepairBreakdown.routine, color: "#3b82f6" },
+    { type: "예방정비", count: craneDetails.dailyRepairBreakdown.preventive, color: "#ef4444" },
+    { type: "점검", count: craneDetails.dailyRepairBreakdown.inspection, color: "#10b981" }
+  ] : [];
+
+  const emergencyRepairData = craneDetails ? [
+    { type: "유압계통", count: craneDetails.emergencyRepairBreakdown.hydraulic, color: "#f59e0b" },
+    { type: "전기계통", count: craneDetails.emergencyRepairBreakdown.electrical, color: "#ef4444" },
+    { type: "기계계통", count: craneDetails.emergencyRepairBreakdown.mechanical, color: "#8b5cf6" },
+    { type: "구조계통", count: craneDetails.emergencyRepairBreakdown.structural, color: "#06b6d4" }
+  ] : [];
+
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-['IBM_Plex_Sans']">
       {/* Row 1: 위치 개요, 크레인 상세정보, 설치 및 점검일자 */}
@@ -215,13 +319,18 @@ export default function Dashboard() {
               <div className="bg-gray-100 rounded-lg h-32 flex items-center justify-center">
                 <div className="text-center">
                   <MapPin className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium">{craneData.location.name}</p>
-                  <p className="text-xs text-gray-500">{craneData.location.coordinates}</p>
+                  <p className="text-sm font-medium">{crane?.plantSection || '공장 정보 없음'}</p>
+                  <p className="text-xs text-gray-500">{crane?.location || '위치 정보 없음'}</p>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                  정상 운영중
+                <Badge variant="outline" className={
+                  crane?.status === 'operating' ? "bg-green-50 text-green-700 border-green-200" :
+                  crane?.status === 'maintenance' ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
+                  "bg-red-50 text-red-700 border-red-200"
+                }>
+                  {crane?.status === 'operating' ? '정상 운영중' :
+                   crane?.status === 'maintenance' ? '정비중' : '점검 필요'}
                 </Badge>
                 <Button size="sm" variant="ghost">
                   <Settings className="w-4 h-4" />
@@ -242,24 +351,24 @@ export default function Dashboard() {
           <CardContent>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">크레인 타입</span>
-                <span className="text-sm font-medium">{craneData.details.type}</span>
+                <span className="text-sm text-gray-600">크레인명</span>
+                <span className="text-sm font-medium">{crane?.craneName || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">설비코드</span>
-                <span className="text-sm font-medium">{craneData.details.equipmentCode}</span>
+                <span className="text-sm font-medium">{crane?.craneId || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">작동방식</span>
-                <span className="text-sm font-medium">{craneData.details.operationMethod}</span>
+                <span className="text-sm text-gray-600">모델</span>
+                <span className="text-sm font-medium">{crane?.model || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">용량</span>
-                <span className="text-sm font-medium">{craneData.details.capacity}</span>
+                <span className="text-sm text-gray-600">위치</span>
+                <span className="text-sm font-medium">{crane?.location || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">제조사</span>
-                <span className="text-sm font-medium">{craneData.details.manufacturer}</span>
+                <span className="text-sm text-gray-600">공장/구역</span>
+                <span className="text-sm font-medium">{crane?.plantSection || 'N/A'}</span>
               </div>
             </div>
           </CardContent>
@@ -276,20 +385,24 @@ export default function Dashboard() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">설치일</span>
+                <span className="text-sm text-gray-600">최근 정비일</span>
                 <div className="text-right">
-                  <p className="text-sm font-medium">{craneData.dates.installation}</p>
-                  <p className="text-xs text-gray-500">{craneData.dates.daysSinceInstallation}일 경과</p>
+                  <p className="text-sm font-medium">{craneDetails?.lastMaintenanceDate || 'N/A'}</p>
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">최근 점검일</span>
+                <span className="text-sm text-gray-600">다음 점검일</span>
                 <div className="text-right">
-                  <p className="text-sm font-medium">{craneData.dates.lastInspection}</p>
-                  <p className="text-xs text-gray-500">{craneData.dates.daysSinceInspection}일 경과</p>
+                  <p className="text-sm font-medium">{craneDetails?.nextInspectionDate || 'N/A'}</p>
                 </div>
               </div>
-              <Progress value={(craneData.dates.daysSinceInspection / 90) * 100} className="h-2" />
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">점검까지</span>
+                <div className="text-right">
+                  <p className="text-sm font-medium">{craneDetails?.daysUntilInspection || 0}일 남음</p>
+                </div>
+              </div>
+              <Progress value={Math.min(100, (90 - (craneDetails?.daysUntilInspection || 0)) / 90 * 100)} className="h-2" />
             </div>
           </CardContent>
         </Card>
@@ -308,16 +421,16 @@ export default function Dashboard() {
           <CardContent>
             <div className="space-y-4">
               <DonutChart 
-                data={craneData.dailyRepair.breakdown} 
+                data={dailyRepairData} 
                 title="건수" 
-                total={craneData.dailyRepair.totalCases} 
+                total={craneDetails?.dailyRepairCount || 0} 
               />
               <div className="text-center">
-                <p className="text-xl font-bold text-blue-600">{craneData.dailyRepair.totalHours}</p>
+                <p className="text-xl font-bold text-blue-600">{craneDetails?.dailyRepairHours || 0}</p>
                 <p className="text-sm text-gray-500">총 시간</p>
               </div>
               <div className="space-y-1">
-                {craneData.dailyRepair.breakdown.map((item, index) => (
+                {dailyRepairData.map((item, index) => (
                   <div key={index} className="flex items-center space-x-2 text-xs">
                     <div className="w-3 h-3 rounded" style={{backgroundColor: item.color}}></div>
                     <span>{item.type} ({item.count})</span>
@@ -339,16 +452,16 @@ export default function Dashboard() {
           <CardContent>
             <div className="space-y-4">
               <DonutChart 
-                data={craneData.emergencyRepair.breakdown} 
+                data={emergencyRepairData} 
                 title="건수" 
-                total={craneData.emergencyRepair.totalCases} 
+                total={craneDetails?.emergencyRepairCount || 0} 
               />
               <div className="text-center">
-                <p className="text-xl font-bold text-red-600">{craneData.emergencyRepair.totalHours}</p>
+                <p className="text-xl font-bold text-red-600">{craneDetails?.emergencyRepairHours || 0}</p>
                 <p className="text-sm text-gray-500">총 시간</p>
               </div>
               <div className="space-y-1">
-                {craneData.emergencyRepair.breakdown.map((item, index) => (
+                {emergencyRepairData.map((item, index) => (
                   <div key={index} className="flex items-center space-x-2 text-xs">
                     <div className="w-3 h-3 rounded" style={{backgroundColor: item.color}}></div>
                     <span>{item.type} ({item.count})</span>
@@ -370,12 +483,12 @@ export default function Dashboard() {
           <CardContent>
             <div className="text-center space-y-4">
               <div>
-                <p className="text-4xl font-bold text-yellow-600">D-{craneData.inspection.daysRemaining}</p>
+                <p className="text-4xl font-bold text-yellow-600">D-{craneDetails?.daysUntilInspection || 0}</p>
                 <p className="text-sm text-gray-600">다음 정기점검까지</p>
               </div>
               <div className="bg-yellow-50 rounded-lg p-3">
                 <p className="text-sm font-medium text-yellow-800">다음 점검일</p>
-                <p className="text-lg font-bold text-yellow-900">{craneData.inspection.nextDate}</p>
+                <p className="text-lg font-bold text-yellow-900">{craneDetails?.nextInspectionDate || 'N/A'}</p>
               </div>
               <Button className="w-full bg-yellow-600 hover:bg-yellow-700">
                 점검 일정 조정
@@ -395,19 +508,19 @@ export default function Dashboard() {
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
-                <p className="text-lg font-bold text-blue-600">{craneData.metrics.avgRepairTime}</p>
+                <p className="text-lg font-bold text-blue-600">{Math.round((craneDetails?.dailyRepairHours || 0) / Math.max(1, craneDetails?.dailyRepairCount || 1) * 10) / 10}h</p>
                 <p className="text-xs text-gray-500">평균 수리시간</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-green-600">{craneData.metrics.operationRate}</p>
+                <p className="text-lg font-bold text-green-600">{craneDetails?.crane?.status === 'operating' ? '95%' : '85%'}</p>
                 <p className="text-xs text-gray-500">가동률</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-purple-600">{craneData.metrics.mtbf}</p>
+                <p className="text-lg font-bold text-purple-600">{Math.max(30, 120 - (craneDetails?.emergencyRepairCount || 0) * 10)}일</p>
                 <p className="text-xs text-gray-500">MTBF</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-orange-600">{craneData.metrics.reliability}</p>
+                <p className="text-lg font-bold text-orange-600">{Math.max(80, 98 - (craneDetails?.emergencyRepairCount || 0) * 2)}%</p>
                 <p className="text-xs text-gray-500">신뢰도</p>
               </div>
             </div>
@@ -427,26 +540,26 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-2">
-              {craneData.failureHeatmap.map((item, index) => (
+              {Object.entries(craneDetails?.failureHeatmap || {}).map(([cause, count], index) => (
                 <Button
                   key={index}
-                  variant={selectedPart === item.part ? "default" : "outline"}
+                  variant={selectedPart === cause ? "default" : "outline"}
                   className={`h-16 flex flex-col items-center justify-center text-xs ${
-                    item.severity === 'high' ? 'border-red-300 bg-red-50 hover:bg-red-100' :
-                    item.severity === 'medium' ? 'border-yellow-300 bg-yellow-50 hover:bg-yellow-100' :
+                    count >= 3 ? 'border-red-300 bg-red-50 hover:bg-red-100' :
+                    count >= 2 ? 'border-yellow-300 bg-yellow-50 hover:bg-yellow-100' :
                     'border-green-300 bg-green-50 hover:bg-green-100'
                   }`}
-                  onClick={() => setSelectedPart(item.part)}
+                  onClick={() => setSelectedPart(cause)}
                 >
-                  <span className="font-medium">{item.part}</span>
-                  <span className="text-xs text-gray-500">{item.count}건</span>
+                  <span className="font-medium">{cause}</span>
+                  <span className="text-xs text-gray-500">{count}건</span>
                 </Button>
               ))}
             </div>
             {selectedPart && (
               <div className="mt-3 p-2 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  선택된 부품: <strong>{selectedPart}</strong>
+                  선택된 원인: <strong>{selectedPart}</strong>
                 </p>
               </div>
             )}
