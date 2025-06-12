@@ -170,11 +170,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get maintenance records by crane ID
-  app.get("/api/maintenance-records/:craneId", async (req, res) => {
+  // Get maintenance records by crane name
+  app.get("/api/maintenance-records/:craneName", async (req, res) => {
     try {
-      const { craneId } = req.params;
-      const records = await storage.getMaintenanceRecordsByCraneId(craneId);
+      const { craneName } = req.params;
+      // First find the crane by name to get its craneId
+      const crane = await storage.getCraneByCraneName(craneName);
+      if (!crane) {
+        return res.status(404).json({ message: "Crane not found" });
+      }
+      const records = await storage.getMaintenanceRecordsByCraneId(crane.craneId);
       res.json(records);
     } catch (error) {
       console.error("Error fetching maintenance records for crane:", error);
@@ -182,11 +187,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get failure records by crane ID
-  app.get("/api/failure-records/:craneId", async (req, res) => {
+  // Get failure records by crane name
+  app.get("/api/failure-records/:craneName", async (req, res) => {
     try {
-      const { craneId } = req.params;
-      const records = await storage.getFailureRecordsByCraneId(craneId);
+      const { craneName } = req.params;
+      // First find the crane by name to get its craneId
+      const crane = await storage.getCraneByCraneName(craneName);
+      if (!crane) {
+        return res.status(404).json({ message: "Crane not found" });
+      }
+      const records = await storage.getFailureRecordsByCraneId(crane.craneId);
       res.json(records);
     } catch (error) {
       console.error("Error fetching failure records for crane:", error);
