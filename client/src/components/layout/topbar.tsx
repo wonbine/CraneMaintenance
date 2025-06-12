@@ -79,7 +79,7 @@ export function Topbar() {
                 setDateMode("range");
               }}
               placeholder="시작일자"
-              className="h-9 w-[140px] text-sm"
+              className="h-9 w-[140px] text-sm rounded-lg"
             />
             <span className="text-gray-400 text-sm">~</span>
             <Input
@@ -90,7 +90,7 @@ export function Topbar() {
                 setDateMode("range");
               }}
               placeholder="종료일자"
-              className="h-9 w-[140px] text-sm"
+              className="h-9 w-[140px] text-sm rounded-lg"
             />
           </div>
         </div>
@@ -139,14 +139,14 @@ export function Topbar() {
           onClick={handleSearch}
           className="bg-blue-500 hover:bg-blue-600 text-white h-9 px-5 rounded-lg flex items-center space-x-2"
         >
-          <SearchIcon className="w-4 h-4" />
+          <SearchIcon className="w-5 h-5" />
           <span className="text-sm">조회</span>
         </Button>
         
         {/* User Profile */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-9 flex items-center space-x-2 hover:bg-gray-50 px-3">
+            <Button variant="ghost" className="h-9 flex items-center space-x-2 hover:bg-gray-50 px-3 rounded-lg">
               <Avatar className="h-7 w-7">
                 <AvatarImage src="" alt="Jane Cooper" />
                 <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">

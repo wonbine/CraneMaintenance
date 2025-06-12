@@ -52,7 +52,7 @@ export function FactoryCraneSelector({ onSelectionChange }: FactoryCraneSelector
       <div className="flex items-center space-x-2">
         <Building2 className="w-5 h-5 text-gray-500" />
         <Select value={selectedFactory} onValueChange={handleFactoryChange}>
-          <SelectTrigger className="w-[160px] h-9 text-sm">
+          <SelectTrigger className="w-[160px] h-9 text-sm rounded-lg">
             <SelectValue placeholder="공장 선택" />
           </SelectTrigger>
           <SelectContent>
@@ -69,7 +69,7 @@ export function FactoryCraneSelector({ onSelectionChange }: FactoryCraneSelector
       <div className="flex items-center space-x-2">
         <Factory className="w-5 h-5 text-gray-500" />
         <Select value={selectedCrane} onValueChange={handleCraneChange}>
-          <SelectTrigger className="w-[160px] h-9 text-sm">
+          <SelectTrigger className="w-[160px] h-9 text-sm rounded-lg">
             <SelectValue placeholder="크레인 선택" />
           </SelectTrigger>
           <SelectContent>
