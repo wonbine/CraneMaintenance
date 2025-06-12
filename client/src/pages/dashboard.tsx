@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Factory } from 'lucide-react';
 import { useSearch } from '../contexts/SearchContext';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList } from 'recharts';
 
 export default function Dashboard() {
   const { filters } = useSearch();
@@ -51,6 +51,16 @@ export default function Dashboard() {
     enabled: !filters.selectedCrane || filters.selectedCrane === 'all'
   });
 
+  // Fetch recent maintenance statistics
+  const { data: recentMaintenanceData = [] } = useQuery({
+    queryKey: ['/api/analytics/recent-maintenance-stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/analytics/recent-maintenance-stats');
+      if (!response.ok) throw new Error('Failed to fetch recent maintenance stats');
+      return response.json();
+    }
+  });
+
   // Chart colors
   const OPERATION_COLORS = ['#22c55e', '#ef4444']; // Green for manned, Red for unmanned
   const GRADE_COLORS = {
@@ -77,6 +87,18 @@ export default function Dashboard() {
       percentage: item.percentage,
       fill: GRADE_COLORS[item.grade as keyof typeof GRADE_COLORS] || '#6b7280'
     }));
+
+  // Prepare maintenance chart data with month formatting
+  const maintenanceChartData = recentMaintenanceData.map((item: any) => {
+    const [year, month] = item.month.split('-');
+    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('ko-KR', { month: 'short' });
+    return {
+      month: monthName,
+      돌발작업: item.failureCount,
+      일상수리: item.maintenanceCount,
+      total: item.total
+    };
+  });
 
   const FactoryOverviewCard = ({ factory }: { factory: any }) => {
     // Fetch factory-specific operation type stats
@@ -299,6 +321,40 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Recent Maintenance Statistics */}
+              <Card className="col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-gray-800">최근 6개월 정비 통계</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={maintenanceChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip 
+                          formatter={(value: any, name: string) => [value, name]}
+                          labelFormatter={(label) => `${label}`}
+                        />
+                        <Bar dataKey="돌발작업" stackId="a" fill="#ef4444" />
+                        <Bar dataKey="일상수리" stackId="a" fill="#22c55e" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="mt-4 flex justify-center space-x-6">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-red-500 rounded mr-2"></div>
+                      <span className="text-sm text-gray-600">돌발작업</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-green-500 rounded mr-2"></div>
+                      <span className="text-sm text-gray-600">일상수리</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Factory Cards Grid */}
