@@ -15,7 +15,9 @@ import {
   type MaintenanceStats,
   type MonthlyTrend,
   type FactoryOverview,
-  type SystemOverview
+  type SystemOverview,
+  type CraneGradeStats,
+  type OperationTypeStats
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, isNotNull } from "drizzle-orm";
@@ -66,6 +68,8 @@ export interface IStorage {
   // Factory and system overview
   getFactoryOverview(): Promise<FactoryOverview[]>;
   getSystemOverview(): Promise<SystemOverview>;
+  getCraneGradeStats(): Promise<CraneGradeStats[]>;
+  getOperationTypeStats(): Promise<OperationTypeStats>;
 }
 
 export class MemStorage implements IStorage {
@@ -644,6 +648,41 @@ export class MemStorage implements IStorage {
       totalFactories: factories.size,
       totalCranes,
       totalMannedPercentage: totalCranes > 0 ? Math.round((mannedCranes / totalCranes) * 100) : 0
+    };
+  }
+
+  async getCraneGradeStats(): Promise<CraneGradeStats[]> {
+    const cranes = Array.from(this.cranes.values());
+    const gradeMap = new Map<string, number>();
+    
+    cranes.forEach(crane => {
+      const grade = crane.grade || '미분류';
+      gradeMap.set(grade, (gradeMap.get(grade) || 0) + 1);
+    });
+    
+    const totalCranes = cranes.length;
+    
+    return Array.from(gradeMap.entries()).map(([grade, count]) => ({
+      grade,
+      count,
+      percentage: totalCranes > 0 ? Math.round((count / totalCranes) * 100) : 0
+    })).sort((a, b) => b.count - a.count);
+  }
+
+  async getOperationTypeStats(): Promise<OperationTypeStats> {
+    const cranes = Array.from(this.cranes.values());
+    const totalCranes = cranes.length;
+    
+    const unmannedCranes = cranes.filter(crane => 
+      crane.unmannedOperation === '무인' || crane.unmannedOperation === 'Y'
+    ).length;
+    const mannedCranes = totalCranes - unmannedCranes;
+    
+    return {
+      manned: mannedCranes,
+      unmanned: unmannedCranes,
+      mannedPercentage: totalCranes > 0 ? Math.round((mannedCranes / totalCranes) * 100) : 0,
+      unmannedPercentage: totalCranes > 0 ? Math.round((unmannedCranes / totalCranes) * 100) : 0
     };
   }
 
@@ -1283,6 +1322,55 @@ export class DatabaseStorage implements IStorage {
       totalFactories: factories.size,
       totalCranes,
       totalMannedPercentage: totalCranes > 0 ? Math.round((mannedCranes / totalCranes) * 100) : 0
+    };
+
+    cache.set(cacheKey, result);
+    return result;
+  }
+
+  async getCraneGradeStats(): Promise<CraneGradeStats[]> {
+    const cacheKey = 'crane-grade-stats';
+    const cached = cache.get<CraneGradeStats[]>(cacheKey);
+    if (cached) return cached;
+
+    const cranes = await this.getCranes();
+    const gradeMap = new Map<string, number>();
+    
+    cranes.forEach(crane => {
+      const grade = crane.grade || '미분류';
+      gradeMap.set(grade, (gradeMap.get(grade) || 0) + 1);
+    });
+    
+    const totalCranes = cranes.length;
+    
+    const result = Array.from(gradeMap.entries()).map(([grade, count]) => ({
+      grade,
+      count,
+      percentage: totalCranes > 0 ? Math.round((count / totalCranes) * 100) : 0
+    })).sort((a, b) => b.count - a.count);
+
+    cache.set(cacheKey, result);
+    return result;
+  }
+
+  async getOperationTypeStats(): Promise<OperationTypeStats> {
+    const cacheKey = 'operation-type-stats';
+    const cached = cache.get<OperationTypeStats>(cacheKey);
+    if (cached) return cached;
+
+    const cranes = await this.getCranes();
+    const totalCranes = cranes.length;
+    
+    const unmannedCranes = cranes.filter(crane => 
+      crane.unmannedOperation === '무인' || crane.unmannedOperation === 'Y'
+    ).length;
+    const mannedCranes = totalCranes - unmannedCranes;
+    
+    const result = {
+      manned: mannedCranes,
+      unmanned: unmannedCranes,
+      mannedPercentage: totalCranes > 0 ? Math.round((mannedCranes / totalCranes) * 100) : 0,
+      unmannedPercentage: totalCranes > 0 ? Math.round((unmannedCranes / totalCranes) * 100) : 0
     };
 
     cache.set(cacheKey, result);

@@ -134,3 +134,16 @@ export type SystemOverview = {
   totalCranes: number;
   totalMannedPercentage: number;
 };
+
+export type CraneGradeStats = {
+  grade: string;
+  count: number;
+  percentage: number;
+};
+
+export type OperationTypeStats = {
+  manned: number;
+  unmanned: number;
+  mannedPercentage: number;
+  unmannedPercentage: number;
+};

@@ -443,6 +443,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get crane grade statistics
+  app.get("/api/analytics/crane-grade-stats", async (req, res) => {
+    try {
+      const gradeStats = await storage.getCraneGradeStats();
+      res.json(gradeStats);
+    } catch (error) {
+      console.error("Error fetching crane grade stats:", error);
+      res.status(500).json({ message: "Failed to fetch crane grade stats" });
+    }
+  });
+
+  // Get operation type statistics
+  app.get("/api/analytics/operation-type-stats", async (req, res) => {
+    try {
+      const operationStats = await storage.getOperationTypeStats();
+      res.json(operationStats);
+    } catch (error) {
+      console.error("Error fetching operation type stats:", error);
+      res.status(500).json({ message: "Failed to fetch operation type stats" });
+    }
+  });
+
   // Get active alerts
   app.get("/api/alerts", async (req, res) => {
     try {

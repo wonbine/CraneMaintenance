@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Factory } from 'lucide-react';
 import { useSearch } from '../contexts/SearchContext';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 export default function Dashboard() {
   const { filters } = useSearch();
