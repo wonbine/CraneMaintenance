@@ -24,38 +24,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+import { useSearch } from "@/contexts/SearchContext";
 import { FactoryCraneSelector } from "@/components/dashboard/factory-crane-selector";
 
 export function Topbar() {
-  const [selectedPeriod, setSelectedPeriod] = useState("1개월");
-  const [selectedFactory, setSelectedFactory] = useState("");
-  const [selectedCrane, setSelectedCrane] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [dateMode, setDateMode] = useState<"period" | "range">("period");
+  const { filters, updateFilters, triggerSearch } = useSearch();
 
   const handleSearch = () => {
-    // 조회 로직 실행
-    if (dateMode === "period") {
-      console.log("Searching with period:", { selectedFactory, selectedCrane, selectedPeriod });
-    } else {
-      console.log("Searching with date range:", { selectedFactory, selectedCrane, startDate, endDate });
-    }
+    triggerSearch();
   };
 
   const handlePeriodSelect = (period: string) => {
-    setSelectedPeriod(period);
-    setDateMode("period");
+    updateFilters({ selectedPeriod: period, dateMode: "period" });
   };
 
   const handleDateRangeMode = () => {
-    setDateMode("range");
+    updateFilters({ dateMode: "range" });
   };
 
   const handleSelectionChange = (factory?: string, crane?: string) => {
-    setSelectedFactory(factory || "");
-    setSelectedCrane(crane || "");
+    updateFilters({ 
+      selectedFactory: factory || "", 
+      selectedCrane: crane || "" 
+    });
   };
 
   return (
@@ -73,10 +64,9 @@ export function Topbar() {
           <div className="flex items-center space-x-2">
             <Input
               type="date"
-              value={startDate}
+              value={filters.startDate}
               onChange={(e) => {
-                setStartDate(e.target.value);
-                setDateMode("range");
+                updateFilters({ startDate: e.target.value, dateMode: "range" });
               }}
               placeholder="시작일자"
               className="h-9 w-[140px] text-sm rounded-lg"
@@ -84,10 +74,9 @@ export function Topbar() {
             <span className="text-gray-400 text-sm">~</span>
             <Input
               type="date"
-              value={endDate}
+              value={filters.endDate}
               onChange={(e) => {
-                setEndDate(e.target.value);
-                setDateMode("range");
+                updateFilters({ endDate: e.target.value, dateMode: "range" });
               }}
               placeholder="종료일자"
               className="h-9 w-[140px] text-sm rounded-lg"
@@ -100,7 +89,7 @@ export function Topbar() {
           <Calendar className="w-5 h-5 text-gray-500" />
           <div className="flex space-x-2">
             <Button
-              variant={dateMode === "period" && selectedPeriod === "1개월" ? "default" : "outline"}
+              variant={filters.dateMode === "period" && filters.selectedPeriod === "1개월" ? "default" : "outline"}
               size="sm"
               onClick={() => handlePeriodSelect("1개월")}
               className="h-9 px-4 text-sm"
@@ -108,7 +97,7 @@ export function Topbar() {
               1개월
             </Button>
             <Button
-              variant={dateMode === "period" && selectedPeriod === "3개월" ? "default" : "outline"}
+              variant={filters.dateMode === "period" && filters.selectedPeriod === "3개월" ? "default" : "outline"}
               size="sm"
               onClick={() => handlePeriodSelect("3개월")}
               className="h-9 px-4 text-sm"
@@ -116,7 +105,7 @@ export function Topbar() {
               3개월
             </Button>
             <Button
-              variant={dateMode === "period" && selectedPeriod === "6개월" ? "default" : "outline"}
+              variant={filters.dateMode === "period" && filters.selectedPeriod === "6개월" ? "default" : "outline"}
               size="sm"
               onClick={() => handlePeriodSelect("6개월")}
               className="h-9 px-4 text-sm"
@@ -124,7 +113,7 @@ export function Topbar() {
               6개월
             </Button>
             <Button
-              variant={dateMode === "period" && selectedPeriod === "1년" ? "default" : "outline"}
+              variant={filters.dateMode === "period" && filters.selectedPeriod === "1년" ? "default" : "outline"}
               size="sm"
               onClick={() => handlePeriodSelect("1년")}
               className="h-9 px-4 text-sm"

@@ -210,6 +210,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get crane details by crane name
+  app.get("/api/crane-details", async (req, res) => {
+    try {
+      const { craneName, factory, startDate, endDate } = req.query;
+      
+      if (!craneName || craneName === 'all') {
+        return res.json({
+          crane: null,
+          dailyRepairCount: 0,
+          emergencyRepairCount: 0,
+          lastMaintenanceDate: null,
+          nextInspectionDate: null,
+          daysUntilInspection: 0
+        });
+      }
+
+      // Get crane details
+      const cranes = await storage.getCranes();
+      const crane = cranes.find(c => c.craneName === craneName && 
+        (!factory || factory === 'all' || c.plantSection === factory));
+
+      if (!crane) {
+        return res.status(404).json({ message: "Crane not found" });
+      }
+
+      // Get maintenance records (daily repair)
+      const maintenanceRecords = await storage.getMaintenanceRecords();
+      let dailyRepairs = maintenanceRecords.filter(r => 
+        r.craneId === crane.craneId && 
+        (r.type === 'routine' || r.type === 'preventive' || r.type === 'inspection')
+      );
+
+      // Get failure records (emergency repair)
+      const failureRecords = await storage.getFailureRecords();
+      let emergencyRepairs = failureRecords.filter(r => r.craneId === crane.craneId);
+
+      // Apply date filtering if provided
+      if (startDate && endDate) {
+        dailyRepairs = dailyRepairs.filter(r => r.date >= startDate && r.date <= endDate);
+        emergencyRepairs = emergencyRepairs.filter(r => r.date >= startDate && r.date <= endDate);
+      }
+
+      // Calculate last maintenance date and next inspection
+      const sortedMaintenance = maintenanceRecords
+        .filter(r => r.craneId === crane.craneId && r.status === 'completed')
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      const lastMaintenanceDate = sortedMaintenance.length > 0 ? sortedMaintenance[0].date : null;
+      
+      // Calculate next inspection (assuming 90-day cycle)
+      let nextInspectionDate = null;
+      let daysUntilInspection = 0;
+      
+      if (lastMaintenanceDate) {
+        const lastDate = new Date(lastMaintenanceDate);
+        const nextDate = new Date(lastDate);
+        nextDate.setDate(nextDate.getDate() + 90);
+        nextInspectionDate = nextDate.toISOString().split('T')[0];
+        
+        const today = new Date();
+        const diffTime = nextDate.getTime() - today.getTime();
+        daysUntilInspection = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      }
+
+      res.json({
+        crane,
+        dailyRepairCount: dailyRepairs.length,
+        emergencyRepairCount: emergencyRepairs.length,
+        lastMaintenanceDate,
+        nextInspectionDate,
+        daysUntilInspection: Math.max(0, daysUntilInspection),
+        dailyRepairHours: dailyRepairs.reduce((sum, r) => sum + (r.duration || 0), 0),
+        emergencyRepairHours: emergencyRepairs.reduce((sum, r) => sum + (r.downtime || 0), 0),
+        dailyRepairBreakdown: {
+          routine: dailyRepairs.filter(r => r.type === 'routine').length,
+          preventive: dailyRepairs.filter(r => r.type === 'preventive').length,
+          inspection: dailyRepairs.filter(r => r.type === 'inspection').length
+        },
+        emergencyRepairBreakdown: {
+          hydraulic: emergencyRepairs.filter(r => r.failureType === 'hydraulic').length,
+          electrical: emergencyRepairs.filter(r => r.failureType === 'electrical').length,
+          mechanical: emergencyRepairs.filter(r => r.failureType === 'mechanical').length,
+          structural: emergencyRepairs.filter(r => r.failureType === 'structural').length
+        },
+        failureHeatmap: emergencyRepairs.reduce((acc, r) => {
+          const key = r.cause || 'Unknown';
+          acc[key] = (acc[key] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>)
+      });
+    } catch (error) {
+      console.error("Error fetching crane details:", error);
+      res.status(500).json({ message: "Failed to fetch crane details" });
+    }
+  });
+
   // Test Google Sheets connection
   app.post("/api/test-sheets", async (req, res) => {
     try {
