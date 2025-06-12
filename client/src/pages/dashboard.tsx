@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Factory, Settings, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { useSearch } from '../contexts/SearchContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line } from 'recharts';
+import { AISummaryButton } from '../components/dashboard/ai-summary-button';
 
 export default function Dashboard() {
   const { filters } = useSearch();
@@ -572,6 +573,7 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-center space-x-4">
+              <AISummaryButton />
               <div className="bg-green-100 px-3 py-1 rounded-full">
                 <span className="text-green-800 text-sm font-medium">실시간 연결됨</span>
               </div>
