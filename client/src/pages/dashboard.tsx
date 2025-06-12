@@ -380,19 +380,23 @@ export default function Dashboard() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">설비코드</span>
-                  <span className="text-sm font-medium">{craneData.craneId}</span>
+                  <span className="text-sm font-medium">{craneData.equipmentCode || craneData.craneId}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">등급</span>
                   <span className="text-sm font-medium">{craneData.grade ? `${craneData.grade}등급` : 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">운전방식</span>
-                  <span className="text-sm font-medium">{craneData.operationType || craneData.driveType || 'Manual'}</span>
+                  <span className="text-sm text-gray-600">유인/무인</span>
+                  <span className="text-sm font-medium">{craneData.unmannedOperation || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">운전상태</span>
-                  <span className="text-sm font-medium">{craneData.status === 'operating' ? 'Active' : craneData.status || 'Active'}</span>
+                  <span className="text-sm text-gray-600">전기담당자</span>
+                  <span className="text-sm font-medium">{craneData.electricalManager || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">기계담당자</span>
+                  <span className="text-sm font-medium">{craneData.mechanicalManager || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">총 고장 건수</span>
