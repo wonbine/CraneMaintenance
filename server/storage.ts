@@ -770,8 +770,8 @@ export class DatabaseStorage implements IStorage {
     for (const data of cranesData) {
       const equipmentCode = data.EquipmentCode || data.crane_id || data.CraneID || data.equipment_code;
       if (equipmentCode) {
-        // Extract exact Plant/Section data preserving original format
-        const plantSection = data['Plant/Section'] || data.PlantSection || data.plant_section || data['공장'] || data.Factory;
+        // Extract exact Plant/Section data preserving original format - handle typo in column name
+        const plantSection = data['Plant/Secsion'] || data['Plant/Section'] || data.PlantSection || data.plant_section || data['공장'] || data.Factory;
         const craneName = data.CraneName || data.crane_name || data.Name || data.name || data['크레인명'];
         
         console.log('Extracting Plant/Section for', equipmentCode);
