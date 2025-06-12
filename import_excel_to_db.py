@@ -94,12 +94,11 @@ def insert_crane_data(conn, crane_data_list):
         
         insert_query = """
             INSERT INTO cranes (
-                "craneId", "craneName", "plantSection", status, location, model, 
-                grade, "driveType", "unmannedOperation", capacity, span, height,
-                manufacturer, "installationDate", "lastMaintenanceDate", 
-                "nextMaintenanceDate", "isUrgent"
+                crane_id, crane_name, plant_section, status, location, model, 
+                grade, drive_type, unmanned_operation, installation_date, 
+                last_maintenance_date, next_maintenance_date, is_urgent
             ) VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
             )
         """
         
@@ -116,10 +115,6 @@ def insert_crane_data(conn, crane_data_list):
                     crane_data['grade'],
                     crane_data['driveType'],
                     crane_data['unmannedOperation'],
-                    crane_data['capacity'],
-                    crane_data['span'],
-                    crane_data['height'],
-                    crane_data['manufacturer'],
                     crane_data['installationDate'],
                     crane_data['lastMaintenanceDate'],
                     crane_data['nextMaintenanceDate'],
