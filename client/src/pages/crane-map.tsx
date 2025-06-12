@@ -453,10 +453,8 @@ export default function CraneMap() {
                       <span className="flex items-center space-x-1">
                         {selectedCrane.unmannedOperation === "무인" ? (
                           <Settings className="h-3 w-3" />
-                        ) : (
-                          <HelpCircle className="h-3 w-3" />
                         )}
-                        <span>{selectedCrane.unmannedOperation || "무인"}</span>
+                        {selectedCrane.unmannedOperation || "무인"}
                       </span>
                     </Badge>
                   </div>
