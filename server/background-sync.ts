@@ -6,15 +6,15 @@ class BackgroundSync {
   private isSyncing = false;
 
   start() {
-    console.log('[BackgroundSync] Starting background data sync...');
+    console.log('[BackgroundSync] Database mode - using PostgreSQL data only');
     
-    // Initial sync
+    // Initial cache warm-up for database data
     this.performSync();
     
-    // Set up periodic sync every 3 minutes
+    // Set up periodic cache refresh every 5 minutes (less frequent for database)
     this.syncInterval = setInterval(() => {
       this.performSync();
-    }, 3 * 60 * 1000);
+    }, 5 * 60 * 1000);
   }
 
   stop() {
