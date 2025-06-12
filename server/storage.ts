@@ -1615,14 +1615,38 @@ export class DatabaseStorage implements IStorage {
       }
     });
 
-    // Convert to result format with percentages
-    const result = Array.from(causeCount.entries())
-      .map(([cause, count]) => ({
-        cause,
-        count,
-        percentage: totalCount > 0 ? Math.round((count / totalCount) * 100) : 0
-      }))
-      .sort((a, b) => b.count - a.count);
+    // Convert to result format with percentages, consolidate minor categories
+    const sortedEntries = Array.from(causeCount.entries())
+      .sort((a, b) => b[1] - a[1]);
+    
+    // Keep top 5 categories, group others as "기타"
+    const topCategories = sortedEntries.slice(0, 5);
+    const minorCategories = sortedEntries.slice(5);
+    
+    const result = topCategories.map(([cause, count]) => ({
+      cause,
+      count,
+      percentage: totalCount > 0 ? Math.round((count / totalCount) * 100) : 0
+    }));
+    
+    // Add consolidated "기타" category if there are minor categories
+    if (minorCategories.length > 0) {
+      const otherCount = minorCategories.reduce((sum, [_, count]) => sum + count, 0);
+      const existingOtherIndex = result.findIndex(item => item.cause === '기타');
+      
+      if (existingOtherIndex !== -1) {
+        // If "기타" already exists in top 5, combine counts
+        result[existingOtherIndex].count += otherCount;
+        result[existingOtherIndex].percentage = totalCount > 0 ? Math.round((result[existingOtherIndex].count / totalCount) * 100) : 0;
+      } else {
+        // Add new "기타" category
+        result.push({
+          cause: '기타',
+          count: otherCount,
+          percentage: totalCount > 0 ? Math.round((otherCount / totalCount) * 100) : 0
+        });
+      }
+    }
 
     cache.set(cacheKey, result);
     return result;
