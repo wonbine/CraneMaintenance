@@ -102,6 +102,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get specific crane by crane ID
+  app.get("/api/cranes/by-crane-id/:craneId", async (req, res) => {
+    try {
+      const { craneId } = req.params;
+      const crane = await storage.getCraneByCraneId(craneId);
+      if (!crane) {
+        return res.status(404).json({ message: "Crane not found" });
+      }
+      res.json(crane);
+    } catch (error) {
+      console.error("Error fetching crane by ID:", error);
+      res.status(500).json({ message: "Failed to fetch crane" });
+    }
+  });
+
   // Factory and crane selection endpoints
   app.get("/api/factories", async (req, res) => {
     try {
