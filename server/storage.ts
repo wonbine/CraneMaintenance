@@ -687,60 +687,74 @@ export class DatabaseStorage implements IStorage {
   }
 
   async syncDataFromSheets(cranesData: any[], failureData: any[], maintenanceData: any[]): Promise<void> {
+    console.log('Syncing data from sheets...');
+    console.log('Cranes data sample:', cranesData.slice(0, 2));
+    console.log('Failure data sample:', failureData.slice(0, 2));
+    console.log('Maintenance data sample:', maintenanceData.slice(0, 2));
+    
     // Clear existing data
     await db.delete(alerts);
     await db.delete(maintenanceRecords);
     await db.delete(failureRecords);
     await db.delete(cranes);
     
-    // Process cranes data
+    // Process cranes data - handle both EquipmentCode and crane_id field names
     for (const data of cranesData) {
-      if (data.crane_id) {
+      const equipmentCode = data.EquipmentCode || data.crane_id || data.CraneID || data.equipment_code;
+      if (equipmentCode) {
+        console.log('Processing crane:', equipmentCode, data);
         await this.createCrane({
-          craneId: data.crane_id,
-          status: data.status || 'operating',
-          location: data.location || '',
-          model: data.model || '',
-          lastMaintenanceDate: data.last_maintenance_date || null,
-          nextMaintenanceDate: data.next_maintenance_date || null,
-          isUrgent: data.is_urgent === 'true' || data.is_urgent === true,
+          craneId: equipmentCode,
+          status: data.Status || data.status || 'operating',
+          location: data.Location || data.location || '',
+          model: data.Model || data.model || '',
+          lastMaintenanceDate: data.LastMaintenanceDate || data.last_maintenance_date || null,
+          nextMaintenanceDate: data.NextMaintenanceDate || data.next_maintenance_date || null,
+          isUrgent: (data.IsUrgent || data.is_urgent) === 'true' || (data.IsUrgent || data.is_urgent) === true,
         });
       }
     }
     
-    // Process failure records
+    // Process failure records - handle EquipmentCode field
     for (const data of failureData) {
-      if (data.crane_id && data.date) {
+      const equipmentCode = data.EquipmentCode || data.crane_id || data.CraneID || data.equipment_code;
+      const date = data.Date || data.date || data.FailureDate || data.failure_date;
+      if (equipmentCode && date) {
+        console.log('Processing failure record:', equipmentCode, date);
         await this.createFailureRecord({
-          craneId: data.crane_id,
-          date: data.date,
-          failureType: data.failure_type || 'mechanical',
-          description: data.description || '',
-          severity: data.severity || 'medium',
-          downtime: data.downtime ? parseInt(data.downtime) : null,
-          cause: data.cause || null,
-          reportedBy: data.reported_by || null,
+          craneId: equipmentCode,
+          date: date,
+          failureType: data.FailureType || data.failure_type || 'mechanical',
+          description: data.Description || data.description || '',
+          severity: data.Severity || data.severity || 'medium',
+          downtime: data.Downtime ? parseInt(data.Downtime) : (data.downtime ? parseInt(data.downtime) : null),
+          cause: data.Cause || data.cause || null,
+          reportedBy: data.ReportedBy || data.reported_by || null,
         });
       }
     }
     
-    // Process maintenance records
+    // Process maintenance records - handle EquipmentCode field
     for (const data of maintenanceData) {
-      if (data.crane_id && data.date) {
+      const equipmentCode = data.EquipmentCode || data.crane_id || data.CraneID || data.equipment_code;
+      const date = data.Date || data.date || data.MaintenanceDate || data.maintenance_date;
+      if (equipmentCode && date) {
+        console.log('Processing maintenance record:', equipmentCode, date);
         await this.createMaintenanceRecord({
-          craneId: data.crane_id,
-          date: data.date,
-          type: data.type || 'routine',
-          technician: data.technician || '',
-          status: data.status || 'completed',
-          notes: data.notes || null,
-          duration: data.duration ? parseInt(data.duration) : null,
-          cost: data.cost ? parseInt(data.cost) : null,
-          relatedFailureId: data.related_failure_id ? parseInt(data.related_failure_id) : null,
+          craneId: equipmentCode,
+          date: date,
+          type: data.Type || data.type || 'routine',
+          technician: data.Technician || data.technician || '',
+          status: data.Status || data.status || 'completed',
+          notes: data.Notes || data.notes || null,
+          duration: data.Duration ? parseInt(data.Duration) : (data.duration ? parseInt(data.duration) : null),
+          cost: data.Cost ? parseInt(data.Cost) : (data.cost ? parseInt(data.cost) : null),
+          relatedFailureId: data.RelatedFailureId ? parseInt(data.RelatedFailureId) : (data.related_failure_id ? parseInt(data.related_failure_id) : null),
         });
       }
     }
     
+    console.log('Data sync completed, generating alerts...');
     // Generate alerts based on data
     await this.generateAlerts();
   }

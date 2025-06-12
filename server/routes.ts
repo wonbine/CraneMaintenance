@@ -3,10 +3,17 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import Papa from "papaparse";
 
+// Helper function to clean spreadsheet ID from URL fragments
+function cleanSpreadsheetId(id: string): string {
+  // Remove common URL fragments that might be included
+  return id.replace(/\/edit.*$/, '').replace(/^.*\/d\//, '').replace(/\/.*$/, '');
+}
+
 // Helper function to fetch Google Sheets data with better error handling
 async function fetchGoogleSheetData(spreadsheetId: string, apiKey: string, sheetName?: string) {
+  const cleanId = cleanSpreadsheetId(spreadsheetId);
   const range = sheetName ? `${sheetName}!A:Z` : 'A:Z';
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${cleanId}/values/${range}?key=${apiKey}`;
   
   const response = await fetch(url);
   if (!response.ok) {
