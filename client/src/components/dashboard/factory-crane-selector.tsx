@@ -109,11 +109,7 @@ export function FactoryCraneSelector({ onSelectionChange }: FactoryCraneSelector
                 공장: {selectedFactory}
               </span>
             )}
-            {selectedCrane && selectedCrane !== "all" && (
-              <span className="bg-green-100 text-green-700 px-2 py-1 rounded ml-2">
-                크레인: {selectedCrane}
-              </span>
-            )}
+            
           </div>
         </div>
       </div>
