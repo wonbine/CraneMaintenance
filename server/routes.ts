@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import Papa from "papaparse";
-import OpenAI from "openai";
 
 // Helper function to clean spreadsheet ID from URL fragments
 function cleanSpreadsheetId(id: string): string {
@@ -102,21 +101,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get crane by crane name
-  app.get("/api/cranes/by-crane-id/:craneName", async (req, res) => {
-    try {
-      const { craneName } = req.params;
-      const crane = await storage.getCraneByCraneName(craneName);
-      if (!crane) {
-        return res.status(404).json({ message: "Crane not found" });
-      }
-      res.json(crane);
-    } catch (error) {
-      console.error("Error fetching crane by name:", error);
-      res.status(500).json({ message: "Failed to fetch crane" });
-    }
-  });
-
   // Factory and crane selection endpoints
   app.get("/api/factories", async (req, res) => {
     try {
@@ -171,16 +155,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get maintenance records by crane name
-  app.get("/api/maintenance-records/:craneName", async (req, res) => {
+  // Get maintenance records by crane ID
+  app.get("/api/maintenance-records/:craneId", async (req, res) => {
     try {
-      const { craneName } = req.params;
-      // First find the crane by name to get its craneId
-      const crane = await storage.getCraneByCraneName(craneName);
-      if (!crane) {
-        return res.status(404).json({ message: "Crane not found" });
-      }
-      const records = await storage.getMaintenanceRecordsByCraneId(crane.craneId);
+      const { craneId } = req.params;
+      const records = await storage.getMaintenanceRecordsByCraneId(craneId);
       res.json(records);
     } catch (error) {
       console.error("Error fetching maintenance records for crane:", error);
@@ -188,16 +167,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get failure records by crane name
-  app.get("/api/failure-records/:craneName", async (req, res) => {
+  // Get failure records by crane ID
+  app.get("/api/failure-records/:craneId", async (req, res) => {
     try {
-      const { craneName } = req.params;
-      // First find the crane by name to get its craneId
-      const crane = await storage.getCraneByCraneName(craneName);
-      if (!crane) {
-        return res.status(404).json({ message: "Crane not found" });
-      }
-      const records = await storage.getFailureRecordsByCraneId(crane.craneId);
+      const { craneId } = req.params;
+      const records = await storage.getFailureRecordsByCraneId(craneId);
       res.json(records);
     } catch (error) {
       console.error("Error fetching failure records for crane:", error);
@@ -965,98 +939,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Test endpoint error:", error);
       res.status(500).json({ message: "테스트 실행 중 오류가 발생했습니다" });
-    }
-  });
-
-  // AI Summary Report endpoint
-  app.post('/api/ai-summary', async (req, res) => {
-    try {
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      
-      // Get comprehensive dashboard data
-      const [
-        dashboardSummary,
-        cranes,
-        factoryOverview,
-        systemOverview,
-        recentMaintenanceStats,
-        failureCauseDistribution,
-        craneGradeStats,
-        operationTypeStats
-      ] = await Promise.all([
-        storage.getDashboardSummary(),
-        storage.getCranes(),
-        storage.getFactoryOverview(),
-        storage.getSystemOverview(),
-        storage.getRecentMaintenanceStats(),
-        storage.getFailureCauseDistribution(),
-        storage.getCraneGradeStats(),
-        storage.getOperationTypeStats()
-      ]);
-
-      // Prepare data for AI analysis
-      const dashboardData = {
-        전체현황: dashboardSummary,
-        공장별현황: factoryOverview,
-        시스템전체현황: systemOverview,
-        최근정비통계: recentMaintenanceStats,
-        고장원인분포: failureCauseDistribution,
-        크레인등급통계: craneGradeStats,
-        운전형태통계: operationTypeStats,
-        총크레인수: cranes.length
-      };
-
-      const prompt = `다음은 크레인 관리 시스템의 대시보드 데이터입니다. 이 데이터를 분석하여 한국어로 종합적인 요약 보고서를 작성해주세요.
-
-데이터: ${JSON.stringify(dashboardData, null, 2)}
-
-다음 형식으로 보고서를 작성해주세요:
-1. 전체 시스템 현황 요약
-2. 주요 지표 분석
-3. 공장별 운영 현황
-4. 정비 및 고장 분석
-5. 운영 효율성 평가
-6. 개선 권장사항
-
-보고서는 경영진이 이해하기 쉽도록 핵심 내용을 중심으로 간결하게 작성해주세요.`;
-
-      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "당신은 산업용 크레인 관리 시스템의 데이터 분석 전문가입니다. 제공된 데이터를 분석하여 경영진을 위한 종합적이고 실용적인 보고서를 작성합니다."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        max_tokens: 2000,
-        temperature: 0.7
-      });
-
-      const summary = response.choices[0].message.content;
-
-      res.json({
-        success: true,
-        summary,
-        timestamp: new Date().toISOString(),
-        dataAnalyzed: {
-          totalCranes: cranes.length,
-          totalFactories: systemOverview.totalFactories,
-          analysisDate: new Date().toLocaleDateString('ko-KR')
-        }
-      });
-
-    } catch (error) {
-      console.error('AI Summary error:', error);
-      res.status(500).json({ 
-        success: false,
-        error: 'AI 요약 보고서 생성에 실패했습니다.',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      });
     }
   });
 

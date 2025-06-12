@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Factory, Settings, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { useSearch } from '../contexts/SearchContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line } from 'recharts';
-import { AISummaryButton } from '../components/dashboard/ai-summary-button';
 
 export default function Dashboard() {
   const { filters } = useSearch();
@@ -227,11 +226,14 @@ export default function Dashboard() {
   // Check if we should show overview dashboard (no specific crane selected)
   const showOverview = !filters.selectedCrane || filters.selectedCrane === 'all';
 
-  // Crane details component for when a specific crane is selected
-  const CraneDetails = ({ selectedCraneId }: { selectedCraneId: string }) => {
-    // Fetch specific crane data
+  // Crane Detail View Component
+  const CraneDetailView = ({ craneId }: { craneId: string }) => {
+    // Get selected crane ID for API calls
+    const selectedCraneId = craneId;
+
+    // Fetch crane data
     const { data: craneData } = useQuery({
-      queryKey: ['/api/cranes', selectedCraneId],
+      queryKey: ['/api/cranes/by-crane-id', selectedCraneId],
       queryFn: async () => {
         const response = await fetch(`/api/cranes/by-crane-id/${selectedCraneId}`);
         if (!response.ok) throw new Error('Failed to fetch crane data');
@@ -262,43 +264,6 @@ export default function Dashboard() {
       enabled: !!selectedCraneId && selectedCraneId !== 'all'
     });
 
-    // Fetch maintenance statistics for charts
-    const { data: recentMaintenanceData = [] } = useQuery({
-      queryKey: ['/api/analytics/recent-maintenance-stats'],
-      queryFn: async () => {
-        const response = await fetch('/api/analytics/recent-maintenance-stats');
-        if (!response.ok) throw new Error('Failed to fetch recent maintenance stats');
-        return response.json();
-      }
-    });
-
-    // Fetch failure cause distribution for charts
-    const { data: failureCauseData = [] } = useQuery({
-      queryKey: ['/api/analytics/failure-cause-distribution'],
-      queryFn: async () => {
-        const response = await fetch('/api/analytics/failure-cause-distribution');
-        if (!response.ok) throw new Error('Failed to fetch failure cause distribution');
-        return response.json();
-      }
-    });
-
-    // Process maintenance chart data
-    const maintenanceChartData = recentMaintenanceData.map((item: any) => ({
-      month: item.month,
-      돌발작업: item.failureCount || 0,
-      일상수리: item.maintenanceCount || 0,
-      total: (item.failureCount || 0) + (item.maintenanceCount || 0)
-    }));
-
-    // Process failure cause chart data
-    const failureCauseChartData = failureCauseData.map((item: any, index: number) => ({
-      name: item.cause,
-      value: item.count,
-      percentage: item.percentage,
-      fill: FAILURE_CAUSE_COLORS[item.cause as keyof typeof FAILURE_CAUSE_COLORS] || 
-            `hsl(${(index * 137.5) % 360}, 70%, 50%)`
-    }));
-
     if (!craneData) {
       return (
         <div className="text-center py-12">
@@ -327,6 +292,23 @@ export default function Dashboard() {
 
     const operationalStatus = getOperationalStatus();
     const StatusIcon = operationalStatus.icon;
+
+    // Process maintenance chart data
+    const maintenanceChartData = recentMaintenanceData.map((item: any) => ({
+      month: item.month,
+      돌발작업: item.failureCount || 0,
+      일상수리: item.maintenanceCount || 0,
+      total: (item.failureCount || 0) + (item.maintenanceCount || 0)
+    }));
+
+    // Process failure cause chart data
+    const failureCauseChartData = failureCauseData.map((item: any, index: number) => ({
+      name: item.cause,
+      value: item.count,
+      percentage: item.percentage,
+      fill: FAILURE_CAUSE_COLORS[item.cause as keyof typeof FAILURE_CAUSE_COLORS] || 
+            `hsl(${(index * 137.5) % 360}, 70%, 50%)`
+    }));
 
     return (
       <div className="space-y-6">
@@ -503,24 +485,6 @@ export default function Dashboard() {
                           fontSize: '14px'
                         }}
                       />
-                      <Legend 
-                        verticalAlign="bottom"
-                        height={60}
-                        wrapperStyle={{ 
-                          paddingTop: '20px',
-                          fontSize: '13px'
-                        }}
-                        iconType="circle"
-                        formatter={(value: string) => (
-                          <span style={{ 
-                            color: '#374151',
-                            fontSize: '13px',
-                            fontWeight: '500'
-                          }}>
-                            {value}
-                          </span>
-                        )}
-                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -542,8 +506,8 @@ export default function Dashboard() {
               // Create device failure heatmap data
               const deviceFailureMap = new Map();
               failureRecords.forEach((record: any) => {
-                const device = record.byDevice || '알 수 없음';
-                const category = record.category || '기타';
+                const device = String(record.byDevice || '알 수 없음');
+                const category = String(record.category || '기타');
                 const key = `${device}-${category}`;
                 deviceFailureMap.set(key, (deviceFailureMap.get(key) || 0) + 1);
               });
@@ -577,7 +541,7 @@ export default function Dashboard() {
                       
                       {/* Data rows */}
                       {devices.map((device: string) => (
-                        <React.Fragment key={device}>
+                        <div key={device} className="contents">
                           <div className="p-2 text-xs font-medium bg-gray-100 rounded flex items-center">
                             {device}
                           </div>
@@ -600,7 +564,7 @@ export default function Dashboard() {
                               </div>
                             );
                           })}
-                        </React.Fragment>
+                        </div>
                       ))}
                     </div>
                     
@@ -743,7 +707,6 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-center space-x-4">
-              <AISummaryButton />
               <div className="bg-green-100 px-3 py-1 rounded-full">
                 <span className="text-green-800 text-sm font-medium">실시간 연결됨</span>
               </div>
@@ -977,7 +940,7 @@ export default function Dashboard() {
             </div>
           </div>
         ) : (
-          <CraneDetails selectedCraneId={filters.selectedCrane} />
+          <CraneDetailView craneId={filters.selectedCrane} />
         )}
       </div>
     </div>

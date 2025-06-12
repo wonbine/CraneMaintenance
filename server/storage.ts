@@ -28,7 +28,6 @@ export interface IStorage {
   getCranes(): Promise<Crane[]>;
   getCrane(id: number): Promise<Crane | undefined>;
   getCraneByCraneId(craneId: string): Promise<Crane | undefined>;
-  getCraneByCraneName(craneName: string): Promise<Crane | undefined>;
   createCrane(crane: InsertCrane): Promise<Crane>;
   updateCrane(id: number, crane: Partial<InsertCrane>): Promise<Crane | undefined>;
   
@@ -326,10 +325,6 @@ export class MemStorage implements IStorage {
 
   async getCraneByCraneId(craneId: string): Promise<Crane | undefined> {
     return Array.from(this.cranes.values()).find(crane => crane.craneId === craneId);
-  }
-
-  async getCraneByCraneName(craneName: string): Promise<Crane | undefined> {
-    return Array.from(this.cranes.values()).find(crane => crane.craneName === craneName);
   }
 
   async createCrane(insertCrane: InsertCrane): Promise<Crane> {
@@ -937,11 +932,6 @@ export class DatabaseStorage implements IStorage {
 
   async getCraneByCraneId(craneId: string): Promise<Crane | undefined> {
     const [crane] = await db.select().from(cranes).where(eq(cranes.craneId, craneId));
-    return crane || undefined;
-  }
-
-  async getCraneByCraneName(craneName: string): Promise<Crane | undefined> {
-    const [crane] = await db.select().from(cranes).where(eq(cranes.craneName, craneName));
     return crane || undefined;
   }
 
