@@ -808,23 +808,38 @@ export class DatabaseStorage implements IStorage {
     }
     
     // Process failure records - handle EquipmentCode field
-    for (const data of failureData) {
-      const equipmentCode = data.EquipmentCode || data.crane_id || data.CraneID || data.equipment_code;
-      const date = data.Date || data.date || data.FailureDate || data.failure_date;
+    console.log(`Processing ${failureData.length} failure records...`);
+    for (let i = 0; i < failureData.length; i++) {
+      const data = failureData[i];
+      // Skip header row
+      if (i === 0) continue;
+      
+      // Map array indices to field names based on the header structure
+      const equipmentCode = Array.isArray(data) ? data[14] : (data.EquipmentCode || data.crane_id);
+      const date = Array.isArray(data) ? data[0] : (data.date || data.Date);
+      const symptom = Array.isArray(data) ? data[6] : (data.symptom || data.Description);
+      const worktime = Array.isArray(data) ? data[9] : (data.worktime || data.Worktime);
+      const type = Array.isArray(data) ? data[13] : (data.type || data.FailureType);
+      const mechanicalElectrical = Array.isArray(data) ? data[11] : (data['Mechanical/Electrical'] || data.category);
+      
       if (equipmentCode && date) {
         console.log('Processing failure record:', equipmentCode, date);
-        await this.createFailureRecord({
-          craneId: equipmentCode,
-          date: date,
-          failureType: data.FailureType || data.failure_type || 'mechanical',
-          description: data.Description || data.description || '',
-          severity: data.Severity || data.severity || 'medium',
-          downtime: data.Downtime ? parseInt(data.Downtime) : (data.downtime ? parseInt(data.downtime) : null),
-          cause: data.Cause || data.cause || null,
-          reportedBy: data.ReportedBy || data.reported_by || null,
-          data: data.data ? parseFloat(data.data) : (data.Data ? parseFloat(data.Data) : (data.interval ? parseFloat(data.interval) : (data.Interval ? parseFloat(data.Interval) : (data.failureInterval ? parseFloat(data.failureInterval) : null)))),
-          worktime: data.worktime ? parseFloat(data.worktime) : (data.Worktime ? parseFloat(data.Worktime) : (data.WorkTime ? parseFloat(data.WorkTime) : (data.work_time ? parseFloat(data.work_time) : null))),
-        });
+        try {
+          await this.createFailureRecord({
+            craneId: equipmentCode,
+            date: date,
+            failureType: type || mechanicalElectrical || 'mechanical',
+            description: symptom || '',
+            severity: 'medium',
+            downtime: null,
+            cause: null,
+            reportedBy: null,
+            data: null,
+            worktime: worktime || null,
+          });
+        } catch (error) {
+          console.error(`Error creating failure record for ${equipmentCode}:`, error);
+        }
       }
     }
     
