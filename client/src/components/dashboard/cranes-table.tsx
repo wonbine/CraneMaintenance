@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { Search, ChevronUp, ChevronDown, ChevronsUpDown, Settings, User, HelpCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "./empty-state";
 import type { Crane } from "@shared/schema";
@@ -134,16 +134,16 @@ export function CranesTable({ selectedFactory, selectedCrane }: CranesTableProps
                 크레인명 ↕
               </TableHead>
               <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                크레인 ID ↕
+                설비코드 ↕
               </TableHead>
               <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                용량 ↕
+                등급 ↕
               </TableHead>
               <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                위치 ↕
+                유/무인 ↕
               </TableHead>
               <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                유형 ↕
+                공장 ↕
               </TableHead>
               <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
                 상태 ↕
@@ -177,20 +177,53 @@ export function CranesTable({ selectedFactory, selectedCrane }: CranesTableProps
                           {crane.craneId.slice(0, 2).toUpperCase()}
                         </span>
                       </div>
-                      <div className="font-medium text-gray-900">{crane.craneId}</div>
+                      <div className="font-medium text-gray-900">{crane.craneName || crane.craneId}</div>
                     </div>
                   </TableCell>
                   <TableCell className="px-6 py-4 text-sm text-gray-500">
-                    #{crane.id.toString().padStart(7, '0')}
+                    {crane.craneId}
                   </TableCell>
-                  <TableCell className="px-6 py-4 text-sm font-medium text-gray-900">
-                    ${(Math.random() * 200 + 50).toFixed(2)}
+                  {/* Grade - Enhanced Visual Display */}
+                  <TableCell className="px-6 py-4">
+                    <Badge 
+                      className={`px-3 py-1 text-xs font-bold ${
+                        crane.grade === "A급" || crane.grade === "A" 
+                          ? "bg-blue-100 text-blue-800 border-blue-200"
+                          : crane.grade === "B급" || crane.grade === "B"
+                          ? "bg-green-100 text-green-800 border-green-200"
+                          : crane.grade === "C급" || crane.grade === "C"
+                          ? "bg-orange-100 text-orange-800 border-orange-200"
+                          : "bg-gray-100 text-gray-800 border-gray-200"
+                      }`}
+                    >
+                      {crane.grade || "미분류"}
+                    </Badge>
+                  </TableCell>
+                  {/* Unmanned Operation - Enhanced Visual Display */}
+                  <TableCell className="px-6 py-4">
+                    <Badge 
+                      className={`px-3 py-1 text-xs font-bold ${
+                        crane.unmannedOperation === "무인"
+                          ? "bg-purple-100 text-purple-800 border-purple-200"
+                          : crane.unmannedOperation === "유인"
+                          ? "bg-indigo-100 text-indigo-800 border-indigo-200"
+                          : "bg-gray-100 text-gray-800 border-gray-200"
+                      }`}
+                    >
+                      <span className="flex items-center space-x-1">
+                        {crane.unmannedOperation === "무인" ? (
+                          <Settings className="h-3 w-3" />
+                        ) : crane.unmannedOperation === "유인" ? (
+                          <User className="h-3 w-3" />
+                        ) : (
+                          <HelpCircle className="h-3 w-3" />
+                        )}
+                        <span>{crane.unmannedOperation || "정보 없음"}</span>
+                      </span>
+                    </Badge>
                   </TableCell>
                   <TableCell className="px-6 py-4 text-sm text-gray-500">
-                    {Math.floor(Math.random() * 1000 + 100)} {['pcs', 'kg', 'tons'][index % 3]}
-                  </TableCell>
-                  <TableCell className="px-6 py-4 text-sm text-gray-500 capitalize">
-                    {['Heavy Duty', 'Mobile', 'Tower', 'Gantry', 'Overhead'][index % 5]}
+                    {crane.factory || "정보 없음"}
                   </TableCell>
                   <TableCell className="px-6 py-4">
                     <Badge 
@@ -200,8 +233,8 @@ export function CranesTable({ selectedFactory, selectedCrane }: CranesTableProps
                         'bg-red-100 text-red-700'
                       }`}
                     >
-                      {crane.status === 'operating' ? 'Active' :
-                       crane.status === 'maintenance' ? 'Pending' : 'Inactive'}
+                      {crane.status === 'operating' ? '가동중' :
+                       crane.status === 'maintenance' ? '정비중' : '긴급'}
                     </Badge>
                   </TableCell>
                   <TableCell className="px-6 py-4">
