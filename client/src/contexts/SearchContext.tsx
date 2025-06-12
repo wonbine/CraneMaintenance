@@ -24,7 +24,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     selectedCrane: '',
     startDate: '',
     endDate: '',
-    selectedPeriod: '1개월',
+    selectedPeriod: '', // Empty by default to show all data
     dateMode: 'period'
   });
   

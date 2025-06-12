@@ -101,6 +101,14 @@ export default function Dashboard() {
     const today = new Date();
     const startDate = new Date();
     
+    // If no period is selected or period is empty, return all time (very early date)
+    if (!filters.selectedPeriod || filters.selectedPeriod === '') {
+      return {
+        startDate: '2020-01-01', // Early date to capture all data
+        endDate: today.toISOString().split('T')[0]
+      };
+    }
+    
     switch (filters.selectedPeriod) {
       case '1개월':
         startDate.setMonth(today.getMonth() - 1);
@@ -115,7 +123,11 @@ export default function Dashboard() {
         startDate.setFullYear(today.getFullYear() - 1);
         break;
       default:
-        startDate.setMonth(today.getMonth() - 1);
+        // Default to all time if unknown period
+        return {
+          startDate: '2020-01-01',
+          endDate: today.toISOString().split('T')[0]
+        };
     }
     
     return {
@@ -154,53 +166,82 @@ export default function Dashboard() {
     }
   }, [searchTrigger, refetch]);
 
-  const DonutChart = ({ data, title, total }: { data: any[], title: string, total: number }) => (
-    <div className="relative w-24 h-24 mx-auto">
-      <svg className="w-24 h-24 transform -rotate-90">
-        <circle cx="48" cy="48" r="40" fill="transparent" stroke="#e5e7eb" strokeWidth="6"/>
-        {data.map((item, index) => {
-          const percentage = (item.count / total) * 100;
-          const strokeDasharray = `${(percentage / 100) * 251.3} 251.3`;
-          const strokeDashoffset = -251.3 * data.slice(0, index).reduce((acc, curr) => acc + (curr.count / total), 0);
-          
-          return (
-            <circle
-              key={item.type}
-              cx="48"
-              cy="48"
-              r="40"
-              fill="transparent"
-              stroke={item.color}
-              strokeWidth="6"
-              strokeDasharray={strokeDasharray}
-              strokeDashoffset={strokeDashoffset}
-              className="transition-all duration-300"
-            />
-          );
-        })}
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-lg font-bold">{total}</span>
-        <span className="text-xs text-gray-500">{title}</span>
+  const DonutChart = ({ data, title, total }: { data: any[], title: string, total: number }) => {
+    if (!data || data.length === 0 || total === 0) {
+      return (
+        <div className="relative w-24 h-24 mx-auto">
+          <svg className="w-24 h-24 transform -rotate-90">
+            <circle cx="48" cy="48" r="40" fill="transparent" stroke="#e5e7eb" strokeWidth="6"/>
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-lg font-bold">0</span>
+            <span className="text-xs text-gray-500">{title}</span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="relative w-24 h-24 mx-auto">
+        <svg className="w-24 h-24 transform -rotate-90">
+          <circle cx="48" cy="48" r="40" fill="transparent" stroke="#e5e7eb" strokeWidth="6"/>
+          {data.map((item, index) => {
+            const percentage = total > 0 ? (item.count / total) * 100 : 0;
+            const strokeDasharray = `${(percentage / 100) * 251.3} 251.3`;
+            const strokeDashoffset = -251.3 * data.slice(0, index).reduce((acc, curr) => acc + (total > 0 ? curr.count / total : 0), 0);
+            
+            if (item.count === 0) return null;
+            
+            return (
+              <circle
+                key={item.type}
+                cx="48"
+                cy="48"
+                r="40"
+                fill="transparent"
+                stroke={item.color}
+                strokeWidth="6"
+                strokeDasharray={strokeDasharray}
+                strokeDashoffset={isNaN(strokeDashoffset) ? 0 : strokeDashoffset}
+                className="transition-all duration-300"
+              />
+            );
+          })}
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-lg font-bold">{total}</span>
+          <span className="text-xs text-gray-500">{title}</span>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const BarChart = ({ data }: { data: any[] }) => {
-    const maxCount = Math.max(...data.map(d => d.count));
+    if (!data || data.length === 0) {
+      return (
+        <div className="h-32 flex items-center justify-center text-gray-500">
+          <span className="text-sm">데이터가 없습니다</span>
+        </div>
+      );
+    }
+
+    const maxCount = Math.max(...data.map(d => d.value || d.count || 0), 1);
     
     return (
       <div className="space-y-3">
         {data.map((item, index) => (
           <div key={index} className="flex items-center space-x-3">
-            <span className="text-sm w-20 text-right">{item.category}</span>
+            <span className="text-sm w-20 text-right">{item.category || item.type}</span>
             <div className="flex-1 bg-gray-200 rounded-full h-4 relative">
               <div 
-                className="bg-blue-500 h-4 rounded-full transition-all duration-500"
-                style={{ width: `${(item.count / maxCount) * 100}%` }}
+                className="h-4 rounded-full transition-all duration-500"
+                style={{ 
+                  width: `${((item.value || item.count || 0) / maxCount) * 100}%`,
+                  backgroundColor: item.color || '#3b82f6'
+                }}
               />
               <span className="absolute right-2 top-0 h-4 flex items-center text-xs text-white font-medium">
-                {item.count}
+                {item.value || item.count || 0}
               </span>
             </div>
           </div>
@@ -210,7 +251,15 @@ export default function Dashboard() {
   };
 
   const LineChart = ({ data }: { data: { months: string[], maintenance: number[], failures: number[], avgRepairTime: number[] } }) => {
-    const maxValue = Math.max(...data.maintenance, ...data.failures, ...data.avgRepairTime);
+    if (!data || !data.months || data.months.length === 0) {
+      return (
+        <div className="h-48 flex items-center justify-center text-gray-500">
+          <span className="text-sm">데이터가 없습니다</span>
+        </div>
+      );
+    }
+
+    const maxValue = Math.max(...data.maintenance, ...data.failures, ...data.avgRepairTime, 1);
     
     return (
       <div className="h-48 relative">
@@ -226,7 +275,7 @@ export default function Dashboard() {
             stroke="#3b82f6"
             strokeWidth="2"
             points={data.months.map((_: string, i: number) => 
-              `${40 + (i * 60)},${180 - (data.maintenance[i] / maxValue) * 140}`
+              `${40 + (i * 60)},${180 - ((data.maintenance[i] || 0) / maxValue) * 140}`
             ).join(' ')}
           />
           
@@ -236,7 +285,7 @@ export default function Dashboard() {
             stroke="#ef4444"
             strokeWidth="2"
             points={data.months.map((_: string, i: number) => 
-              `${40 + (i * 60)},${180 - (data.failures[i] / maxValue) * 140}`
+              `${40 + (i * 60)},${180 - ((data.failures[i] || 0) / maxValue) * 140}`
             ).join(' ')}
           />
           
@@ -596,7 +645,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <LineChart data={{
-              labels: ['1월', '2월', '3월', '4월', '5월', '6월'],
+              months: ['1월', '2월', '3월', '4월', '5월', '6월'],
               maintenance: Array.from({length: 6}, (_, i) => Math.max(0, (craneDetails?.dailyRepairCount || 0) + Math.floor(Math.random() * 3) - 1)),
               failures: Array.from({length: 6}, (_, i) => Math.max(0, (craneDetails?.emergencyRepairCount || 0) + Math.floor(Math.random() * 2) - 1)),
               avgRepairTime: Array.from({length: 6}, (_, i) => Math.round((craneDetails?.dailyRepairHours || 0) / Math.max(1, craneDetails?.dailyRepairCount || 1) * 10) / 10)
