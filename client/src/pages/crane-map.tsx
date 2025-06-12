@@ -340,14 +340,18 @@ export default function CraneMap() {
                   </button>
                 ))}
 
-                {/* S57 Cell Special Marking */}
-                <div
-                  className="absolute border-2 border-red-500 bg-red-100 bg-opacity-30 pointer-events-none z-10"
+                {/* S57 Cell Special Marking with Clickable Area */}
+                <button
+                  className="group absolute border-2 border-red-500 bg-red-100 bg-opacity-30 hover:bg-red-200 hover:bg-opacity-50 z-10 cursor-pointer transition-all duration-200"
                   style={{
                     left: `${s57Position.x}px`,
                     top: `${s57Position.y}px`,
                     width: '30px',
                     height: '25px',
+                  }}
+                  onClick={() => {
+                    // Navigate directly to the specific crane dashboard
+                    setLocation(`/dashboard?crane=${encodeURIComponent('4C1001101')}`);
                   }}
                 >
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -355,7 +359,14 @@ export default function CraneMap() {
                       S57
                     </span>
                   </div>
-                </div>
+                  
+                  {/* Hover tooltip */}
+                  <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+                    <div className="text-center font-medium">CT73_PCM</div>
+                    <div className="text-center text-gray-300 text-xs">1냉연공장</div>
+                    <div className="text-center text-blue-300 text-xs">클릭하여 상세정보 보기</div>
+                  </div>
+                </button>
 
                 {/* Grid lines for reference */}
                 <div className="absolute inset-0 pointer-events-none opacity-10">
