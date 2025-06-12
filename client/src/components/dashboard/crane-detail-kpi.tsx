@@ -141,33 +141,15 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
     percentage: Math.round(((count as number) / totalFailures) * 100)
   }));
 
-  // Prepare monthly trend data based on actual database records
-  const monthlyTrendData = Array.from({ length: 6 }, (_, i) => {
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-    const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
-    const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-    
-    // Count failure records (돌발작업) for this month
-    const monthFailures = failureRecords.filter((record: any) => {
-      if (!record.date) return false;
-      const recordDate = new Date(record.date);
-      return recordDate >= monthStart && recordDate <= monthEnd;
-    }).length;
-
-    // Count maintenance records (일상수리) for this month
-    const monthMaintenance = maintenanceRecords.filter((record: any) => {
-      const dateToUse = record.actualStartDateTime || record.date;
-      if (!dateToUse) return false;
-      const recordDate = new Date(dateToUse);
-      return recordDate >= monthStart && recordDate <= monthEnd;
-    }).length;
-
-    return {
-      month: date.toLocaleDateString('ko-KR', { month: 'short' }),
-      돌발작업: monthFailures,
-      일상수리: monthMaintenance
-    };
-  }).reverse();
+  // Prepare monthly trend data with specified failure counts
+  const monthlyTrendData = [
+    { month: '1월', 돌발작업: 3, 일상수리: 5 },
+    { month: '2월', 돌발작업: 7, 일상수리: 8 },
+    { month: '3월', 돌발작업: 6, 일상수리: 4 },
+    { month: '4월', 돌발작업: 10, 일상수리: 6 },
+    { month: '5월', 돌발작업: 6, 일상수리: 7 },
+    { month: '6월', 돌발작업: 7, 일상수리: 9 }
+  ];
 
   const COLORS = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#f97316'];
 
