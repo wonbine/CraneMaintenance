@@ -351,7 +351,7 @@ export default function CraneMap() {
                   }}
                   onClick={() => {
                     // Navigate directly to the specific crane dashboard
-                    setLocation(`/dashboard?crane=${encodeURIComponent('4C1001101')}`);
+                    setLocation(`/dashboard?crane=${encodeURIComponent('4P1001201')}`);
                   }}
                 >
                   <div className="absolute inset-0 flex items-center justify-center">
