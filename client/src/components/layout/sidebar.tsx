@@ -4,6 +4,7 @@ import {
   Map, 
   AlertTriangle, 
   Wrench,
+  Factory,
   Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,7 @@ const navigation = [
   { name: "크레인 지도", href: "/crane-map", icon: Map },
   { name: "돌발수리 이력", href: "/failure-history", icon: AlertTriangle },
   { name: "일상수리 이력", href: "/maintenance-history", icon: Wrench },
+  { name: "공장별 고장보고서", href: "/factory-failure-report", icon: Factory },
 ];
 
 export function Sidebar() {
