@@ -770,11 +770,12 @@ export class DatabaseStorage implements IStorage {
     for (const data of cranesData) {
       const equipmentCode = data.EquipmentCode || data.crane_id || data.CraneID || data.equipment_code;
       if (equipmentCode) {
-        // Get Plant/Section data - prioritize the exact field name from Google Sheets
-        const plantSection = data['Plant/Section'] || data.PlantSection || data.plant_section || data.Plant || data.plant || data.Section || data.section || data.Factory || data.factory;
+        // Get exact Plant/Section data from Google Sheets without any modification
+        const plantSection = data['Plant/Section'] || data.PlantSection || data.plant_section;
         const craneName = data.CraneName || data.crane_name || data.Name || data.name;
         
-        console.log('Plant/Section mapping for', equipmentCode, ':', plantSection, '| CraneName:', craneName);
+        console.log('Raw Plant/Section for', equipmentCode, ':', plantSection, '| CraneName:', craneName);
+        console.log('Available fields in data:', Object.keys(data));
         
         await this.createCrane({
           craneId: equipmentCode,
