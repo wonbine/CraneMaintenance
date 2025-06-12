@@ -134,32 +134,21 @@ export default function Dashboard() {
           {/* Grade Distribution */}
           <div className="space-y-2">
             <div className="text-sm font-semibold text-gray-700">등급 분포</div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                {factoryGradeData
-                  .sort((a: any, b: any) => a.grade.localeCompare(b.grade)) // Sort A, B, C, D
-                  .slice(0, 4)
-                  .map((grade: any) => (
-                    <span key={grade.grade} className="font-semibold" style={{ color: GRADE_COLORS[grade.grade as keyof typeof GRADE_COLORS] || '#6b7280' }}>
+            <div className="grid grid-cols-2 gap-1">
+              {factoryGradeData
+                .sort((a: any, b: any) => a.grade.localeCompare(b.grade)) // Sort A, B, C, D
+                .slice(0, 4)
+                .map((grade: any) => (
+                  <div key={grade.grade} className="flex items-center space-x-1">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: GRADE_COLORS[grade.grade as keyof typeof GRADE_COLORS] || '#6b7280' }}
+                    ></div>
+                    <span className="text-xs font-medium text-gray-600">
                       {grade.grade}급 {grade.percentage}%
                     </span>
-                  ))}
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3 flex overflow-hidden">
-                {factoryGradeData
-                  .sort((a: any, b: any) => a.grade.localeCompare(b.grade)) // Sort A, B, C, D
-                  .slice(0, 4)
-                  .map((grade: any) => (
-                    <div 
-                      key={grade.grade}
-                      className="h-3 transition-all duration-300" 
-                      style={{ 
-                        width: `${grade.percentage}%`,
-                        backgroundColor: GRADE_COLORS[grade.grade as keyof typeof GRADE_COLORS] || '#6b7280'
-                      }}
-                    ></div>
-                  ))}
-              </div>
+                  </div>
+                ))}
             </div>
           </div>
         </CardContent>
