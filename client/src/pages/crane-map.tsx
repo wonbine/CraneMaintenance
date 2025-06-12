@@ -54,12 +54,29 @@ export default function CraneMap() {
     const position = convertCoordinateToPosition(coord.좌표);
     const craneCode = coord.크레인코드;
     // Try to find matching crane in database
-    const matchingCrane = cranes.find(crane => 
-      crane.craneId === craneCode || 
-      crane.craneName === craneCode ||
-      crane.craneId?.includes(craneCode) ||
-      craneCode.includes(crane.craneId || '')
-    );
+    const matchingCrane = cranes.find(crane => {
+      // Direct match first
+      if (crane.craneId === craneCode || crane.craneName === craneCode) {
+        return true;
+      }
+      
+      // Check if crane name contains the crane code (like "3CPL(CT82)" contains "CT82")
+      if (crane.craneName?.includes(`(${craneCode})`) || crane.craneName?.includes(craneCode)) {
+        return true;
+      }
+      
+      // Check if crane ID contains the crane code
+      if (crane.craneId?.includes(craneCode)) {
+        return true;
+      }
+      
+      // Check if crane code is part of crane name without parentheses
+      if (crane.craneName?.includes(craneCode)) {
+        return true;
+      }
+      
+      return false;
+    });
 
     if (matchingCrane) {
       return {
@@ -84,8 +101,8 @@ export default function CraneMap() {
       lastMaintenanceDate: null,
       nextMaintenanceDate: null,
       isUrgent: false,
-      grade: "무인",
-      driveType: "무인",
+      grade: "B",
+      driveType: "정보 없음",
       unmannedOperation: "무인",
       installationDate: null,
       inspectionReferenceDate: null,
