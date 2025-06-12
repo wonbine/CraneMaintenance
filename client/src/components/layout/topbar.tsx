@@ -62,25 +62,41 @@ export function Topbar() {
         <div className="flex items-center space-x-3">
           <CalendarDays className="w-5 h-5 text-gray-500" />
           <div className="flex items-center space-x-2">
-            <Input
-              type="date"
-              value={filters.startDate}
-              onChange={(e) => {
-                updateFilters({ startDate: e.target.value, dateMode: "range" });
-              }}
-              placeholder="시작일자"
-              className="h-9 w-[140px] text-sm rounded-lg"
-            />
+            <div className="relative">
+              <Input
+                type="date"
+                value={filters.startDate}
+                onChange={(e) => {
+                  updateFilters({ startDate: e.target.value, dateMode: "range" });
+                }}
+                className={`h-9 w-[140px] text-sm rounded-lg ${
+                  !filters.startDate ? 'text-gray-400' : 'text-gray-900'
+                }`}
+              />
+              {!filters.startDate && (
+                <span className="absolute left-3 top-2 text-sm text-gray-400 pointer-events-none">
+                  전체기간
+                </span>
+              )}
+            </div>
             <span className="text-gray-400 text-sm">~</span>
-            <Input
-              type="date"
-              value={filters.endDate}
-              onChange={(e) => {
-                updateFilters({ endDate: e.target.value, dateMode: "range" });
-              }}
-              placeholder="종료일자"
-              className="h-9 w-[140px] text-sm rounded-lg"
-            />
+            <div className="relative">
+              <Input
+                type="date"
+                value={filters.endDate}
+                onChange={(e) => {
+                  updateFilters({ endDate: e.target.value, dateMode: "range" });
+                }}
+                className={`h-9 w-[140px] text-sm rounded-lg ${
+                  !filters.endDate ? 'text-gray-400' : 'text-gray-900'
+                }`}
+              />
+              {!filters.endDate && (
+                <span className="absolute left-3 top-2 text-sm text-gray-400 pointer-events-none">
+                  전체기간
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -88,6 +104,14 @@ export function Topbar() {
         <div className="flex items-center space-x-3">
           <Calendar className="w-5 h-5 text-gray-500" />
           <div className="flex space-x-2">
+            <Button
+              variant={filters.dateMode === "period" && !filters.selectedPeriod ? "default" : "outline"}
+              size="sm"
+              onClick={() => handlePeriodSelect("")}
+              className="h-9 px-4 text-sm text-gray-500"
+            >
+              전체기간
+            </Button>
             <Button
               variant={filters.dateMode === "period" && filters.selectedPeriod === "1개월" ? "default" : "outline"}
               size="sm"
