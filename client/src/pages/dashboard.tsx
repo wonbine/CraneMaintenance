@@ -188,6 +188,27 @@ export default function Dashboard() {
     },
   });
 
+  // Fetch device failure heatmap data
+  const { data: deviceHeatmapData = [] } = useQuery({
+    queryKey: ['/api/device-failure-heatmap', filters.selectedCrane, filters.selectedFactory, startDate, endDate],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.selectedCrane && filters.selectedCrane !== 'all') {
+        params.append('craneName', filters.selectedCrane);
+      }
+      if (filters.selectedFactory && filters.selectedFactory !== 'all') {
+        params.append('factory', filters.selectedFactory);
+      }
+      params.append('startDate', startDate);
+      params.append('endDate', endDate);
+
+      const response = await fetch(`/api/device-failure-heatmap?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch device heatmap data');
+      return response.json();
+    },
+    enabled: !!filters.selectedCrane && filters.selectedCrane !== 'all'
+  });
+
   const DonutChart = ({ data, title, total }: { data: any[], title: string, total: number }) => {
     if (!data || data.length === 0 || total === 0) {
       return (
@@ -268,6 +289,76 @@ export default function Dashboard() {
             </div>
           </div>
         ))}
+      </div>
+    );
+  };
+
+  const HeatmapChart = ({ data }: { data: any[] }) => {
+    if (!data || data.length === 0) {
+      return (
+        <div className="h-48 flex items-center justify-center text-gray-500">
+          <span className="text-sm">데이터가 없습니다</span>
+        </div>
+      );
+    }
+
+    // Get all unique failure types across all devices
+    const failureTypeSet = new Set(
+      data.flatMap(device => device.failureTypes.map((ft: any) => ft.type))
+    );
+    const allFailureTypes = Array.from(failureTypeSet);
+
+    const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6'];
+
+    return (
+      <div className="space-y-3">
+        {data.slice(0, 8).map((device, deviceIndex) => (
+          <div key={device.device} className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium truncate max-w-24" title={device.device}>
+                {device.device}
+              </span>
+              <span className="text-xs text-gray-500">{device.total}건</span>
+            </div>
+            <div className="flex space-x-1 h-4">
+              {allFailureTypes.map((failureType, typeIndex) => {
+                const failureData = device.failureTypes.find((ft: any) => ft.type === failureType);
+                const count = failureData ? failureData.count : 0;
+                const width = device.total > 0 ? (count / device.total) * 100 : 0;
+                
+                if (count === 0) return null;
+                
+                return (
+                  <div
+                    key={failureType}
+                    className="h-full rounded-sm relative group cursor-pointer"
+                    style={{
+                      width: `${width}%`,
+                      backgroundColor: colors[typeIndex % colors.length],
+                      minWidth: count > 0 ? '4px' : '0px'
+                    }}
+                    title={`${failureType}: ${count}건`}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        ))}
+        
+        {/* Legend */}
+        <div className="mt-4 pt-3 border-t">
+          <div className="grid grid-cols-2 gap-1 text-xs">
+            {allFailureTypes.slice(0, 6).map((type, index) => (
+              <div key={type} className="flex items-center space-x-1">
+                <div 
+                  className="w-2 h-2 rounded-sm" 
+                  style={{ backgroundColor: colors[index % colors.length] }}
+                />
+                <span className="truncate" title={type}>{type}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   };
@@ -584,8 +675,20 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Row 2: Charts and Analysis */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+      {/* Row 2: Device Heatmap and Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+        {/* Device Failure Heatmap */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <Activity className="w-5 h-5 text-purple-600" />
+              <span>장치별 고장유형 히트맵</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <HeatmapChart data={deviceHeatmapData} />
+          </CardContent>
+        </Card>
         {/* Daily Repair History */}
         <Card className="shadow-lg border-0 rounded-xl">
           <CardHeader className="pb-3">

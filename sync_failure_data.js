@@ -49,6 +49,7 @@ async function syncFailureData() {
       const worktime = row[9];
       const type = row[13] || 'mechanical';
       const mechanicalElectrical = row[11] || 'mechanical';
+      const byDevice = row[12] || null;
       
       if (equipmentCode && date) {
         try {
@@ -63,6 +64,7 @@ async function syncFailureData() {
             reportedBy: null,
             data: null,
             worktime: worktime || null,
+            byDevice: byDevice,
           });
           processedCount++;
           
