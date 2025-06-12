@@ -128,25 +128,25 @@ export default function Dashboard() {
           <div className="space-y-2">
             <div className="text-sm font-semibold text-gray-700">등급 분포</div>
             <div className="space-y-1">
-              {factoryGradeData.slice(0, 4).map((grade: any, index: number) => (
-                <div key={grade.grade} className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-600">{grade.grade}급</span>
-                    <span className="font-semibold" style={{ color: GRADE_COLORS[index] }}>
-                      {grade.percentage}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-1.5">
-                    <div 
-                      className="h-1.5 rounded-full transition-all duration-300" 
-                      style={{ 
-                        width: `${grade.percentage}%`,
-                        backgroundColor: GRADE_COLORS[index] 
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
+              <div className="flex justify-between text-xs">
+                {factoryGradeData.slice(0, 4).map((grade: any, index: number) => (
+                  <span key={grade.grade} className="font-semibold" style={{ color: GRADE_COLORS[index] }}>
+                    {grade.grade}급 {grade.percentage}%
+                  </span>
+                ))}
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3 flex overflow-hidden">
+                {factoryGradeData.slice(0, 4).map((grade: any, index: number) => (
+                  <div 
+                    key={grade.grade}
+                    className="h-3 transition-all duration-300" 
+                    style={{ 
+                      width: `${grade.percentage}%`,
+                      backgroundColor: GRADE_COLORS[index] 
+                    }}
+                  ></div>
+                ))}
+              </div>
             </div>
           </div>
         </CardContent>
