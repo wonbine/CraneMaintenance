@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { 
   Factory, Settings, AlertCircle, CheckCircle, Clock, MapPin, Calendar, 
   Activity, AlertTriangle, Wrench, TrendingUp, Gauge, Users, Zap, 
-  FileText, BarChart3, PieChart as PieChartIcon, Timer
+  FileText, BarChart3, PieChart as PieChartIcon, Timer, ClipboardList
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
@@ -197,7 +199,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
               등급 {craneData.grade}
             </Badge>
             <AISummaryButton 
-              craneId={craneData.craneId} 
+              selectedCraneId={craneData.craneId} 
               mode="crane" 
               className="bg-white/20 hover:bg-white/30 border-white/30"
             />
@@ -205,8 +207,23 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
         </div>
       </div>
 
-      {/* KPI 카드들 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Tabbed Content */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="overview" className="flex items-center space-x-2">
+            <BarChart3 className="w-4 h-4" />
+            <span>종합 현황</span>
+          </TabsTrigger>
+          <TabsTrigger value="failure-history" className="flex items-center space-x-2">
+            <ClipboardList className="w-4 h-4" />
+            <span>돌발수리 이력</span>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="mt-6">
+          <div className="space-y-6">
+            {/* KPI 카드들 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* 운영 상태 */}
         <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50">
           <CardHeader className="pb-2">
@@ -465,7 +482,82 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
             </div>
           </CardContent>
         </Card>
-      </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="failure-history" className="mt-6">
+          {/* 돌발수리 이력 테이블 */}
+          <Card className="shadow-lg border-0 rounded-xl">
+            <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 border-b">
+              <CardTitle className="flex items-center space-x-2">
+                <ClipboardList className="h-5 w-5 text-red-600" />
+                <span>돌발수리 이력</span>
+                <Badge variant="outline" className="ml-2">
+                  총 {failureRecords.length}건
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {failureRecords.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gray-50">
+                        <TableHead className="text-center">발생일자</TableHead>
+                        <TableHead className="text-center">고장부위</TableHead>
+                        <TableHead className="text-center">고장원인</TableHead>
+                        <TableHead className="text-center">수리내용</TableHead>
+                        <TableHead className="text-center">작업자</TableHead>
+                        <TableHead className="text-center">소요시간</TableHead>
+                        <TableHead className="text-center">상태</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {failureRecords.map((record: any, index: number) => (
+                        <TableRow key={index} className="hover:bg-gray-50">
+                          <TableCell className="text-center">
+                            {formatDate(record.failureDate)}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {record.byDevice || '정보없음'}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {record.failureCause || '정보없음'}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {record.repairContent || '정보없음'}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {record.technician || '정보없음'}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {record.repairTime ? `${record.repairTime}시간` : '정보없음'}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge 
+                              variant={record.status === 'completed' ? 'default' : 'destructive'}
+                              className="text-xs"
+                            >
+                              {record.status === 'completed' ? '완료' : '진행중'}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <ClipboardList className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-600 mb-2">돌발수리 이력이 없습니다</h3>
+                  <p className="text-gray-500">현재 선택한 크레인의 돌발수리 기록이 없습니다.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
