@@ -28,10 +28,9 @@ export function Sidebar() {
             alt="PoCRANE Logo" 
             className="h-14 w-auto max-w-[280px] object-contain"
           />
-          <p className="text-xs text-gray-500 font-medium">크레인 정비 관리 시스템</p>
+          <p className="text-gray-500 font-medium text-[18px] text-center">스마트 크레인 정비 모니터링 시스템</p>
         </div>
       </div>
-
       {/* Navigation */}
       <nav className="flex-1 px-8 py-10">
         <div className="space-y-3">
@@ -60,7 +59,6 @@ export function Sidebar() {
           })}
         </div>
       </nav>
-
       {/* Footer */}
       <div className="border-t border-gray-100 px-8 py-6">
         <button className="group flex w-full items-center rounded-xl px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200 shadow-sm hover:shadow-md mb-6">
