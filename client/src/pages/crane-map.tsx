@@ -85,6 +85,19 @@ export default function CraneMap() {
     setIsModalOpen(true);
   };
 
+  const getGradeColor = (grade: string) => {
+    switch (grade) {
+      case "A":
+        return "bg-blue-600 border-blue-800"; // A급 - 파란색 (최고등급)
+      case "B":
+        return "bg-green-600 border-green-800"; // B급 - 초록색 (중간등급)
+      case "C":
+        return "bg-orange-600 border-orange-800"; // C급 - 주황색 (기본등급)
+      default:
+        return "bg-gray-500 border-gray-700"; // 등급 정보 없음
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "operating":
