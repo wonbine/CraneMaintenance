@@ -101,17 +101,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get crane by crane ID
-  app.get("/api/cranes/by-crane-id/:craneId", async (req, res) => {
+  // Get crane by crane name
+  app.get("/api/cranes/by-crane-id/:craneName", async (req, res) => {
     try {
-      const { craneId } = req.params;
-      const crane = await storage.getCraneByCraneId(craneId);
+      const { craneName } = req.params;
+      const crane = await storage.getCraneByCraneName(craneName);
       if (!crane) {
         return res.status(404).json({ message: "Crane not found" });
       }
       res.json(crane);
     } catch (error) {
-      console.error("Error fetching crane by ID:", error);
+      console.error("Error fetching crane by name:", error);
       res.status(500).json({ message: "Failed to fetch crane" });
     }
   });
