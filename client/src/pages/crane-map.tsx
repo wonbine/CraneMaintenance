@@ -171,13 +171,26 @@ export default function CraneMap() {
   const getGradeColor = (grade: string) => {
     switch (grade) {
       case "A":
-        return "bg-blue-600 border-blue-800"; // A급 - 파란색 (최고등급)
+        return "bg-blue-500 border-blue-700"; // A급 - 파란색 (최고등급)
       case "B":
-        return "bg-green-600 border-green-800"; // B급 - 초록색 (중간등급)
+        return "bg-green-500 border-green-700"; // B급 - 초록색 (중간등급)
       case "C":
-        return "bg-orange-600 border-orange-800"; // C급 - 주황색 (기본등급)
+        return "bg-orange-500 border-orange-700"; // C급 - 주황색 (기본등급)
       default:
-        return "bg-gray-500 border-gray-700"; // 등급 정보 없음
+        return "bg-gray-400 border-gray-600"; // 등급 정보 없음
+    }
+  };
+
+  const getCellBackgroundColor = (grade: string) => {
+    switch (grade) {
+      case "A":
+        return "bg-blue-200"; // A급 - 연한 파란색
+      case "B":
+        return "bg-green-200"; // B급 - 연한 초록색
+      case "C":
+        return "bg-orange-200"; // C급 - 연한 주황색
+      default:
+        return "bg-gray-200"; // 등급 정보 없음
     }
   };
 
@@ -269,22 +282,34 @@ export default function CraneMap() {
     <div className="h-screen flex flex-col">
       <div className="flex items-center justify-between p-6 border-b bg-white">
         <h1 className="text-3xl font-bold tracking-tight">크레인 지도</h1>
-        <div className="flex items-center space-x-4">
-          <Badge variant="outline" className="bg-green-50">
-            전체 크레인: {cranes.length}대
-          </Badge>
-          <Badge variant="outline" className="bg-blue-50">
-            지도에 표시: {cranesWithPositions.length}대
-          </Badge>
-          <Badge variant="outline" className="bg-blue-100 text-blue-800">
-            A급: {cranes.filter(c => c.grade === 'A').length}대
-          </Badge>
-          <Badge variant="outline" className="bg-green-100 text-green-800">
-            B급: {cranes.filter(c => c.grade === 'B').length}대
-          </Badge>
-          <Badge variant="outline" className="bg-orange-100 text-orange-800">
-            C급: {cranes.filter(c => c.grade === 'C').length}대
-          </Badge>
+        <div className="flex flex-col space-y-2">
+          <div className="flex items-center space-x-4">
+            <Badge variant="outline" className="bg-green-50">
+              전체 크레인: {cranes.length}대
+            </Badge>
+            <Badge variant="outline" className="bg-blue-50">
+              지도에 표시: {cranesWithPositions.length}대
+            </Badge>
+          </div>
+          <div className="flex items-center space-x-4">
+            <span className="text-sm font-medium text-gray-700">색상 범례:</span>
+            <div className="flex items-center space-x-1">
+              <div className="w-4 h-4 bg-blue-200 border border-blue-400 rounded"></div>
+              <span className="text-sm">A급: {cranes.filter(c => c.grade === 'A').length}대</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-4 h-4 bg-green-200 border border-green-400 rounded"></div>
+              <span className="text-sm">B급: {cranes.filter(c => c.grade === 'B').length}대</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-4 h-4 bg-orange-200 border border-orange-400 rounded"></div>
+              <span className="text-sm">C급: {cranes.filter(c => c.grade === 'C').length}대</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-4 h-4 bg-gray-200 border border-gray-400 rounded"></div>
+              <span className="text-sm">정보없음: {cranes.filter(c => !c.grade || c.grade === '').length}대</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -300,9 +325,31 @@ export default function CraneMap() {
           <CardContent className="p-6 h-full">
             <div className="relative w-full h-full bg-gray-50 border rounded-lg overflow-auto">
 
-
-              {/* Crane Position Markers */}
+              {/* Grid Background with Colored Cells */}
               <div className="relative w-full h-full min-w-[2400px] min-h-[2000px]">
+                {/* Colored Cell Grid */}
+                {cranesWithPositions.map((crane, index) => (
+                  <div
+                    key={`cell-${crane.id}-${index}-${crane.position.x}-${crane.position.y}`}
+                    className={`absolute border-2 border-gray-400 ${getCellBackgroundColor(crane.grade || "")} hover:opacity-90 transition-opacity duration-200`}
+                    style={{
+                      left: `${crane.position.x - 15}px`,
+                      top: `${crane.position.y - 12}px`,
+                      width: '30px',
+                      height: '25px',
+                      opacity: 0.8
+                    }}
+                  >
+                    {/* Cell Label */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xs font-bold text-gray-800">
+                        {crane.grade || "?"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              
+              {/* Crane Position Markers */}
                 {cranesWithPositions.map((crane, index) => (
                   <button
                     key={`crane-${crane.id}-${index}-${crane.position.x}-${crane.position.y}`}
