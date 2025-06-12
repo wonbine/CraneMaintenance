@@ -22,7 +22,7 @@ export function Sidebar() {
     <div className="flex h-screen w-96 flex-col bg-white border-r border-gray-200">
       {/* Header */}
       <div className="flex h-24 items-center px-10 border-b border-gray-100">
-        <Link href="/" className="flex flex-col items-start space-y-1 w-full cursor-pointer hover:opacity-80 transition-opacity">
+        <Link href="/" className="flex flex-col items-start space-y-1 w-full cursor-pointer hover:opacity-80 transition-opacity" onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}>
           <img 
             src="/src/assets/pocrane-logo.png" 
             alt="PoCRANE Logo" 
