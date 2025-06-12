@@ -68,12 +68,15 @@ export default function Dashboard() {
     { name: '무인', value: operationTypeData.unmanned, percentage: operationTypeData.unmannedPercentage }
   ] : [];
 
-  // Prepare crane grade chart data
-  const gradeChartData = craneGradeData.map((item: any) => ({
-    name: item.grade,
-    value: item.count,
-    percentage: item.percentage
-  }));
+  // Prepare crane grade chart data with proper sorting and colors
+  const gradeChartData = craneGradeData
+    .sort((a: any, b: any) => a.grade.localeCompare(b.grade)) // Sort A, B, C, D
+    .map((item: any) => ({
+      name: item.grade,
+      value: item.count,
+      percentage: item.percentage,
+      fill: GRADE_COLORS[item.grade as keyof typeof GRADE_COLORS] || '#6b7280'
+    }));
 
   const FactoryOverviewCard = ({ factory }: { factory: any }) => {
     // Fetch factory-specific operation type stats
@@ -304,7 +307,7 @@ export default function Dashboard() {
                         <div key={item.name} className="flex items-center">
                           <div 
                             className="w-3 h-3 rounded mr-2" 
-                            style={{ backgroundColor: GRADE_COLORS[index % GRADE_COLORS.length] }}
+                            style={{ backgroundColor: item.fill }}
                           ></div>
                           <span>{item.name}: {item.value}대 ({item.percentage}%)</span>
                         </div>
