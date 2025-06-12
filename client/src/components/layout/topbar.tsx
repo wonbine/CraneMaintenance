@@ -108,65 +108,30 @@ export function Topbar() {
 
         {/* Date Range Selection */}
         <div className="flex items-center space-x-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={dateMode === "range" ? "default" : "outline"}
-                size="sm"
-                onClick={handleDateRangeMode}
-                className="h-8 px-3 text-xs flex items-center space-x-1"
-              >
-                <CalendarDays className="w-3 h-3" />
-                <span>기간 지정</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4" align="end">
-              <div className="space-y-4">
-                <div className="text-sm font-medium">기간 설정</div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs text-gray-500 mb-1 block">시작일자</label>
-                    <Input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="h-8 text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-500 mb-1 block">종료일자</label>
-                    <Input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="h-8 text-xs"
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setStartDate("");
-                      setEndDate("");
-                      setDateMode("period");
-                    }}
-                    className="h-7 px-3 text-xs"
-                  >
-                    취소
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setDateMode("range")}
-                    className="h-7 px-3 text-xs"
-                  >
-                    적용
-                  </Button>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <CalendarDays className="w-4 h-4 text-gray-500" />
+          <div className="flex items-center space-x-2">
+            <Input
+              type="date"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setDateMode("range");
+              }}
+              placeholder="시작일자"
+              className="h-8 w-[130px] text-xs"
+            />
+            <span className="text-gray-400 text-xs">~</span>
+            <Input
+              type="date"
+              value={endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setDateMode("range");
+              }}
+              placeholder="종료일자"
+              className="h-8 w-[130px] text-xs"
+            />
+          </div>
         </div>
 
         {/* Search Button */}
