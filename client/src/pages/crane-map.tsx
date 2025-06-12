@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, MapPin, Wrench, AlertTriangle, X, Info, Calendar, Cog } from "lucide-react";
+import { Loader2, MapPin, Wrench, AlertTriangle } from "lucide-react";
 import type { Crane } from "@shared/schema";
 import craneCoordinates from "../data/crane-coordinates.json";
 
@@ -137,8 +137,8 @@ export default function CraneMap() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="h-screen flex flex-col">
+      <div className="flex items-center justify-between p-6 border-b bg-white">
         <h1 className="text-3xl font-bold tracking-tight">크레인 지도</h1>
         <div className="flex items-center space-x-4">
           <Badge variant="outline" className="bg-green-50">
@@ -151,85 +151,87 @@ export default function CraneMap() {
       </div>
 
       {/* Interactive Crane Map */}
-      <Card className="border-0 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-teal-50 to-blue-50 border-b">
-          <CardTitle className="flex items-center">
-            <MapPin className="h-5 w-5 mr-2 text-teal-600" />
-            공장 크레인 지도
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="relative w-full h-[700px] bg-gray-50 border rounded-lg overflow-auto">
-            {/* Map Legend */}
-            <div className="absolute top-4 right-4 z-10 bg-white p-3 rounded-lg shadow-md border">
-              <h4 className="text-sm font-medium mb-2">범례</h4>
-              <div className="space-y-1 text-xs">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span>가동중</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                  <span>정비중</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <span>긴급</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Crane Position Markers */}
-            <div className="relative w-full h-full min-w-[1800px] min-h-[1600px]">
-              {cranesWithPositions.map((crane) => (
-                <button
-                  key={crane.id}
-                  onClick={() => handleCraneClick(crane)}
-                  className="absolute transform -translate-x-1/2 -translate-y-1/2 group"
-                  style={{
-                    left: `${crane.position.x}px`,
-                    top: `${crane.position.y}px`,
-                  }}
-                >
-                  <div className="relative">
-                    {/* Crane Marker */}
-                    <div
-                      className={`w-4 h-4 rounded-full border-2 border-white shadow-lg transition-all duration-200 group-hover:scale-125 ${getStatusColor(
-                        crane.status
-                      )}`}
-                    />
-                    
-                    {/* Crane Label */}
-                    <div className="absolute top-5 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      {crane.craneId}
-                    </div>
+      <div className="flex-1 p-6">
+        <Card className="border-0 shadow-lg h-full">
+          <CardHeader className="bg-gradient-to-r from-teal-50 to-blue-50 border-b">
+            <CardTitle className="flex items-center">
+              <MapPin className="h-5 w-5 mr-2 text-teal-600" />
+              공장 크레인 지도
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 h-full">
+            <div className="relative w-full h-full bg-gray-50 border rounded-lg overflow-auto">
+              {/* Map Legend */}
+              <div className="absolute top-4 right-4 z-10 bg-white p-3 rounded-lg shadow-md border">
+                <h4 className="text-sm font-medium mb-2">범례</h4>
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span>가동중</span>
                   </div>
-                </button>
-              ))}
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <span>정비중</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <span>긴급</span>
+                  </div>
+                </div>
+              </div>
 
-              {/* Grid lines for reference */}
-              <div className="absolute inset-0 pointer-events-none opacity-10">
-                {/* Vertical lines */}
-                {Array.from({ length: 40 }, (_, i) => (
-                  <div
-                    key={`v-${i}`}
-                    className="absolute top-0 bottom-0 w-px bg-gray-400"
-                    style={{ left: `${i * 30}px` }}
-                  />
+              {/* Crane Position Markers */}
+              <div className="relative w-full h-full min-w-[1800px] min-h-[1600px]">
+                {cranesWithPositions.map((crane) => (
+                  <button
+                    key={crane.id}
+                    onClick={() => handleCraneClick(crane)}
+                    className="absolute transform -translate-x-1/2 -translate-y-1/2 group"
+                    style={{
+                      left: `${crane.position.x}px`,
+                      top: `${crane.position.y}px`,
+                    }}
+                  >
+                    <div className="relative">
+                      {/* Crane Marker */}
+                      <div
+                        className={`w-4 h-4 rounded-full border-2 border-white shadow-lg transition-all duration-200 group-hover:scale-125 ${getStatusColor(
+                          crane.status
+                        )}`}
+                      />
+                      
+                      {/* Crane Label */}
+                      <div className="absolute top-5 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        {crane.craneId}
+                      </div>
+                    </div>
+                  </button>
                 ))}
-                {/* Horizontal lines */}
-                {Array.from({ length: 30 }, (_, i) => (
-                  <div
-                    key={`h-${i}`}
-                    className="absolute left-0 right-0 h-px bg-gray-400"
-                    style={{ top: `${i * 30}px` }}
-                  />
-                ))}
+
+                {/* Grid lines for reference */}
+                <div className="absolute inset-0 pointer-events-none opacity-10">
+                  {/* Vertical lines */}
+                  {Array.from({ length: 40 }, (_, i) => (
+                    <div
+                      key={`v-${i}`}
+                      className="absolute top-0 bottom-0 w-px bg-gray-400"
+                      style={{ left: `${i * 30}px` }}
+                    />
+                  ))}
+                  {/* Horizontal lines */}
+                  {Array.from({ length: 30 }, (_, i) => (
+                    <div
+                      key={`h-${i}`}
+                      className="absolute left-0 right-0 h-px bg-gray-400"
+                      style={{ top: `${i * 30}px` }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Crane Detail Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
