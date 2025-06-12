@@ -416,7 +416,7 @@ export default function Dashboard() {
                 <span className="text-sm font-medium">{crane?.driveType || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">유/무인(UnmannedOperation)</span>
+                <span className="text-sm text-gray-600">유/무인</span>
                 <span className="text-sm font-medium">{crane?.unmannedOperation || 'N/A'}</span>
               </div>
             </div>
