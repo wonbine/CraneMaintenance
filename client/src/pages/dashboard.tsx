@@ -82,9 +82,15 @@ export default function Dashboard() {
     'F': '#f97316'  // Dark orange for F grade
   };
   const FAILURE_CAUSE_COLORS = {
-    '전기계통': '#ef4444', // Red for electrical system
-    '기계계통': '#3b82f6', // Blue for mechanical system  
-    '제어계통': '#f59e0b'  // Orange for control system
+    '모터': '#ef4444', // Red for motor
+    '기어박스/감속기': '#3b82f6', // Blue for gearbox
+    '센서': '#f59e0b', // Orange for sensor
+    '와이어로프': '#8b5cf6', // Purple for wire rope
+    '제어장치': '#22c55e', // Green for control device
+    '베어링': '#f97316', // Orange for bearing
+    '브레이크': '#6b7280', // Gray for brake
+    '정기점검': '#14b8a6', // Teal for regular inspection
+    '기타': '#9ca3af' // Light gray for others
   };
 
   // Prepare operation type chart data

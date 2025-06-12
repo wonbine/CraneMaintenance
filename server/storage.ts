@@ -886,14 +886,34 @@ export class MemStorage implements IStorage {
   async getFailureCauseDistribution(): Promise<{ cause: string; count: number; percentage: number }[]> {
     const failureRecords = Array.from(this.failureRecords.values());
     
-    // Count failure types
+    // Count by device from byDevice column (extract from description if byDevice is empty)
     const causeCount = new Map<string, number>();
     let totalCount = 0;
 
     failureRecords.forEach(record => {
-      if (record.failureType && record.failureType.trim() !== '') {
-        const cause = record.failureType.trim();
-        causeCount.set(cause, (causeCount.get(cause) || 0) + 1);
+      let device = '';
+      
+      // First try byDevice column
+      if (record.byDevice && record.byDevice.trim() !== '') {
+        device = record.byDevice.trim();
+      } 
+      // If byDevice is empty, extract device from description
+      else if (record.description && record.description.trim() !== '') {
+        const desc = record.description.trim();
+        // Extract device/component from description
+        if (desc.includes('모터')) device = '모터';
+        else if (desc.includes('기어박스') || desc.includes('감속기')) device = '기어박스/감속기';
+        else if (desc.includes('센서')) device = '센서';
+        else if (desc.includes('와이어로프')) device = '와이어로프';
+        else if (desc.includes('제어판') || desc.includes('접촉기')) device = '제어장치';
+        else if (desc.includes('베어링')) device = '베어링';
+        else if (desc.includes('브레이크')) device = '브레이크';
+        else if (desc.includes('정기점검')) device = '정기점검';
+        else device = '기타';
+      }
+
+      if (device !== '') {
+        causeCount.set(device, (causeCount.get(device) || 0) + 1);
         totalCount++;
       }
     });
@@ -1558,14 +1578,34 @@ export class DatabaseStorage implements IStorage {
 
     const failureRecords = await this.getFailureRecords();
     
-    // Count failure types
+    // Count by device from byDevice column (extract from description if byDevice is empty)
     const causeCount = new Map<string, number>();
     let totalCount = 0;
 
     failureRecords.forEach(record => {
-      if (record.failureType && record.failureType.trim() !== '') {
-        const cause = record.failureType.trim();
-        causeCount.set(cause, (causeCount.get(cause) || 0) + 1);
+      let device = '';
+      
+      // First try byDevice column
+      if (record.byDevice && record.byDevice.trim() !== '') {
+        device = record.byDevice.trim();
+      } 
+      // If byDevice is empty, extract device from description
+      else if (record.description && record.description.trim() !== '') {
+        const desc = record.description.trim();
+        // Extract device/component from description
+        if (desc.includes('모터')) device = '모터';
+        else if (desc.includes('기어박스') || desc.includes('감속기')) device = '기어박스/감속기';
+        else if (desc.includes('센서')) device = '센서';
+        else if (desc.includes('와이어로프')) device = '와이어로프';
+        else if (desc.includes('제어판') || desc.includes('접촉기')) device = '제어장치';
+        else if (desc.includes('베어링')) device = '베어링';
+        else if (desc.includes('브레이크')) device = '브레이크';
+        else if (desc.includes('정기점검')) device = '정기점검';
+        else device = '기타';
+      }
+
+      if (device !== '') {
+        causeCount.set(device, (causeCount.get(device) || 0) + 1);
         totalCount++;
       }
     });

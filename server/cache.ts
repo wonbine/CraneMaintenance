@@ -37,6 +37,10 @@ class MemoryCache {
     this.cache.clear();
   }
 
+  clearKey(key: string): void {
+    this.cache.delete(key);
+  }
+
   has(key: string): boolean {
     const item = this.cache.get(key);
     if (!item) return false;
