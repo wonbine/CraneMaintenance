@@ -57,6 +57,147 @@ export class MemStorage implements IStorage {
     this.currentCraneId = 1;
     this.currentMaintenanceId = 1;
     this.currentAlertId = 1;
+    
+    // Initialize with sample data
+    this.initializeSampleData();
+  }
+
+  private async initializeSampleData() {
+    // Sample crane data
+    const sampleCranes = [
+      {
+        craneId: "CR-001",
+        status: "operating",
+        location: "Warehouse A",
+        model: "Liebherr LTM 1030",
+        lastMaintenanceDate: "2024-05-15",
+        nextMaintenanceDate: "2024-06-15",
+        isUrgent: false
+      },
+      {
+        craneId: "CR-002", 
+        status: "maintenance",
+        location: "Dock B",
+        model: "Manitowoc 18000",
+        lastMaintenanceDate: "2024-05-20",
+        nextMaintenanceDate: "2024-06-10",
+        isUrgent: false
+      },
+      {
+        craneId: "CR-003",
+        status: "operating", 
+        location: "Yard C",
+        model: "Terex RT780",
+        lastMaintenanceDate: "2024-05-10",
+        nextMaintenanceDate: "2024-06-05",
+        isUrgent: true
+      },
+      {
+        craneId: "CR-004",
+        status: "urgent",
+        location: "Storage D", 
+        model: "Liebherr LTM 1055",
+        lastMaintenanceDate: "2024-04-30",
+        nextMaintenanceDate: "2024-05-30",
+        isUrgent: true
+      },
+      {
+        craneId: "CR-005",
+        status: "operating",
+        location: "Port E",
+        model: "Grove GMK4100L", 
+        lastMaintenanceDate: "2024-05-18",
+        nextMaintenanceDate: "2024-06-18",
+        isUrgent: false
+      }
+    ];
+
+    // Sample maintenance records
+    const sampleMaintenanceRecords = [
+      {
+        craneId: "CR-001",
+        date: "2024-05-15",
+        type: "routine",
+        technician: "John Smith",
+        status: "completed",
+        notes: "Regular inspection and lubrication",
+        duration: 4,
+        cost: 25000
+      },
+      {
+        craneId: "CR-002",
+        date: "2024-05-20", 
+        type: "repair",
+        technician: "Mike Johnson",
+        status: "in_progress",
+        notes: "Hydraulic system repair",
+        duration: 8,
+        cost: 75000
+      },
+      {
+        craneId: "CR-003",
+        date: "2024-05-10",
+        type: "preventive",
+        technician: "Sarah Wilson",
+        status: "completed", 
+        notes: "Brake system check",
+        duration: 2,
+        cost: 15000
+      },
+      {
+        craneId: "CR-004",
+        date: "2024-04-30",
+        type: "emergency",
+        technician: "Tom Brown", 
+        status: "completed",
+        notes: "Emergency cable replacement",
+        duration: 12,
+        cost: 120000
+      },
+      {
+        craneId: "CR-005",
+        date: "2024-05-18",
+        type: "inspection",
+        technician: "Lisa Davis",
+        status: "completed",
+        notes: "Safety inspection",
+        duration: 3,
+        cost: 18000
+      },
+      {
+        craneId: "CR-001",
+        date: "2024-04-15",
+        type: "routine", 
+        technician: "John Smith",
+        status: "completed",
+        notes: "Monthly maintenance check",
+        duration: 3,
+        cost: 20000
+      },
+      {
+        craneId: "CR-003",
+        date: "2024-04-25",
+        type: "repair",
+        technician: "Mike Johnson",
+        status: "completed",
+        notes: "Wire rope replacement",
+        duration: 6,
+        cost: 45000
+      }
+    ];
+
+    // Create cranes
+    for (const crane of sampleCranes) {
+      await this.createCrane(crane);
+    }
+
+    // Create maintenance records
+    for (const record of sampleMaintenanceRecords) {
+      await this.createMaintenanceRecord(record);
+    }
+
+    // Generate alerts
+    await this.generateAlerts();
   }
 
   async getCranes(): Promise<Crane[]> {
