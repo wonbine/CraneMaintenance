@@ -10,7 +10,6 @@ import Dashboard from "@/pages/dashboard";
 import CraneMap from "@/pages/crane-map";
 import MaintenanceHistory from "@/pages/maintenance-history";
 import FailureHistory from "@/pages/failure-history";
-import FactoryFailureReport from "@/pages/factory-failure-report";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -27,7 +26,6 @@ function Router() {
               <Route path="/failure-history" component={FailureHistory} />
               <Route path="/maintenance-history" component={MaintenanceHistory} />
               <Route path="/maintenance-history/:craneId" component={MaintenanceHistory} />
-              <Route path="/factory-failure-report" component={FactoryFailureReport} />
               <Route component={NotFound} />
             </Switch>
           </div>
