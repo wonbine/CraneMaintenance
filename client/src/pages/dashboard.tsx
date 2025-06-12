@@ -1180,6 +1180,42 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Factory Overview Layout - shown when no specific crane is selected */}
+      {(!filters.selectedCrane || filters.selectedCrane === 'all') && (
+        <div className="space-y-6">
+          {/* System Summary */}
+          {systemOverviewData && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl font-bold text-blue-600">{systemOverviewData.totalFactories}</div>
+                  <div className="text-sm text-gray-600">총 공장 수</div>
+                </CardContent>
+              </Card>
+              <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-green-50 to-green-100">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl font-bold text-green-600">{systemOverviewData.totalCranes}</div>
+                  <div className="text-sm text-gray-600">전체 크레인 수</div>
+                </CardContent>
+              </Card>
+              <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl font-bold text-orange-600">{systemOverviewData.totalMannedPercentage}%</div>
+                  <div className="text-sm text-gray-600">전체 유인 크레인 비율</div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Factory Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {factoryOverviewData.map((factory: any, index: number) => (
+              <FactoryOverviewCard key={factory.factoryName || index} factory={factory} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
