@@ -28,7 +28,7 @@ export function Sidebar() {
             alt="PoCRANE Logo" 
             className="h-14 w-auto max-w-[280px] object-contain"
           />
-          <p className="text-gray-500 font-medium text-[18px] text-center">스마트 크레인 정비 모니터링 시스템</p>
+          <p className="text-gray-500 font-medium text-[18px] text-center mx-auto">스마트 크레인 정비 모니터링 시스템</p>
         </div>
       </div>
       {/* Navigation */}
