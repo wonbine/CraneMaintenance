@@ -188,7 +188,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const cranes = await storage.getCranes();
         const targetCrane = cranes.find(c => c.craneName === craneName);
         if (targetCrane) {
+          console.log(`Filtering failure records for crane: ${craneName} with craneId: ${targetCrane.craneId}`);
           records = records.filter(r => r.craneId === targetCrane.craneId);
+          console.log(`Found ${records.length} failure records for this crane`);
+        } else {
+          console.log(`No crane found with name: ${craneName}`);
         }
       }
       
