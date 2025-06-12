@@ -224,18 +224,18 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
           <div className="space-y-6">
             {/* KPI 카드들 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* 운영 상태 */}
-        <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center justify-between text-sm font-medium text-gray-600">
-              <span>운영 상태</span>
-              <StatusIcon className="w-5 h-5 text-green-600" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold text-green-600">{operationalStatus.status}</div>
+              {/* 운영 상태 */}
+              <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center justify-between text-sm font-medium text-gray-600">
+                    <span>운영 상태</span>
+                    <StatusIcon className="w-5 h-5 text-green-600" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-2xl font-bold text-green-600">{operationalStatus.status}</div>
                 <div className="text-xs text-gray-500">
                   {craneData.unmannedOperation || '정보 없음'}
                 </div>
