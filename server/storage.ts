@@ -17,6 +17,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, isNotNull } from "drizzle-orm";
+import { cache } from "./cache";
 
 export interface IStorage {
   // Crane operations
@@ -642,7 +643,13 @@ export class MemStorage implements IStorage {
 // DatabaseStorage implementation
 export class DatabaseStorage implements IStorage {
   async getCranes(): Promise<Crane[]> {
-    return await db.select().from(cranes);
+    const cacheKey = 'cranes:all';
+    const cached = cache.get<Crane[]>(cacheKey);
+    if (cached) return cached;
+
+    const result = await db.select().from(cranes);
+    cache.set(cacheKey, result, 2 * 60 * 1000); // Cache for 2 minutes
+    return result;
   }
 
   async getCrane(id: number): Promise<Crane | undefined> {
@@ -673,7 +680,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFailureRecords(): Promise<FailureRecord[]> {
-    return await db.select().from(failureRecords);
+    const cacheKey = 'failure-records:all';
+    const cached = cache.get<FailureRecord[]>(cacheKey);
+    if (cached) return cached;
+
+    const result = await db.select().from(failureRecords);
+    cache.set(cacheKey, result, 3 * 60 * 1000); // Cache for 3 minutes
+    return result;
   }
 
   async getFailureRecord(id: number): Promise<FailureRecord | undefined> {
@@ -830,13 +843,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUniqueFactories(): Promise<string[]> {
+    const cacheKey = 'factories:unique';
+    const cached = cache.get<string[]>(cacheKey);
+    if (cached) return cached;
+
     const result = await db.selectDistinct({ plantSection: cranes.plantSection }).from(cranes);
-    return result.map(r => r.plantSection).filter((section): section is string => Boolean(section)).sort();
+    const factories = result.map(r => r.plantSection).filter((section): section is string => Boolean(section)).sort();
+    cache.set(cacheKey, factories, 5 * 60 * 1000); // Cache for 5 minutes
+    return factories;
   }
 
   async getUniqueCraneNames(): Promise<string[]> {
+    const cacheKey = 'crane-names:unique';
+    const cached = cache.get<string[]>(cacheKey);
+    if (cached) return cached;
+
     const result = await db.selectDistinct({ craneName: cranes.craneName }).from(cranes);
-    return result.map(r => r.craneName).filter((name): name is string => Boolean(name)).sort();
+    const craneNames = result.map(r => r.craneName).filter((name): name is string => Boolean(name)).sort();
+    cache.set(cacheKey, craneNames, 5 * 60 * 1000); // Cache for 5 minutes
+    return craneNames;
   }
 
   async getCranesByFactoryAndName(factory?: string, craneName?: string): Promise<Crane[]> {
