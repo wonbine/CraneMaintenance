@@ -68,14 +68,14 @@ export function Topbar() {
       {/* Right side - Date Selection, Search Button and Profile */}
       <div className="flex items-center space-x-4">
         {/* Period Selection Buttons */}
-        <div className="flex items-center space-x-2">
-          <Calendar className="w-4 h-4 text-gray-500" />
-          <div className="flex space-x-1">
+        <div className="flex items-center space-x-3">
+          <Calendar className="w-5 h-5 text-gray-500" />
+          <div className="flex space-x-2">
             <Button
               variant={dateMode === "period" && selectedPeriod === "1개월" ? "default" : "outline"}
               size="sm"
               onClick={() => handlePeriodSelect("1개월")}
-              className="h-8 px-3 text-xs"
+              className="h-9 px-4 text-sm"
             >
               1개월
             </Button>
@@ -83,7 +83,7 @@ export function Topbar() {
               variant={dateMode === "period" && selectedPeriod === "3개월" ? "default" : "outline"}
               size="sm"
               onClick={() => handlePeriodSelect("3개월")}
-              className="h-8 px-3 text-xs"
+              className="h-9 px-4 text-sm"
             >
               3개월
             </Button>
@@ -91,7 +91,7 @@ export function Topbar() {
               variant={dateMode === "period" && selectedPeriod === "6개월" ? "default" : "outline"}
               size="sm"
               onClick={() => handlePeriodSelect("6개월")}
-              className="h-8 px-3 text-xs"
+              className="h-9 px-4 text-sm"
             >
               6개월
             </Button>
@@ -99,7 +99,7 @@ export function Topbar() {
               variant={dateMode === "period" && selectedPeriod === "1년" ? "default" : "outline"}
               size="sm"
               onClick={() => handlePeriodSelect("1년")}
-              className="h-8 px-3 text-xs"
+              className="h-9 px-4 text-sm"
             >
               1년
             </Button>
@@ -107,8 +107,8 @@ export function Topbar() {
         </div>
 
         {/* Date Range Selection */}
-        <div className="flex items-center space-x-2">
-          <CalendarDays className="w-4 h-4 text-gray-500" />
+        <div className="flex items-center space-x-3">
+          <CalendarDays className="w-5 h-5 text-gray-500" />
           <div className="flex items-center space-x-2">
             <Input
               type="date"
@@ -118,9 +118,9 @@ export function Topbar() {
                 setDateMode("range");
               }}
               placeholder="시작일자"
-              className="h-8 w-[130px] text-xs"
+              className="h-9 w-[140px] text-sm"
             />
-            <span className="text-gray-400 text-xs">~</span>
+            <span className="text-gray-400 text-sm">~</span>
             <Input
               type="date"
               value={endDate}
@@ -129,7 +129,7 @@ export function Topbar() {
                 setDateMode("range");
               }}
               placeholder="종료일자"
-              className="h-8 w-[130px] text-xs"
+              className="h-9 w-[140px] text-sm"
             />
           </div>
         </div>
@@ -137,19 +137,19 @@ export function Topbar() {
         {/* Search Button */}
         <Button 
           onClick={handleSearch}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+          className="bg-blue-500 hover:bg-blue-600 text-white h-9 px-5 rounded-lg flex items-center space-x-2"
         >
           <SearchIcon className="w-4 h-4" />
-          <span>조회</span>
+          <span className="text-sm">조회</span>
         </Button>
         
         {/* User Profile */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center space-x-2 hover:bg-gray-50">
-              <Avatar className="h-8 w-8">
+            <Button variant="ghost" className="h-9 flex items-center space-x-2 hover:bg-gray-50 px-3">
+              <Avatar className="h-7 w-7">
                 <AvatarImage src="" alt="Jane Cooper" />
-                <AvatarFallback className="bg-blue-100 text-blue-700 text-sm">
+                <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">
                   JC
                 </AvatarFallback>
               </Avatar>
