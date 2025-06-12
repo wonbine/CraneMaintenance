@@ -12,7 +12,7 @@ const navigation = [
   { name: "대시보드", href: "/", icon: LayoutDashboard },
   { name: "크레인 지도", href: "/crane-map", icon: Map },
   { name: "돌발수리 이력", href: "/failure-history", icon: AlertTriangle },
-  { name: "정비수리 이력", href: "/maintenance-history", icon: Wrench },
+  { name: "일상수리 이력", href: "/maintenance-history", icon: Wrench },
 ];
 
 export function Sidebar() {
@@ -35,8 +35,8 @@ export function Sidebar() {
                 className={cn(
                   "group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer",
                   isActive
-                    ? "bg-teal-700 text-white shadow-lg"
-                    : "text-teal-100 hover:bg-teal-700/50 hover:text-white"
+                    ? "bg-teal-700 text-white shadow-lg border-r-2 border-white"
+                    : "text-teal-100 hover:bg-teal-700/60 hover:text-white hover:shadow-md hover:scale-105"
                 )}
               >
                 <item.icon
