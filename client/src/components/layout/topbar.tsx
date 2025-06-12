@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Bell, User, Calendar, Filter, Search as SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,23 +22,52 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FactoryCraneSelector } from "@/components/dashboard/factory-crane-selector";
 
 export function Topbar() {
+  const [selectedPeriod, setSelectedPeriod] = useState("1개월");
+  const [selectedFactory, setSelectedFactory] = useState("");
+  const [selectedCrane, setSelectedCrane] = useState("");
+
+  const handleSearch = () => {
+    // 조회 로직 실행
+    console.log("Searching with:", { selectedFactory, selectedCrane, selectedPeriod });
+  };
+
+  const handleSelectionChange = (factory?: string, crane?: string) => {
+    setSelectedFactory(factory || "");
+    setSelectedCrane(crane || "");
+  };
+
   return (
     <div className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6">
-      {/* Left side - Page title and filters */}
-      <div className="flex items-center space-x-6">
-        <div className="flex items-center space-x-4">
-          
-          
-        </div>
+      {/* Left side - Factory and Crane Selection */}
+      <div className="flex items-center space-x-4">
+        <FactoryCraneSelector onSelectionChange={handleSelectionChange} />
       </div>
 
-      
-
-      {/* Right side - Factory/Crane Selector, Add New Product and Profile */}
+      {/* Right side - Date Selection, Search Button and Profile */}
       <div className="flex items-center space-x-4">
-        <FactoryCraneSelector onSelectionChange={() => {}} />
-        <Button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
-          + 새 크레인 추가
+        {/* Date Period Selection */}
+        <div className="flex items-center space-x-2">
+          <Calendar className="w-4 h-4 text-gray-500" />
+          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+            <SelectTrigger className="w-[120px] h-9 text-sm">
+              <SelectValue placeholder="기간 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1개월">최근 1개월</SelectItem>
+              <SelectItem value="3개월">최근 3개월</SelectItem>
+              <SelectItem value="6개월">최근 6개월</SelectItem>
+              <SelectItem value="1년">최근 1년</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Search Button */}
+        <Button 
+          onClick={handleSearch}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+        >
+          <SearchIcon className="w-4 h-4" />
+          <span>조회</span>
         </Button>
         
         {/* Notifications */}
