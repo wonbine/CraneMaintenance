@@ -408,8 +408,8 @@ export default function CraneMap() {
           
           {selectedCrane && (
             <div className="space-y-4">
-              {/* Grade and Status Badges */}
-              <div className="flex justify-center space-x-2">
+              {/* Grade Badge */}
+              <div className="flex justify-center">
                 <Badge
                   className={`px-3 py-1 font-bold text-white ${
                     selectedCrane.grade === 'A' ? 'bg-blue-600' : 
@@ -417,19 +417,7 @@ export default function CraneMap() {
                     selectedCrane.grade === 'C' ? 'bg-orange-600' : 'bg-gray-500'
                   }`}
                 >
-                  등급: {selectedCrane.grade || "미분류"}
-                </Badge>
-                <Badge
-                  className={`px-3 py-1 ${getStatusBadgeColor(selectedCrane.status)}`}
-                >
-                  <span className="flex items-center space-x-1">
-                    {getStatusIcon(selectedCrane.status)}
-                    <span>
-                      {selectedCrane.status === "operating" && "가동중"}
-                      {selectedCrane.status === "maintenance" && "정비중"}
-                      {selectedCrane.status === "urgent" && "긴급"}
-                    </span>
-                  </span>
+                  등급: {selectedCrane.grade || "B"}
                 </Badge>
               </div>
 
@@ -460,7 +448,7 @@ export default function CraneMap() {
                           : "bg-gray-100 text-gray-800 border-gray-200"
                       }`}
                     >
-                      {selectedCrane.grade || "미분류"}
+                      {selectedCrane.grade || "B"}
                     </Badge>
                   </div>
                 </div>
@@ -486,12 +474,10 @@ export default function CraneMap() {
                       <span className="flex items-center space-x-1">
                         {selectedCrane.unmannedOperation === "무인" ? (
                           <Settings className="h-3 w-3" />
-                        ) : selectedCrane.unmannedOperation === "유인" ? (
-                          <User className="h-3 w-3" />
                         ) : (
                           <HelpCircle className="h-3 w-3" />
                         )}
-                        <span>{selectedCrane.unmannedOperation || "정보 없음"}</span>
+                        <span>{selectedCrane.unmannedOperation || "무인"}</span>
                       </span>
                     </Badge>
                   </div>
@@ -627,20 +613,7 @@ export default function CraneMap() {
         </DialogContent>
       </Dialog>
 
-      {/* Empty State */}
-      {cranesWithPositions.length === 0 && (
-        <Card className="border-dashed border-2 border-gray-200">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <MapPin className="h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-lg font-medium text-gray-900 mb-2">
-              지도에 표시할 크레인이 없습니다
-            </p>
-            <p className="text-sm text-gray-500 text-center">
-              좌표 데이터와 일치하는 크레인을 찾을 수 없습니다.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      
     </div>
   );
 }
