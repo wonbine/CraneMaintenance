@@ -380,7 +380,9 @@ export default function Dashboard() {
                           labelFormatter={(label) => `${label}`}
                         />
                         <Bar dataKey="돌발작업" stackId="a" fill="#ef4444" />
-                        <Bar dataKey="일상수리" stackId="a" fill="#22c55e" />
+                        <Bar dataKey="일상수리" stackId="a" fill="#22c55e">
+                          <LabelList dataKey="total" position="top" />
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
