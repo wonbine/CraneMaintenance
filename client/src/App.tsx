@@ -24,6 +24,7 @@ function Router() {
               <Route path="/" component={Dashboard} />
               <Route path="/crane-map" component={CraneMap} />
               <Route path="/failure-history" component={FailureHistory} />
+              <Route path="/maintenance-history" component={MaintenanceHistory} />
               <Route path="/maintenance-history/:craneId" component={MaintenanceHistory} />
               <Route component={NotFound} />
             </Switch>
