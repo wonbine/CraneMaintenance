@@ -73,6 +73,9 @@ export interface IStorage {
   
   // Recent maintenance statistics
   getRecentMaintenanceStats(): Promise<{ month: string; failureCount: number; maintenanceCount: number; total: number }[]>;
+  
+  // Failure cause distribution
+  getFailureCauseDistribution(): Promise<{ cause: string; count: number; percentage: number }[]>;
 }
 
 export class MemStorage implements IStorage {
