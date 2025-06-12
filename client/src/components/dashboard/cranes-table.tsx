@@ -4,7 +4,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, ChevronUp, ChevronDown, ChevronsUpDown, Settings, User, HelpCircle } from "lucide-react";
+import { Search, ChevronUp, ChevronDown, ChevronsUpDown, Settings, User, HelpCircle, History } from "lucide-react";
+import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "./empty-state";
 import type { Crane } from "@shared/schema";
@@ -22,6 +23,7 @@ export function CranesTable({ selectedFactory, selectedCrane }: CranesTableProps
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortField, setSortField] = useState<SortField>('craneId');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [, setLocation] = useLocation();
 
   const { data: cranes = [], isLoading } = useQuery<Crane[]>({
     queryKey: ["/api/cranes", selectedFactory, selectedCrane],
@@ -150,6 +152,9 @@ export function CranesTable({ selectedFactory, selectedCrane }: CranesTableProps
               </TableHead>
               <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
                 작업 ↕
+              </TableHead>
+              <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                수리 이력
               </TableHead>
             </TableRow>
           </TableHeader>

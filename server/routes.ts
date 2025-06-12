@@ -225,6 +225,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get maintenance records for a specific crane
+  app.get("/api/maintenance-records/:craneId", async (req, res) => {
+    try {
+      const { craneId } = req.params;
+      const records = await storage.getMaintenanceRecordsByCraneId(craneId);
+      
+      // Sort by date descending (most recent first)
+      const sortedRecords = records
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .map((record, index) => ({
+          ...record,
+          순번: index + 1
+        }));
+      
+      res.json(sortedRecords);
+    } catch (error) {
+      console.error("Error fetching maintenance records:", error);
+      res.status(500).json({ message: "Failed to fetch maintenance records" });
+    }
+  });
+
   // Get cranes with failure data
   app.get("/api/cranes-with-failure-data", async (req, res) => {
     try {
