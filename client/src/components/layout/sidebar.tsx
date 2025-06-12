@@ -36,23 +36,23 @@ export function Sidebar() {
           {navigation.map((item) => {
             const isActive = location === item.href;
             return (
-              <Link key={item.name} href={item.href}>
-                <div
+              <Link
+                key={item.name} 
+                href={item.href}
+                className={cn(
+                  "group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer",
+                  isActive
+                    ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                )}
+              >
+                <item.icon
                   className={cn(
-                    "group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer",
-                    isActive
-                      ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    "mr-3 h-5 w-5 flex-shrink-0",
+                    isActive ? "text-blue-600" : "text-gray-400 group-hover:text-gray-500"
                   )}
-                >
-                  <item.icon
-                    className={cn(
-                      "mr-3 h-5 w-5 flex-shrink-0",
-                      isActive ? "text-blue-600" : "text-gray-400 group-hover:text-gray-500"
-                    )}
-                  />
-                  {item.name}
-                </div>
+                />
+                {item.name}
               </Link>
             );
           })}

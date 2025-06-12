@@ -734,12 +734,12 @@ export class DatabaseStorage implements IStorage {
 
   async getUniqueFactories(): Promise<string[]> {
     const result = await db.selectDistinct({ plantSection: cranes.plantSection }).from(cranes);
-    return result.map(r => r.plantSection).filter(Boolean).sort();
+    return result.map(r => r.plantSection).filter((section): section is string => Boolean(section)).sort();
   }
 
   async getUniqueCraneNames(): Promise<string[]> {
     const result = await db.selectDistinct({ craneName: cranes.craneName }).from(cranes);
-    return result.map(r => r.craneName).filter(Boolean).sort();
+    return result.map(r => r.craneName).filter((name): name is string => Boolean(name)).sort();
   }
 
   async getCranesByFactoryAndName(factory?: string, craneName?: string): Promise<Crane[]> {

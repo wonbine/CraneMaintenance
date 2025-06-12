@@ -118,8 +118,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (factory) {
         // Get crane names filtered by factory
         const cranes = await storage.getCranesByFactoryAndName(factory as string);
-        const craneNames = cranes.map(crane => crane.craneName).filter(Boolean);
-        res.json([...new Set(craneNames)].sort());
+        const craneNames = cranes.map(crane => crane.craneName).filter((name): name is string => Boolean(name));
+        res.json(Array.from(new Set(craneNames)).sort());
       } else {
         const craneNames = await storage.getUniqueCraneNames();
         res.json(craneNames);
@@ -288,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           failureData = await fetchGoogleSheetData(failureSpreadsheetId, apiKey, failureSheetName);
         } catch (error) {
-          console.log('Failure data not available:', error.message);
+          console.log('Failure data not available:', error instanceof Error ? error.message : 'Unknown error');
         }
       }
       
@@ -296,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           maintenanceData = await fetchGoogleSheetData(maintenanceSpreadsheetId, apiKey, maintenanceSheetName);
         } catch (error) {
-          console.log('Maintenance data not available:', error.message);
+          console.log('Maintenance data not available:', error instanceof Error ? error.message : 'Unknown error');
         }
       }
       
