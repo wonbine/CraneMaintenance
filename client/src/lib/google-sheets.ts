@@ -95,14 +95,8 @@ export class GoogleSheetsService {
   }
 
   static createFromConfig(config: GoogleSheetsConfig): GoogleSheetsService | null {
-    const apiKey = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY;
-
-    if (!apiKey) {
-      console.error('VITE_GOOGLE_SHEETS_API_KEY가 설정되지 않았습니다.');
-      return null;
-    }
-
-    return new GoogleSheetsService(config, apiKey);
+    // Note: API key is handled server-side for security
+    return new GoogleSheetsService(config, '');
   }
 }
 

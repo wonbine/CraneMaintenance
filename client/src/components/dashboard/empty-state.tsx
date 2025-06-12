@@ -68,12 +68,13 @@ export function EmptyState({ type, onAction }: EmptyStateProps) {
         return {
           icon: <FileSpreadsheet className="w-12 h-12 text-gray-400" />,
           title: "데이터를 불러올 수 없습니다",
-          description: "구글 스프레드시트 설정을 확인해주세요:",
+          description: "구글 스프레드시트 API 설정을 확인해주세요:",
           items: [
-            "시트가 '링크가 있는 모든 사용자' 권한으로 공유되어 있나요?",
-            "CSV 내보내기 URL이 올바른가요?",
+            "스프레드시트가 'Google Sheets API'에서 접근 가능한가요?",
+            "스프레드시트 ID가 올바른가요?",
+            "시트명이 정확한가요? (비어있으면 첫 번째 시트 사용)",
             "시트에 데이터가 입력되어 있나요?",
-            "헤더가 올바르게 설정되어 있나요?"
+            "첫 번째 행에 헤더(컬럼명)가 설정되어 있나요?"
           ],
           action: "데이터 다시 동기화"
         };
