@@ -1359,18 +1359,9 @@ export class DatabaseStorage implements IStorage {
       if (equipmentCode && actualStartDateTime) {
         console.log('Processing maintenance record:', equipmentCode, actualStartDateTime);
         try {
-          // Extract date portion from actualStartDateTime for the date field
-          let dateOnly = null;
-          if (actualStartDateTime) {
-            const fullDate = new Date(actualStartDateTime);
-            if (!isNaN(fullDate.getTime())) {
-              dateOnly = `${fullDate.getFullYear()}-${String(fullDate.getMonth() + 1).padStart(2, '0')}-${String(fullDate.getDate()).padStart(2, '0')}`;
-            }
-          }
-          
           await this.createMaintenanceRecord({
             craneId: equipmentCode,
-            date: dateOnly,
+            date: actualStartDateTime,
             type: 'repair',
             technician: '',
             status: 'completed',
@@ -1562,14 +1553,10 @@ export class DatabaseStorage implements IStorage {
 
     // Count maintenance records by month
     maintenanceRecords.forEach(record => {
-      // Use actualStartDateTime for RepairReport data, fall back to date field
-      const dateToUse = record.actualStartDateTime || record.date;
-      if (dateToUse) {
-        const recordDate = new Date(dateToUse);
-        // Extract only the date portion (ignore time)
-        const dateOnly = new Date(recordDate.getFullYear(), recordDate.getMonth(), recordDate.getDate());
-        if (dateOnly >= startDate && dateOnly <= referenceDate) {
-          const monthKey = `${dateOnly.getFullYear()}-${String(dateOnly.getMonth() + 1).padStart(2, '0')}`;
+      if (record.date) {
+        const recordDate = new Date(record.date);
+        if (recordDate >= startDate && recordDate <= referenceDate) {
+          const monthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
           const stats = monthlyStats.get(monthKey);
           if (stats) {
             stats.maintenanceCount++;
