@@ -252,6 +252,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get device failure heatmap data
+  app.get("/api/device-failure-heatmap", async (req, res) => {
+    try {
+      const { craneName, factory, startDate, endDate } = req.query;
+      let records = await storage.getFailureRecords();
+      
+      // Filter by crane name if specified
+      if (craneName && craneName !== 'all') {
+        const cranes = await storage.getCranes();
+        const targetCranes = cranes.filter(c => c.craneName === craneName);
+        const craneIds = targetCranes.map(c => c.craneId);
+        records = records.filter(r => craneIds.includes(r.craneId));
+      }
+      
+      // Filter by factory if specified
+      if (factory && factory !== 'all') {
+        const cranes = await storage.getCranes();
+        const factoryCranes = cranes.filter(c => c.plantSection === factory);
+        const craneIds = factoryCranes.map(c => c.craneId);
+        records = records.filter(r => craneIds.includes(r.craneId));
+      }
+      
+      // Filter by date range if specified
+      if (startDate && endDate) {
+        records = records.filter(r => {
+          if (!r.date) return false;
+          const recordDate = new Date(r.date);
+          const start = new Date(startDate as string);
+          const end = new Date(endDate as string);
+          return recordDate >= start && recordDate <= end;
+        });
+      }
+      
+      // Group by device type and failure type
+      const heatmapData: { [device: string]: { [failureType: string]: number } } = {};
+      const deviceTotals: { [device: string]: number } = {};
+      
+      records.forEach(record => {
+        const device = record.byDevice || '기타';
+        const failureType = record.failureType || '기타';
+        
+        if (!heatmapData[device]) {
+          heatmapData[device] = {};
+          deviceTotals[device] = 0;
+        }
+        
+        if (!heatmapData[device][failureType]) {
+          heatmapData[device][failureType] = 0;
+        }
+        
+        heatmapData[device][failureType]++;
+        deviceTotals[device]++;
+      });
+      
+      // Convert to array format for visualization
+      const result = Object.entries(heatmapData).map(([device, failureTypes]) => ({
+        device,
+        total: deviceTotals[device],
+        failureTypes: Object.entries(failureTypes).map(([type, count]) => ({
+          type,
+          count
+        }))
+      })).sort((a, b) => b.total - a.total);
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching device failure heatmap:", error);
+      res.status(500).json({ message: "Failed to fetch device failure heatmap" });
+    }
+  });
+
   // Get monthly trends
   app.get("/api/analytics/monthly-trends", async (req, res) => {
     try {

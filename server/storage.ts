@@ -328,7 +328,8 @@ export class MemStorage implements IStorage {
       worktime: insertRecord.worktime || null,
       downtime: insertRecord.downtime || null,
       cause: insertRecord.cause || null,
-      reportedBy: insertRecord.reportedBy || null
+      reportedBy: insertRecord.reportedBy || null,
+      byDevice: insertRecord.byDevice || null
     };
     this.failureRecords.set(id, record);
     return record;
@@ -874,6 +875,7 @@ export class DatabaseStorage implements IStorage {
       const worktime = Array.isArray(data) ? data[9] : (data.worktime || data.Worktime);
       const type = Array.isArray(data) ? data[13] : (data.type || data.FailureType);
       const mechanicalElectrical = Array.isArray(data) ? data[11] : (data['Mechanical/Electrical'] || data.category);
+      const byDevice = Array.isArray(data) ? data[12] : (data.byDevice || data.ByDevice || data.by_device);
       
       if (equipmentCode && date) {
         console.log('Processing failure record:', equipmentCode, date);
@@ -889,6 +891,7 @@ export class DatabaseStorage implements IStorage {
             reportedBy: null,
             data: null,
             worktime: worktime || null,
+            byDevice: byDevice || null,
           });
         } catch (error) {
           console.error(`Error creating failure record for ${equipmentCode}:`, error);

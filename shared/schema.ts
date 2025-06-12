@@ -34,6 +34,7 @@ export const failureRecords = pgTable("failure_records", {
   reportedBy: text("reported_by"),
   data: numeric("data"), // failure interval in days
   worktime: numeric("worktime"), // work time in hours
+  byDevice: text("by_device"), // device/equipment type causing the failure
 });
 
 export const maintenanceRecords = pgTable("maintenance_records", {
