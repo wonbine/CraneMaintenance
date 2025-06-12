@@ -289,7 +289,7 @@ export default function Dashboard() {
                             dataKey="value"
                           >
                             {gradeChartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={GRADE_COLORS[index % GRADE_COLORS.length]} />
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
                             ))}
                           </Pie>
                           <Tooltip 
