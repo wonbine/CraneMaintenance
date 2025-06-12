@@ -409,7 +409,15 @@ export default function CraneMap() {
                   <span className="text-sm font-medium text-gray-700">등급(Grade)</span>
                   <div className="flex items-center space-x-2">
                     <Badge 
-                      className={`px-3 py-1 text-sm font-bold ${getGradeBadgeColor(selectedCrane.grade)}`}
+                      className={`px-3 py-1 text-sm font-bold ${
+                        selectedCrane.grade === "A급" || selectedCrane.grade === "A" 
+                          ? "bg-blue-100 text-blue-800 border-blue-200"
+                          : selectedCrane.grade === "B급" || selectedCrane.grade === "B"
+                          ? "bg-green-100 text-green-800 border-green-200"
+                          : selectedCrane.grade === "C급" || selectedCrane.grade === "C"
+                          ? "bg-orange-100 text-orange-800 border-orange-200"
+                          : "bg-gray-100 text-gray-800 border-gray-200"
+                      }`}
                     >
                       {selectedCrane.grade || "미분류"}
                     </Badge>
@@ -426,10 +434,22 @@ export default function CraneMap() {
                   <span className="text-sm font-medium text-gray-700">유/무인(UnmannedOperation)</span>
                   <div className="flex items-center space-x-2">
                     <Badge 
-                      className={`px-3 py-1 text-sm font-bold ${getUnmannedBadgeColor(selectedCrane.unmannedOperation)}`}
+                      className={`px-3 py-1 text-sm font-bold ${
+                        selectedCrane.unmannedOperation === "무인"
+                          ? "bg-purple-100 text-purple-800 border-purple-200"
+                          : selectedCrane.unmannedOperation === "유인"
+                          ? "bg-indigo-100 text-indigo-800 border-indigo-200"
+                          : "bg-gray-100 text-gray-800 border-gray-200"
+                      }`}
                     >
                       <span className="flex items-center space-x-1">
-                        {getUnmannedIcon(selectedCrane.unmannedOperation)}
+                        {selectedCrane.unmannedOperation === "무인" ? (
+                          <Settings className="h-3 w-3" />
+                        ) : selectedCrane.unmannedOperation === "유인" ? (
+                          <User className="h-3 w-3" />
+                        ) : (
+                          <HelpCircle className="h-3 w-3" />
+                        )}
                         <span>{selectedCrane.unmannedOperation || "정보 없음"}</span>
                       </span>
                     </Badge>
