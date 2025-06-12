@@ -336,12 +336,12 @@ export default function CraneMap() {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">크레인명</span>
-                  <span className="font-medium">{selectedCrane.craneId}</span>
+                  <span className="font-medium">{selectedCrane.craneName || selectedCrane.craneId}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">설비코드</span>
-                  <span className="font-medium">{selectedCrane.craneId || "N/A"}</span>
+                  <span className="font-medium">{selectedCrane.craneId}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
@@ -357,6 +357,99 @@ export default function CraneMap() {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">유/무인(UnmannedOperation)</span>
                   <span className="font-medium">{selectedCrane.unmannedOperation || "정보 없음"}</span>
+                </div>
+
+                {/* Installation and Inspection Data */}
+                <div className="border-t pt-3 mt-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <Calendar className="h-4 w-4 mr-1" />
+                    설치 및 점검 정보
+                  </h4>
+                  
+                  {selectedCrane.installationDate && (
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-500">설치일자</span>
+                      <span className="font-medium">{selectedCrane.installationDate}</span>
+                    </div>
+                  )}
+                  
+                  {selectedCrane.inspectionReferenceDate && (
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-500">점검기준일</span>
+                      <span className="font-medium">{selectedCrane.inspectionReferenceDate}</span>
+                    </div>
+                  )}
+                  
+                  {selectedCrane.inspectionCycle && (
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-500">정비주기</span>
+                      <span className="font-medium">{selectedCrane.inspectionCycle}일</span>
+                    </div>
+                  )}
+                  
+                  {selectedCrane.leadTime && (
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-sm text-gray-500">리드타임</span>
+                      <span className="font-medium">{selectedCrane.leadTime}일</span>
+                    </div>
+                  )}
+
+                  {/* Inspection Progress Gauge */}
+                  {(() => {
+                    const inspectionData = calculateInspectionData(selectedCrane);
+                    if (inspectionData.nextInspectionDate) {
+                      const isOverdue = inspectionData.daysUntilInspection! < 0;
+                      const urgentThreshold = 7; // 7 days warning
+                      const isUrgent = inspectionData.daysUntilInspection! <= urgentThreshold && !isOverdue;
+                      
+                      return (
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="text-sm font-medium text-gray-700 flex items-center">
+                              <Clock className="h-4 w-4 mr-1" />
+                              점검 진행률
+                            </h5>
+                            <span className={`text-sm font-bold ${
+                              isOverdue ? 'text-red-600' : 
+                              isUrgent ? 'text-orange-600' : 'text-green-600'
+                            }`}>
+                              {isOverdue ? `D+${Math.abs(inspectionData.daysUntilInspection!)}` : 
+                               `D-${inspectionData.daysUntilInspection}`}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center space-x-3">
+                            <div className="w-16 h-16">
+                              <CircularProgressbar
+                                value={inspectionData.progressPercentage}
+                                text={`${Math.round(inspectionData.progressPercentage)}%`}
+                                styles={buildStyles({
+                                  textSize: '20px',
+                                  pathColor: isOverdue ? '#DC2626' : 
+                                           isUrgent ? '#EA580C' : '#059669',
+                                  textColor: isOverdue ? '#DC2626' : 
+                                           isUrgent ? '#EA580C' : '#059669',
+                                  trailColor: '#E5E7EB',
+                                })}
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <div className="text-xs text-gray-500 mb-1">다음 점검일</div>
+                              <div className="font-medium">{inspectionData.nextInspectionDate}</div>
+                              <div className={`text-xs mt-1 ${
+                                isOverdue ? 'text-red-600' : 
+                                isUrgent ? 'text-orange-600' : 'text-green-600'
+                              }`}>
+                                {isOverdue ? '점검이 지연되었습니다' : 
+                                 isUrgent ? '점검이 임박했습니다' : '점검 일정이 양호합니다'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
 
                 {selectedCrane.location && (
