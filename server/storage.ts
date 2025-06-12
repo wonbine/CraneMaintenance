@@ -324,6 +324,8 @@ export class MemStorage implements IStorage {
     const record: FailureRecord = { 
       ...insertRecord, 
       id,
+      data: insertRecord.data || null,
+      worktime: insertRecord.worktime || null,
       downtime: insertRecord.downtime || null,
       cause: insertRecord.cause || null,
       reportedBy: insertRecord.reportedBy || null
@@ -353,7 +355,15 @@ export class MemStorage implements IStorage {
       notes: insertRecord.notes || null,
       duration: insertRecord.duration || null,
       cost: insertRecord.cost || null,
-      relatedFailureId: insertRecord.relatedFailureId || null
+      relatedFailureId: insertRecord.relatedFailureId || null,
+      workOrder: insertRecord.workOrder || null,
+      taskName: insertRecord.taskName || null,
+      actualStartDateTime: insertRecord.actualStartDateTime || null,
+      actualEndDateTime: insertRecord.actualEndDateTime || null,
+      totalWorkers: insertRecord.totalWorkers || null,
+      totalWorkTime: insertRecord.totalWorkTime || null,
+      areaName: insertRecord.areaName || null,
+      equipmentName: insertRecord.equipmentName || null
     };
     this.maintenanceRecords.set(id, record);
     return record;
@@ -660,9 +670,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMaintenanceRecord(insertRecord: InsertMaintenanceRecord): Promise<MaintenanceRecord> {
+    const recordToInsert = {
+      ...insertRecord,
+      workOrder: insertRecord.workOrder || null,
+      priority: insertRecord.priority || null,
+      scheduledDate: insertRecord.scheduledDate || null,
+      completedDate: insertRecord.completedDate || null,
+      partsUsed: insertRecord.partsUsed || null,
+      laborHours: insertRecord.laborHours || null,
+      equipmentName: insertRecord.equipmentName || null,
+      notes: insertRecord.notes || null,
+      duration: insertRecord.duration || null,
+      cost: insertRecord.cost || null,
+      relatedFailureId: insertRecord.relatedFailureId || null
+    };
+    
     const [record] = await db
       .insert(maintenanceRecords)
-      .values(insertRecord)
+      .values(recordToInsert)
       .returning();
     return record;
   }

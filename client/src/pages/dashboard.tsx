@@ -281,7 +281,17 @@ export default function Dashboard() {
       );
     }
 
-    const maxValue = Math.max(...data.maintenance, ...data.failures, ...data.avgRepairTime, 1);
+    // Safely handle undefined arrays
+    const safeMaintenanceData = data.maintenance || [];
+    const safeFailuresData = data.failures || [];
+    const safeAvgRepairTimeData = data.avgRepairTime || [];
+    
+    const maxValue = Math.max(
+      ...(safeMaintenanceData.length > 0 ? safeMaintenanceData : [0]),
+      ...(safeFailuresData.length > 0 ? safeFailuresData : [0]),
+      ...(safeAvgRepairTimeData.length > 0 ? safeAvgRepairTimeData : [0]),
+      1
+    );
     
     return (
       <div className="h-48 relative">
@@ -297,7 +307,7 @@ export default function Dashboard() {
             stroke="#3b82f6"
             strokeWidth="2"
             points={data.months.map((_: string, i: number) => 
-              `${40 + (i * 60)},${180 - ((data.maintenance[i] || 0) / maxValue) * 140}`
+              `${40 + (i * 60)},${180 - ((safeMaintenanceData[i] || 0) / maxValue) * 140}`
             ).join(' ')}
           />
           
@@ -307,7 +317,7 @@ export default function Dashboard() {
             stroke="#ef4444"
             strokeWidth="2"
             points={data.months.map((_: string, i: number) => 
-              `${40 + (i * 60)},${180 - ((data.failures[i] || 0) / maxValue) * 140}`
+              `${40 + (i * 60)},${180 - ((safeFailuresData[i] || 0) / maxValue) * 140}`
             ).join(' ')}
           />
           
