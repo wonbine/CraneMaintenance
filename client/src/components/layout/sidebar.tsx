@@ -24,9 +24,9 @@ export function Sidebar() {
       <div className="flex h-16 items-center px-6 border-b border-gray-100">
         <div className="flex items-center space-x-3">
           <img 
-            src="/src/assets/pocrane-logo.svg" 
+            src="/src/assets/pocrane-logo.png" 
             alt="PoCRANE Logo" 
-            className="h-8 w-auto"
+            className="h-10 w-auto max-w-[180px] object-contain"
           />
         </div>
       </div>
