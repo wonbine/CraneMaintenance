@@ -35,9 +35,9 @@ export default function CraneMap() {
       column = column * 26 + (letters.charCodeAt(i) - 64);
     }
     
-    // Scale coordinates to fit in a reasonable map size
-    const x = (column - 1) * 25; // 25px per column for better spacing
-    const y = (numbers - 1) * 20; // 20px per row for better spacing
+    // Scale coordinates to fit in a reasonable map size with less overlap
+    const x = (column - 1) * 30; // 30px per column for better spacing
+    const y = (numbers - 1) * 25; // 25px per row for better spacing
     
     return { x, y };
   };
@@ -176,7 +176,7 @@ export default function CraneMap() {
               </div>
 
               {/* Crane Position Markers */}
-              <div className="relative w-full h-full min-w-[1800px] min-h-[1600px]">
+              <div className="relative w-full h-full min-w-[2400px] min-h-[2000px]">
                 {cranesWithPositions.map((crane) => (
                   <button
                     key={crane.id}
@@ -190,7 +190,7 @@ export default function CraneMap() {
                     <div className="relative">
                       {/* Crane Marker */}
                       <div
-                        className={`w-6 h-6 rounded-full border-2 border-white shadow-lg transition-all duration-200 group-hover:scale-125 ${getStatusColor(
+                        className={`w-3 h-3 rounded-full border border-white shadow-md transition-all duration-200 group-hover:scale-150 ${getStatusColor(
                           crane.status
                         )}`}
                       />
