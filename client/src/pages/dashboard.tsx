@@ -1,3 +1,4 @@
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Factory, Settings, AlertCircle, CheckCircle, Clock } from 'lucide-react';
@@ -350,6 +351,52 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Crane Detailed Information */}
+        <Card className="shadow-lg border-0 rounded-xl bg-white">
+          <CardHeader>
+            <CardTitle className="text-lg font-bold text-gray-800 flex items-center">
+              <Factory className="w-5 h-5 mr-2 text-blue-500" />
+              크레인 상세 정보
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="space-y-2">
+                <h4 className="font-semibold text-gray-700">설치 정보</h4>
+                <div className="space-y-1 text-sm">
+                  <p><span className="text-gray-500">설치일자:</span> {craneData.installationDate ? new Date(craneData.installationDate).toLocaleDateString('ko-KR') : '정보 없음'}</p>
+                  <p><span className="text-gray-500">위치:</span> {craneData.location || '정보 없음'}</p>
+                  <p><span className="text-gray-500">제조사:</span> {craneData.manufacturer || '정보 없음'}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-semibold text-gray-700">점검 정보</h4>
+                <div className="space-y-1 text-sm">
+                  <p><span className="text-gray-500">최근 점검:</span> {craneData.lastInspectionDate ? new Date(craneData.lastInspectionDate).toLocaleDateString('ko-KR') : '정보 없음'}</p>
+                  <p><span className="text-gray-500">다음 점검:</span> {craneData.nextInspectionDate ? new Date(craneData.nextInspectionDate).toLocaleDateString('ko-KR') : '정보 없음'}</p>
+                  <p><span className="text-gray-500">점검 주기:</span> {craneData.inspectionCycle || '정보 없음'}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-semibold text-gray-700">운전 정보</h4>
+                <div className="space-y-1 text-sm">
+                  <p><span className="text-gray-500">운전 형태:</span> {craneData.operationType}</p>
+                  <p><span className="text-gray-500">구동 방식:</span> {craneData.driveType || '정보 없음'}</p>
+                  <p><span className="text-gray-500">무인 운전:</span> {craneData.unmannedOperation ? '가능' : '불가능'}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-semibold text-gray-700">성능 정보</h4>
+                <div className="space-y-1 text-sm">
+                  <p><span className="text-gray-500">등급:</span> {craneData.grade}급</p>
+                  <p><span className="text-gray-500">용량:</span> {craneData.capacity || '정보 없음'}</p>
+                  <p><span className="text-gray-500">운영 시간:</span> {craneData.operatingHours || '정보 없음'}시간</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Statistics Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100">
@@ -482,74 +529,197 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Recent Records */}
+        {/* Device Failure Heatmap */}
+        <Card className="shadow-lg border-0 rounded-xl bg-white">
+          <CardHeader>
+            <CardTitle className="text-lg font-bold text-gray-800 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-red-500" />
+              장치별 고장 유형 히트맵
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              // Create device failure heatmap data
+              const deviceFailureMap = new Map();
+              failureRecords.forEach((record: any) => {
+                const device = record.byDevice || '알 수 없음';
+                const category = record.category || '기타';
+                const key = `${device}-${category}`;
+                deviceFailureMap.set(key, (deviceFailureMap.get(key) || 0) + 1);
+              });
+
+              const deviceList = failureRecords.map((r: any) => String(r.byDevice || '알 수 없음'));
+              const categoryList = failureRecords.map((r: any) => String(r.category || '기타'));
+              const devices = deviceList.filter((device: string, index: number) => deviceList.indexOf(device) === index);
+              const categories = categoryList.filter((category: string, index: number) => categoryList.indexOf(category) === index);
+
+              if (devices.length === 0 || categories.length === 0) {
+                return (
+                  <div className="text-center py-12 text-gray-500">
+                    고장 데이터가 없어 히트맵을 표시할 수 없습니다
+                  </div>
+                );
+              }
+
+              const maxValue = Math.max(...Array.from(deviceFailureMap.values()));
+              
+              return (
+                <div className="overflow-x-auto">
+                  <div className="min-w-full">
+                    <div className="grid gap-1" style={{ gridTemplateColumns: `150px repeat(${categories.length}, 1fr)` }}>
+                      {/* Header row */}
+                      <div className="p-2"></div>
+                      {categories.map((category: string) => (
+                        <div key={category} className="p-2 text-xs font-medium text-center bg-gray-100 rounded">
+                          {category}
+                        </div>
+                      ))}
+                      
+                      {/* Data rows */}
+                      {devices.map((device: string) => (
+                        <React.Fragment key={device}>
+                          <div className="p-2 text-xs font-medium bg-gray-100 rounded flex items-center">
+                            {device}
+                          </div>
+                          {categories.map((category: string) => {
+                            const count = deviceFailureMap.get(`${device}-${category}`) || 0;
+                            const intensity = maxValue > 0 ? count / maxValue : 0;
+                            const bgColor = count === 0 ? 'bg-gray-50' : 
+                              intensity > 0.7 ? 'bg-red-500' :
+                              intensity > 0.4 ? 'bg-red-300' :
+                              intensity > 0.2 ? 'bg-orange-300' : 'bg-yellow-200';
+                            const textColor = intensity > 0.5 ? 'text-white' : 'text-gray-800';
+                            
+                            return (
+                              <div 
+                                key={`${device}-${category}`}
+                                className={`p-2 text-xs rounded text-center ${bgColor} ${textColor} flex items-center justify-center min-h-[32px]`}
+                                title={`${device} - ${category}: ${count}건`}
+                              >
+                                {count > 0 ? count : ''}
+                              </div>
+                            );
+                          })}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                    
+                    {/* Legend */}
+                    <div className="mt-4 flex items-center justify-center space-x-4 text-xs">
+                      <span>낮음</span>
+                      <div className="flex space-x-1">
+                        <div className="w-4 h-4 bg-yellow-200 rounded"></div>
+                        <div className="w-4 h-4 bg-orange-300 rounded"></div>
+                        <div className="w-4 h-4 bg-red-300 rounded"></div>
+                        <div className="w-4 h-4 bg-red-500 rounded"></div>
+                      </div>
+                      <span>높음</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </CardContent>
+        </Card>
+
+        {/* Detailed History Tables */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Failure Records */}
+          {/* Detailed Failure Records Table */}
           <Card className="shadow-lg border-0 rounded-xl bg-white">
             <CardHeader>
               <CardTitle className="text-lg font-bold text-gray-800 flex items-center">
                 <AlertCircle className="w-5 h-5 mr-2 text-red-500" />
-                최근 고장 기록
+                돌발수리 이력 ({failureRecords.length}건)
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 max-h-80 overflow-y-auto">
-                {failureRecords.slice(0, 10).map((record: any) => (
-                  <div key={record.id} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-gray-800">{record.byDevice || '알 수 없음'}</p>
-                        <p className="text-sm text-gray-600">{record.category || '기타'}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">{new Date(record.failureDate).toLocaleDateString()}</p>
-                        {record.repairTime && (
-                          <p className="text-xs text-blue-600">{record.repairTime}시간</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {failureRecords.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    고장 기록이 없습니다
-                  </div>
-                )}
+              <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">일자</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">장치</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">분류</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">수리시간</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {failureRecords.map((record: any, index: number) => (
+                      <tr key={record.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="px-3 py-2 text-gray-800">
+                          {new Date(record.failureDate).toLocaleDateString('ko-KR')}
+                        </td>
+                        <td className="px-3 py-2 text-gray-800">
+                          {record.byDevice || '알 수 없음'}
+                        </td>
+                        <td className="px-3 py-2">
+                          <span className="inline-flex px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                            {record.category || '기타'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-gray-600">
+                          {record.repairTime ? `${record.repairTime}시간` : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                    {failureRecords.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="px-3 py-8 text-center text-gray-500">
+                          돌발수리 기록이 없습니다
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>
 
-          {/* Recent Maintenance Records */}
+          {/* Detailed Maintenance Records Table */}
           <Card className="shadow-lg border-0 rounded-xl bg-white">
             <CardHeader>
               <CardTitle className="text-lg font-bold text-gray-800 flex items-center">
                 <Settings className="w-5 h-5 mr-2 text-green-500" />
-                최근 정비 기록
+                일상수리 이력 ({maintenanceRecords.length}건)
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 max-h-80 overflow-y-auto">
-                {maintenanceRecords.slice(0, 10).map((record: any) => (
-                  <div key={record.id} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-gray-800">{record.workType || '정비'}</p>
-                        <p className="text-sm text-gray-600">{record.description || '정비 작업'}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">{new Date(record.maintenanceDate).toLocaleDateString()}</p>
-                        {record.workers && (
-                          <p className="text-xs text-green-600">{record.workers}명</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {maintenanceRecords.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    정비 기록이 없습니다
-                  </div>
-                )}
+              <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">일자</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">작업유형</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">작업자</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">작업시간</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {maintenanceRecords.map((record: any, index: number) => (
+                      <tr key={record.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="px-3 py-2 text-gray-800">
+                          {new Date(record.maintenanceDate).toLocaleDateString('ko-KR')}
+                        </td>
+                        <td className="px-3 py-2 text-gray-800">
+                          {record.workType || '정비'}
+                        </td>
+                        <td className="px-3 py-2 text-gray-600">
+                          {record.workers ? `${record.workers}명` : '-'}
+                        </td>
+                        <td className="px-3 py-2 text-gray-600">
+                          {record.workTime ? `${record.workTime}시간` : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                    {maintenanceRecords.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="px-3 py-8 text-center text-gray-500">
+                          일상수리 기록이 없습니다
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>
