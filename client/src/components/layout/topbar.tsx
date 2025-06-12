@@ -66,7 +66,7 @@ export function Topbar() {
       </div>
 
       {/* Right side - Date Selection, Search Button and Profile */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-6">
         {/* Date Range Selection */}
         <div className="flex items-center space-x-3">
           <CalendarDays className="w-5 h-5 text-gray-500" />
