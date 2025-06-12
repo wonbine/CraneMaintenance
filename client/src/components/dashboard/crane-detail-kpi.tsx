@@ -429,19 +429,12 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                   <div className="font-medium">{craneData.unmannedOperation || '정보 없음'}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-500">구동방식</div>
-                  <div className="font-medium">{craneData.driveType || '정보 없음'}</div>
+                  <div className="text-sm text-gray-500">전기담당자</div>
+                  <div className="font-medium">{craneData.electricalManager || '정보 없음'}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-500">설치위치</div>
-                  <div className="font-medium">{craneData.location || '정보 없음'}</div>
-                </div>
-              </div>
-              
-              {/* Note about missing manager fields */}
-              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <div className="text-sm text-yellow-800">
-                  <strong>알림:</strong> 전기담당자와 기계담당자 정보는 현재 데이터베이스에 없습니다.
+                  <div className="text-sm text-gray-500">기계담당자</div>
+                  <div className="font-medium">{craneData.mechanicalManager || '정보 없음'}</div>
                 </div>
               </div>
             </div>

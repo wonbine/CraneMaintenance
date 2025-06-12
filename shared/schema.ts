@@ -13,6 +13,8 @@ export const cranes = pgTable("cranes", {
   grade: text("grade"), // Grade field
   driveType: text("drive_type"), // DriveType field
   unmannedOperation: text("unmanned_operation"), // UnmannedOperation field
+  electricalManager: text("electrical_manager"), // ElectricalManager from CraneList sheet
+  mechanicalManager: text("mechanical_manager"), // MechanicalManager from CraneList sheet
   installationDate: text("installation_date"), // InstallationDate from CraneList
   inspectionReferenceDate: text("inspection_reference_date"), // InspectionReferenceDate from CraneList
   inspectionCycle: integer("inspection_cycle"), // InspectionCycle from CraneList (days)
