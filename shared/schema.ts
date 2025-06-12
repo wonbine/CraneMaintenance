@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, numeric } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -32,6 +32,8 @@ export const failureRecords = pgTable("failure_records", {
   downtime: integer("downtime"), // in hours
   cause: text("cause"),
   reportedBy: text("reported_by"),
+  data: numeric("data"), // failure interval in days
+  worktime: numeric("worktime"), // work time in hours
 });
 
 export const maintenanceRecords = pgTable("maintenance_records", {

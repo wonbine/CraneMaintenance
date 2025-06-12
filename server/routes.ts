@@ -195,8 +195,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Filter by date range if provided
       if (startDate && endDate) {
         records = records.filter(r => {
-          if (!r.failureDate) return false;
-          const recordDate = new Date(r.failureDate);
+          if (!r.date) return false;
+          const recordDate = new Date(r.date);
           const start = new Date(startDate as string);
           const end = new Date(endDate as string);
           return recordDate >= start && recordDate <= end;
