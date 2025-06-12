@@ -168,6 +168,16 @@ export default function Dashboard() {
 
   const failureStats = calculateFailureStats();
 
+  // Get list of cranes with failure data for user guidance
+  const { data: cranesWithData = [] } = useQuery({
+    queryKey: ['/api/cranes-with-failure-data'],
+    queryFn: async () => {
+      const response = await fetch('/api/cranes-with-failure-data');
+      if (!response.ok) throw new Error('Failed to fetch cranes with data');
+      return response.json();
+    },
+  });
+
   const DonutChart = ({ data, title, total }: { data: any[], title: string, total: number }) => {
     if (!data || data.length === 0 || total === 0) {
       return (
