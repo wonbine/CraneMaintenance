@@ -348,6 +348,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update crane specifications from CraneList sheet
+  app.post("/api/sync-crane-specs", async (req, res) => {
+    try {
+      const { spreadsheetId, sheetName = "CraneList" } = req.body;
+      
+      if (!spreadsheetId) {
+        return res.status(400).json({ 
+          message: "스프레드시트 ID가 필요합니다." 
+        });
+      }
+
+      const apiKey = process.env.GOOGLE_SHEETS_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ 
+          message: "Google Sheets API 키가 설정되지 않았습니다." 
+        });
+      }
+
+      // Fetch CraneList data
+      const craneListData = await fetchGoogleSheetData(spreadsheetId, apiKey, sheetName);
+      
+      if (!craneListData || craneListData.length === 0) {
+        return res.status(404).json({
+          message: "CraneList 시트에서 데이터를 찾을 수 없습니다."
+        });
+      }
+
+      // Update crane specifications in database
+      let updatedCount = 0;
+      
+      for (const row of craneListData) {
+        if (row['설비코드'] || row['CraneId'] || row['crane_id']) {
+          const craneId = row['설비코드'] || row['CraneId'] || row['crane_id'];
+          const grade = row['Grade'] || row['grade'];
+          const driveType = row['DriveType'] || row['drive_type'] || row['운전방식'];
+          const unmannedOperation = row['UnmannedOperation'] || row['unmanned_operation'] || row['유무인'];
+          
+          try {
+            // Get existing crane
+            const existingCrane = await storage.getCraneByCraneId(craneId);
+            if (existingCrane) {
+              await storage.updateCrane(existingCrane.id, {
+                grade: grade || existingCrane.grade,
+                driveType: driveType || existingCrane.driveType,
+                unmannedOperation: unmannedOperation || existingCrane.unmannedOperation
+              });
+              updatedCount++;
+            }
+          } catch (error) {
+            console.error(`Error updating crane ${craneId}:`, error);
+          }
+        }
+      }
+
+      res.json({
+        message: `${updatedCount}개 크레인의 사양 정보가 업데이트되었습니다.`,
+        updatedCount,
+        totalRows: craneListData.length
+      });
+    } catch (error) {
+      console.error("Error syncing crane specs:", error);
+      res.status(500).json({ message: error instanceof Error ? error.message : "크레인 사양 동기화 실패" });
+    }
+  });
+
   // Sync data from Google Sheets API
   app.post("/api/sync-sheets", async (req, res) => {
     try {
