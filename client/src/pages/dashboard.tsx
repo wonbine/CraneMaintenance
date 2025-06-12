@@ -333,6 +333,98 @@ export default function Dashboard() {
     );
   };
 
+  const FailureLineChart = ({ data }: { data: { month: string, count: number }[] }) => {
+    if (!data || data.length === 0) {
+      return (
+        <div className="h-48 flex items-center justify-center text-gray-500">
+          <div className="text-center">
+            <TrendingUp className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p>데이터가 없습니다</p>
+          </div>
+        </div>
+      );
+    }
+
+    const maxValue = Math.max(...data.map(d => d.count), 1);
+    const chartHeight = 200;
+    const chartWidth = 400;
+    const padding = 50;
+
+    // Create SVG path for the line
+    const points = data.map((item, index) => {
+      const x = padding + (index * (chartWidth - 2 * padding)) / Math.max(data.length - 1, 1);
+      const y = chartHeight - padding - ((item.count / maxValue) * (chartHeight - 2 * padding));
+      return `${x},${y}`;
+    }).join(' ');
+
+    return (
+      <div className="space-y-4">
+        <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-48">
+          {/* Grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((percent, i) => (
+            <line
+              key={i}
+              x1={padding}
+              y1={chartHeight - padding - percent * (chartHeight - 2 * padding)}
+              x2={chartWidth - padding}
+              y2={chartHeight - padding - percent * (chartHeight - 2 * padding)}
+              stroke="#e5e7eb"
+              strokeWidth="1"
+            />
+          ))}
+          
+          {/* Line */}
+          <polyline
+            points={points}
+            fill="none"
+            stroke="#ef4444"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          
+          {/* Data points */}
+          {data.map((item, index) => {
+            const x = padding + (index * (chartWidth - 2 * padding)) / Math.max(data.length - 1, 1);
+            const y = chartHeight - padding - ((item.count / maxValue) * (chartHeight - 2 * padding));
+            return (
+              <circle
+                key={index}
+                cx={x}
+                cy={y}
+                r="4"
+                fill="#ef4444"
+                stroke="white"
+                strokeWidth="2"
+              />
+            );
+          })}
+          
+          {/* Y-axis labels */}
+          {[0, 0.5, 1].map((percent, i) => (
+            <text
+              key={i}
+              x={padding - 10}
+              y={chartHeight - padding - percent * (chartHeight - 2 * padding) + 5}
+              textAnchor="end"
+              className="fill-gray-500 text-xs"
+            >
+              {Math.round(maxValue * percent)}
+            </text>
+          ))}
+        </svg>
+        
+        {/* Total count display */}
+        <div className="text-center">
+          <div className="text-2xl font-bold text-red-600">
+            {data.reduce((sum, item) => sum + item.count, 0)}
+          </div>
+          <div className="text-sm text-gray-500">총 고장 건수</div>
+        </div>
+      </div>
+    );
+  };
+
   const HeatmapChart = ({ data }: { data: any[] }) => {
     if (!data || data.length === 0) {
       return (
@@ -403,7 +495,7 @@ export default function Dashboard() {
     );
   };
 
-  const LineChart = ({ data }: { data: { months: string[], maintenance: number[], failures: number[], avgRepairTime: number[] } }) => {
+  const TrendLineChart = ({ data }: { data: { months: string[], maintenance: number[], failures: number[], avgRepairTime: number[] } }) => {
     if (!data || !data.months || data.months.length === 0) {
       return (
         <div className="h-48 flex items-center justify-center text-gray-500">
@@ -853,6 +945,19 @@ export default function Dashboard() {
               value: item.count,
               color: '#f97316'
             }))} />
+          </CardContent>
+        </Card>
+
+        {/* Monthly Failure Count */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+              <span>고장발생 건수</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FailureLineChart data={monthlyFailureData} />
           </CardContent>
         </Card>
 
