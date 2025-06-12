@@ -50,6 +50,11 @@ export interface IStorage {
   getFailureStats(): Promise<MaintenanceStats[]>;
   getMonthlyTrends(): Promise<MonthlyTrend[]>;
   
+  // Factory and crane filters
+  getUniqueFactories(): Promise<string[]>;
+  getUniqueCraneNames(): Promise<string[]>;
+  getCranesByFactoryAndName(factory?: string, craneName?: string): Promise<Crane[]>;
+  
   // Google Sheets sync
   syncDataFromSheets(cranesData: any[], failureData: any[], maintenanceData: any[]): Promise<void>;
 }
@@ -270,8 +275,13 @@ export class MemStorage implements IStorage {
   async createCrane(insertCrane: InsertCrane): Promise<Crane> {
     const id = this.currentCraneId++;
     const crane: Crane = { 
-      ...insertCrane, 
       id,
+      craneId: insertCrane.craneId,
+      craneName: insertCrane.craneName || null,
+      plantSection: insertCrane.plantSection || null,
+      status: insertCrane.status,
+      location: insertCrane.location,
+      model: insertCrane.model,
       lastMaintenanceDate: insertCrane.lastMaintenanceDate || null,
       nextMaintenanceDate: insertCrane.nextMaintenanceDate || null,
       isUrgent: insertCrane.isUrgent || false
@@ -417,6 +427,40 @@ export class MemStorage implements IStorage {
     return Array.from(trends.entries()).map(([month, count]) => ({ month, count }));
   }
 
+  async getUniqueFactories(): Promise<string[]> {
+    const factories = new Set<string>();
+    Array.from(this.cranes.values()).forEach(crane => {
+      if (crane.plantSection) {
+        factories.add(crane.plantSection);
+      }
+    });
+    return Array.from(factories).sort();
+  }
+
+  async getUniqueCraneNames(): Promise<string[]> {
+    const craneNames = new Set<string>();
+    Array.from(this.cranes.values()).forEach(crane => {
+      if (crane.craneName) {
+        craneNames.add(crane.craneName);
+      }
+    });
+    return Array.from(craneNames).sort();
+  }
+
+  async getCranesByFactoryAndName(factory?: string, craneName?: string): Promise<Crane[]> {
+    let cranes = Array.from(this.cranes.values());
+    
+    if (factory) {
+      cranes = cranes.filter(crane => crane.plantSection === factory);
+    }
+    
+    if (craneName) {
+      cranes = cranes.filter(crane => crane.craneName === craneName);
+    }
+    
+    return cranes;
+  }
+
   async syncDataFromSheets(cranesData: any[], failureData: any[], maintenanceData: any[]): Promise<void> {
     // Clear existing data
     this.cranes.clear();
@@ -435,6 +479,8 @@ export class MemStorage implements IStorage {
       if (data.crane_id) {
         await this.createCrane({
           craneId: data.crane_id,
+          craneName: data.crane_name || data.CraneName || null,
+          plantSection: data.plant_section || data['Plant/Section'] || null,
           status: data.status || 'operating',
           location: data.location || '',
           model: data.model || '',
@@ -684,6 +730,30 @@ export class DatabaseStorage implements IStorage {
     });
     
     return Array.from(trends.entries()).map(([month, count]) => ({ month, count }));
+  }
+
+  async getUniqueFactories(): Promise<string[]> {
+    const result = await db.selectDistinct({ plantSection: cranes.plantSection }).from(cranes).where(isNotNull(cranes.plantSection));
+    return result.map(r => r.plantSection).filter(Boolean).sort();
+  }
+
+  async getUniqueCraneNames(): Promise<string[]> {
+    const result = await db.selectDistinct({ craneName: cranes.craneName }).from(cranes).where(isNotNull(cranes.craneName));
+    return result.map(r => r.craneName).filter(Boolean).sort();
+  }
+
+  async getCranesByFactoryAndName(factory?: string, craneName?: string): Promise<Crane[]> {
+    let query = db.select().from(cranes);
+    
+    if (factory && craneName) {
+      query = query.where(and(eq(cranes.plantSection, factory), eq(cranes.craneName, craneName)));
+    } else if (factory) {
+      query = query.where(eq(cranes.plantSection, factory));
+    } else if (craneName) {
+      query = query.where(eq(cranes.craneName, craneName));
+    }
+    
+    return await query;
   }
 
   async syncDataFromSheets(cranesData: any[], failureData: any[], maintenanceData: any[]): Promise<void> {

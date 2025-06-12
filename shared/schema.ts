@@ -5,6 +5,8 @@ import { z } from "zod";
 export const cranes = pgTable("cranes", {
   id: serial("id").primaryKey(),
   craneId: text("crane_id").notNull().unique(),
+  craneName: text("crane_name"), // CraneName from CraneList sheet
+  plantSection: text("plant_section"), // Plant/Section from CraneList sheet
   status: text("status").notNull(), // 'operating', 'maintenance', 'urgent'
   location: text("location").notNull(),
   model: text("model").notNull(),
