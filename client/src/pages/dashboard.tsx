@@ -201,8 +201,11 @@ export default function Dashboard() {
               </DialogHeader>
               <div className="space-y-4">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
-                  <p><strong>Google Sheets API 사용:</strong> 스프레드시트 ID와 시트명을 입력하세요.</p>
-                  <p>URL 예시: https://docs.google.com/spreadsheets/d/<span className="font-mono bg-blue-100 px-1">YOUR_SPREADSHEET_ID</span>/edit</p>
+                  <p><strong>Google Sheets 연결 방법:</strong></p>
+                  <p>1. Google Sheets URL에서 스프레드시트 ID를 복사하세요</p>
+                  <p>2. 예시: https://docs.google.com/spreadsheets/d/<span className="font-mono bg-blue-100 px-1">1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms</span>/edit</p>
+                  <p>3. 스프레드시트를 "링크가 있는 모든 사용자"로 공유 설정해주세요</p>
+                  <p>4. "테스트" 버튼으로 연결 확인 후 "Sync Data" 실행</p>
                 </div>
                 
                 <div>
