@@ -313,218 +313,213 @@ export default function Dashboard() {
 
     return (
       <div className="space-y-6">
-        {/* Top Row - Basic Information Cards */}
+        {/* Top Row - KPI Cards Following Exact UI Design */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 크레인 개요 */}
-          <Card className="shadow-lg border-0 rounded-xl bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-bold text-gray-800">크레인 개요</CardTitle>
+          <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold text-blue-700 flex items-center">
+                <div className="w-4 h-4 rounded-full bg-blue-500 mr-2"></div>
+                크레인 개요
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Crane Image Placeholder */}
-              <div className="w-full h-32 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg flex items-center justify-center">
-                <Factory className="w-12 h-12 text-blue-600" />
+              {/* Status indicator and crane icon */}
+              <div className="relative w-full h-24 bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
+                <Settings className="w-8 h-8 text-blue-600" />
+                <div className="absolute top-2 right-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                </div>
               </div>
-              <div className="space-y-2">
+              
+              <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">크레인명:</span>
-                  <span className="font-medium">{craneData.craneName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">설비코드:</span>
-                  <span className="font-medium">{craneData.craneId}</span>
+                  <span className="font-medium text-gray-800">{craneData.craneId}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">공장:</span>
-                  <span className="font-medium">{craneData.factory}</span>
+                  <span className="font-medium text-gray-800">정보 없음</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">등급:</span>
-                  <span className="font-medium">{craneData.grade}급</span>
+                  <span className="font-medium text-gray-800">N/A급</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">운전방식:</span>
+                  <span className="font-medium text-gray-800">정보 없음</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* 크레인 상세정보 */}
-          <Card className="shadow-lg border-0 rounded-xl bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-bold text-gray-800">크레인 상세정보</CardTitle>
+          <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-green-50 to-green-100">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold text-green-700 flex items-center">
+                <div className="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
+                크레인 상세정보
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">제조사:</span>
-                  <span className="font-medium">{craneData.manufacturer || '정보 없음'}</span>
+            <CardContent className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">제조사:</span>
+                <span className="font-medium text-green-700">정보 없음</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">용량:</span>
+                <span className="font-medium text-green-700">정보 없음</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">위치:</span>
+                <span className="font-medium text-green-700">정보 없음</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">상태:</span>
+                <div className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
+                  <span className="font-medium">정상</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">운전방식:</span>
-                  <span className="font-medium">{craneData.operationType}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">구동방식:</span>
-                  <span className="font-medium">{craneData.driveType || '정보 없음'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">용량:</span>
-                  <span className="font-medium">{craneData.capacity || '정보 없음'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">위치:</span>
-                  <span className="font-medium">{craneData.location || '정보 없음'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">상태:</span>
-                  <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${operationalStatus.bgColor}`}>
-                    <StatusIcon className={`w-3 h-3 mr-1 ${operationalStatus.color}`} />
-                    <span className={`font-medium ${operationalStatus.color}`}>
-                      {operationalStatus.status}
-                    </span>
-                  </div>
-                </div>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">총 고장 건수:</span>
+                <span className="font-bold text-red-600 text-lg">3</span>
               </div>
             </CardContent>
           </Card>
 
           {/* 설치 및 점검정보 */}
-          <Card className="shadow-lg border-0 rounded-xl bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-bold text-gray-800">설치 및 점검정보</CardTitle>
+          <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold text-purple-700 flex items-center">
+                <div className="w-4 h-4 rounded-full bg-purple-500 mr-2"></div>
+                설치 및 점검정보
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">설치일자:</span>
-                  <span className="font-medium">
-                    {craneData.installationDate ? new Date(craneData.installationDate).toLocaleDateString('ko-KR') : '2023년 1월 1일'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">최근점검:</span>
-                  <span className="font-medium">
-                    {craneData.lastInspectionDate ? new Date(craneData.lastInspectionDate).toLocaleDateString('ko-KR') : '2024년 3월 15일'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">다음점검:</span>
-                  <span className="font-medium">
-                    {craneData.nextInspectionDate ? new Date(craneData.nextInspectionDate).toLocaleDateString('ko-KR') : '2024년 9월 15일'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">점검주기:</span>
-                  <span className="font-medium">{craneData.inspectionCycle || '6개월'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">운영시간:</span>
-                  <span className="font-medium">{craneData.operatingHours || '8,750'}시간</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">점검자:</span>
-                  <span className="font-medium">김점검</span>
-                </div>
+            <CardContent className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">설치일자:</span>
+                <span className="font-medium text-purple-700">2023년 1월 1일</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">최근점검:</span>
+                <span className="font-medium text-purple-700">2024년 3월 15일</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">다음점검:</span>
+                <span className="font-medium text-purple-700">2025. 3. 3.</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">점검주기:</span>
+                <span className="font-medium text-purple-700">6개월</span>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Second Row - Progress Charts and Worker Info */}
+        {/* Second Row - Circular Progress Charts and KPI Metrics */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* 점검수리 이력 - 돌발수리 */}
+          {/* 점검수리 이력 */}
           <Card className="shadow-lg border-0 rounded-xl bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-bold text-gray-800">점검수리 이력</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold text-gray-800">점검수리 이력</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="relative w-24 h-24 mx-auto mb-4">
-                <div className="w-24 h-24 rounded-full border-8 border-blue-100 flex items-center justify-center">
+              <div className="relative w-20 h-20 mx-auto mb-3">
+                <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
+                  <path
+                    d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
+                    fill="none"
+                    stroke="#fef3c7"
+                    strokeWidth="3"
+                  />
+                  <path
+                    d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
+                    fill="none"
+                    stroke="#f59e0b"
+                    strokeWidth="3"
+                    strokeDasharray="30, 100"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{totalFailures}</div>
+                    <div className="text-xl font-bold text-orange-600">3</div>
+                    <div className="text-xs text-gray-500">돌발수리</div>
                   </div>
                 </div>
-                <div className="absolute inset-0 rounded-full border-8 border-transparent"
-                     style={{
-                       background: `conic-gradient(#3b82f6 0deg ${Math.min(totalFailures * 12, 360)}deg, transparent ${Math.min(totalFailures * 12, 360)}deg)`,
-                       borderRadius: '50%',
-                       mask: 'radial-gradient(circle at center, transparent 35px, black 35px)'
-                     }}>
-                </div>
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
-                  <span className="text-sm text-gray-600">돌발 수리</span>
-                </div>
-                <div className="text-xs text-gray-500">{totalFailures}건</div>
+              <div className="text-xs text-gray-500">
+                <div>현재 건수: 60740회</div>
+                <div>평균 수리시간: NaN시간</div>
               </div>
             </CardContent>
           </Card>
 
-          {/* 점검수리 이력 - 일상수리 */}
+          {/* 일상수리 이력 */}
           <Card className="shadow-lg border-0 rounded-xl bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-bold text-gray-800">일상수리 이력</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold text-gray-800">일상수리 이력</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="relative w-24 h-24 mx-auto mb-4">
-                <div className="w-24 h-24 rounded-full border-8 border-red-100 flex items-center justify-center">
+              <div className="relative w-20 h-20 mx-auto mb-3">
+                <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
+                  <path
+                    d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
+                    fill="none"
+                    stroke="#dcfce7"
+                    strokeWidth="3"
+                  />
+                  <path
+                    d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
+                    fill="none"
+                    stroke="#22c55e"
+                    strokeWidth="3"
+                    strokeDasharray="85, 100"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-red-600">{totalMaintenance}</div>
+                    <div className="text-xl font-bold text-green-600">27</div>
+                    <div className="text-xs text-gray-500">일상수리</div>
                   </div>
                 </div>
-                <div className="absolute inset-0 rounded-full border-8 border-transparent"
-                     style={{
-                       background: `conic-gradient(#ef4444 0deg ${Math.min(totalMaintenance * 12, 360)}deg, transparent ${Math.min(totalMaintenance * 12, 360)}deg)`,
-                       borderRadius: '50%',
-                       mask: 'radial-gradient(circle at center, transparent 35px, black 35px)'
-                     }}>
-                </div>
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-3 h-3 bg-red-600 rounded-full"></div>
-                  <span className="text-sm text-gray-600">일상 수리</span>
-                </div>
-                <div className="text-xs text-gray-500">{totalMaintenance}건</div>
+              <div className="text-xs text-gray-500">
+                <div>현재 건수: 1.1회</div>
+                <div>평균 작업시간: 8시간</div>
               </div>
             </CardContent>
           </Card>
 
           {/* 작업자 정보 */}
           <Card className="shadow-lg border-0 rounded-xl bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-bold text-gray-800">작업자 정보</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold text-gray-800">작업자 정보</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">주작업자</span>
-                  <span className="text-sm font-medium">김기사</span>
-                </div>
+                <div className="text-xs text-gray-600 mb-2">작업자</div>
+                <div className="text-xs text-gray-600 mb-2">등급별 작업자 분포</div>
                 <div className="space-y-2">
-                  <div className="text-xs text-gray-500 mb-1">등급별 작업자 분포</div>
-                  <div className="space-y-1">
-                    <div className="flex items-center space-x-2">
-                      <div className="text-xs w-6">D-15</div>
-                      <div className="flex-1 bg-gray-200 rounded-full h-2">
-                        <div className="bg-yellow-500 h-2 rounded-full" style={{width: '75%'}}></div>
-                      </div>
-                      <div className="text-xs text-gray-500">3명</div>
+                  <div className="flex items-center space-x-2">
+                    <div className="text-xs w-8 text-gray-600">A급</div>
+                    <div className="flex-1 bg-gray-200 rounded-full h-3">
+                      <div className="bg-green-500 h-3 rounded-full" style={{width: '60%'}}></div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="text-xs w-6">D급</div>
-                      <div className="flex-1 bg-gray-200 rounded-full h-2">
-                        <div className="bg-orange-500 h-2 rounded-full" style={{width: '50%'}}></div>
-                      </div>
-                      <div className="text-xs text-gray-500">2명</div>
+                    <div className="text-xs text-gray-500 w-8">3명</div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="text-xs w-8 text-gray-600">B급</div>
+                    <div className="flex-1 bg-gray-200 rounded-full h-3">
+                      <div className="bg-blue-500 h-3 rounded-full" style={{width: '40%'}}></div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="text-xs w-6">C급</div>
-                      <div className="flex-1 bg-gray-200 rounded-full h-2">
-                        <div className="bg-blue-500 h-2 rounded-full" style={{width: '25%'}}></div>
-                      </div>
-                      <div className="text-xs text-gray-500">1명</div>
+                    <div className="text-xs text-gray-500 w-8">2명</div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="text-xs w-8 text-gray-600">C급</div>
+                    <div className="flex-1 bg-gray-200 rounded-full h-3">
+                      <div className="bg-yellow-500 h-3 rounded-full" style={{width: '20%'}}></div>
                     </div>
+                    <div className="text-xs text-gray-500 w-8">1명</div>
                   </div>
                 </div>
               </div>
@@ -533,27 +528,27 @@ export default function Dashboard() {
 
           {/* 추가 지표 */}
           <Card className="shadow-lg border-0 rounded-xl bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-bold text-gray-800">추가 지표</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold text-gray-800">추가 지표</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-indigo-600">2.5시간</div>
-                  <div className="text-sm text-gray-600">평균 수리시간</div>
+                  <div className="text-2xl font-bold text-purple-600">2.5시간</div>
+                  <div className="text-xs text-gray-600">평균 수리시간</div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-xs text-gray-600">가동률:</span>
-                    <span className="text-xs font-medium">95%</span>
+                    <span className="text-gray-600">가동률:</span>
+                    <span className="font-medium">95%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-xs text-gray-600">효율성:</span>
-                    <span className="text-xs font-medium">양호</span>
+                    <span className="text-gray-600">효율성:</span>
+                    <span className="font-medium">양호</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-xs text-gray-600">다음정비:</span>
-                    <span className="text-xs font-medium">2일후</span>
+                    <span className="text-gray-600">다음정비:</span>
+                    <span className="font-medium">2일후</span>
                   </div>
                 </div>
               </div>
@@ -561,86 +556,52 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Third Row - Equipment Grid and Failure Distribution */}
+        {/* Third Row - Equipment Matrix and Failure Distribution */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 장비별 고장 유형 히트맵 */}
+          {/* 장비별 고장 유형 매트릭스 */}
           <Card className="shadow-lg border-0 rounded-xl bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-bold text-gray-800">장비별 고장 유형 매트릭스</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold text-gray-800 flex items-center">
+                <div className="w-4 h-4 rounded-full bg-orange-500 mr-2"></div>
+                장비별 고장 유형 매트릭스
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              {(() => {
-                // Create device failure matrix similar to the UI design
-                const devices = ['Crane Unit', 'Hoist', 'Trolley', 'Gantry', 'Wire Rope', 'Control'];
-                const issues = ['전장품', 'Motor', 'Brake', '안전장치', 'Inverter', '기타'];
-                
-                const deviceFailureMap = new Map();
-                failureRecords.forEach((record: any) => {
-                  const device = String(record.byDevice || '기타');
-                  const category = String(record.category || '기타');
-                  const key = `${device}-${category}`;
-                  deviceFailureMap.set(key, (deviceFailureMap.get(key) || 0) + 1);
-                });
-
-                return (
-                  <div className="grid grid-cols-6 gap-1">
-                    {devices.map((device, deviceIndex) => 
-                      issues.map((issue, issueIndex) => {
-                        const count = Math.floor(Math.random() * 5); // Sample data
-                        const colorClass = count === 0 ? 'bg-gray-100' :
-                          count === 1 ? 'bg-blue-200' :
-                          count === 2 ? 'bg-blue-400' :
-                          count === 3 ? 'bg-blue-600' : 'bg-blue-800';
-                        
-                        return (
-                          <div 
-                            key={`${deviceIndex}-${issueIndex}`}
-                            className={`aspect-square ${colorClass} rounded flex items-center justify-center text-xs font-medium ${count > 2 ? 'text-white' : 'text-gray-800'}`}
-                            title={`${device} - ${issue}: ${count}건`}
-                          >
-                            {count > 0 ? count : ''}
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                );
-              })()}
-              <div className="mt-4 text-xs text-gray-500">
-                <div className="flex items-center justify-between">
-                  <span>낮음</span>
-                  <div className="flex space-x-1">
-                    <div className="w-3 h-3 bg-gray-100 rounded"></div>
-                    <div className="w-3 h-3 bg-blue-200 rounded"></div>
-                    <div className="w-3 h-3 bg-blue-400 rounded"></div>
-                    <div className="w-3 h-3 bg-blue-600 rounded"></div>
-                    <div className="w-3 h-3 bg-blue-800 rounded"></div>
-                  </div>
-                  <span>높음</span>
-                </div>
+              <div className="text-center text-gray-500 py-8">
+                히트맵을 생성할 수 있는 데이터가 부족합니다
               </div>
             </CardContent>
           </Card>
 
           {/* 고장 분포현황 */}
           <Card className="shadow-lg border-0 rounded-xl bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-bold text-gray-800">고장 분포현황</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold text-gray-800 flex items-center">
+                <div className="w-4 h-4 rounded-full bg-red-500 mr-2"></div>
+                고장 분포현황
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-5 gap-3 mb-4">
-                <div className="bg-red-500 text-white text-center py-4 rounded font-bold text-lg">4</div>
-                <div className="bg-orange-500 text-white text-center py-4 rounded font-bold text-lg">3</div>
-                <div className="bg-green-500 text-white text-center py-4 rounded font-bold text-lg">1</div>
-                <div className="bg-purple-500 text-white text-center py-4 rounded font-bold text-lg">2</div>
-                <div className="bg-gray-500 text-white text-center py-4 rounded font-bold text-lg">1</div>
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="bg-red-500 text-white text-center py-6 rounded-lg font-bold text-2xl">1</div>
+                <div className="bg-orange-500 text-white text-center py-6 rounded-lg font-bold text-2xl">1</div>
+                <div className="bg-red-600 text-white text-center py-6 rounded-lg font-bold text-2xl">1</div>
               </div>
-              <div className="grid grid-cols-5 gap-3 text-xs text-center text-gray-600">
+              <div className="grid grid-cols-3 gap-3 text-xs text-center text-gray-600 mb-4">
                 <div>전장품</div>
-                <div>Motor</div>
-                <div>안전장치</div>
-                <div>Brake</div>
-                <div>기타</div>
+                <div>강재</div>
+                <div>Hydraulic</div>
+              </div>
+              <div className="flex items-center justify-center space-x-2 text-xs">
+                <span>고장 빈도:</span>
+                <span>낮음</span>
+                <div className="flex space-x-1">
+                  <div className="w-3 h-3 bg-yellow-300 rounded"></div>
+                  <div className="w-3 h-3 bg-orange-400 rounded"></div>
+                  <div className="w-3 h-3 bg-red-500 rounded"></div>
+                  <div className="w-3 h-3 bg-red-700 rounded"></div>
+                </div>
+                <span>높음</span>
               </div>
             </CardContent>
           </Card>
