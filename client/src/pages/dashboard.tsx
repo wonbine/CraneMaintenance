@@ -572,6 +572,9 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-center space-x-4">
+              <div className="bg-green-100 px-3 py-1 rounded-full">
+                <span className="text-green-800 text-sm font-medium">실시간 연결됨</span>
+              </div>
               {showOverview && systemOverviewData && (
                 <div className="text-right">
                   <div className="text-2xl font-bold text-blue-600">{systemOverviewData.totalFactories}</div>
