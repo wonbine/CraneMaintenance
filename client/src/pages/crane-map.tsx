@@ -59,6 +59,10 @@ export default function CraneMap() {
     if (matchingCrane) {
       return {
         ...matchingCrane,
+        installationDate: matchingCrane.installationDate || null,
+        inspectionReferenceDate: matchingCrane.inspectionReferenceDate || null,
+        inspectionCycle: matchingCrane.inspectionCycle || null,
+        leadTime: matchingCrane.leadTime || null,
         position
       };
     }
@@ -78,6 +82,10 @@ export default function CraneMap() {
       grade: "N/A",
       driveType: "N/A",
       unmannedOperation: "N/A",
+      installationDate: null,
+      inspectionReferenceDate: null,
+      inspectionCycle: null,
+      leadTime: null,
       position
     };
   });
