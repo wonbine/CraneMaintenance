@@ -153,7 +153,16 @@ export default function CraneMap() {
             전체 크레인: {cranes.length}대
           </Badge>
           <Badge variant="outline" className="bg-blue-50">
-            지도에 표시: {cranesWithPositions.length}대 (좌표 데이터)
+            지도에 표시: {cranesWithPositions.length}대
+          </Badge>
+          <Badge variant="outline" className="bg-blue-100 text-blue-800">
+            A급: {cranes.filter(c => c.grade === 'A').length}대
+          </Badge>
+          <Badge variant="outline" className="bg-green-100 text-green-800">
+            B급: {cranes.filter(c => c.grade === 'B').length}대
+          </Badge>
+          <Badge variant="outline" className="bg-orange-100 text-orange-800">
+            C급: {cranes.filter(c => c.grade === 'C').length}대
           </Badge>
         </div>
       </div>
@@ -171,19 +180,23 @@ export default function CraneMap() {
             <div className="relative w-full h-full bg-gray-50 border rounded-lg overflow-auto">
               {/* Map Legend */}
               <div className="absolute top-4 right-4 z-10 bg-white p-3 rounded-lg shadow-md border">
-                <h4 className="text-sm font-medium mb-2">범례</h4>
+                <h4 className="text-sm font-medium mb-2">크레인 등급 범례</h4>
                 <div className="space-y-1 text-xs">
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span>가동중</span>
+                    <div className="w-3 h-3 bg-blue-600 border border-blue-800 rounded-full"></div>
+                    <span className="font-medium">A급 (최고등급)</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <span>정비중</span>
+                    <div className="w-3 h-3 bg-green-600 border border-green-800 rounded-full"></div>
+                    <span className="font-medium">B급 (중간등급)</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <span>긴급</span>
+                    <div className="w-3 h-3 bg-orange-600 border border-orange-800 rounded-full"></div>
+                    <span className="font-medium">C급 (기본등급)</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-gray-500 border border-gray-700 rounded-full"></div>
+                    <span>등급 미분류</span>
                   </div>
                 </div>
               </div>
@@ -203,14 +216,22 @@ export default function CraneMap() {
                     <div className="relative">
                       {/* Crane Marker */}
                       <div
-                        className={`w-3 h-3 rounded-full border border-white shadow-md transition-all duration-200 group-hover:scale-150 ${getStatusColor(
-                          crane.status
+                        className={`w-3 h-3 rounded-full border-2 shadow-md transition-all duration-200 group-hover:scale-150 ${getGradeColor(
+                          crane.grade || ""
                         )}`}
                       />
                       
                       {/* Crane Label */}
-                      <div className="absolute top-5 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        {crane.craneId}
+                      <div className="absolute top-5 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+                        <div className="text-center font-medium">
+                          {crane.craneName || crane.craneId}
+                        </div>
+                        <div className="text-center text-gray-300 text-xs">
+                          {crane.craneId}
+                        </div>
+                        <div className="text-center text-yellow-300 font-bold">
+                          등급: {crane.grade || "미분류"}
+                        </div>
                       </div>
                     </div>
                   </button>
@@ -256,8 +277,17 @@ export default function CraneMap() {
           
           {selectedCrane && (
             <div className="space-y-4">
-              {/* Status Badge */}
-              <div className="flex justify-center">
+              {/* Grade and Status Badges */}
+              <div className="flex justify-center space-x-2">
+                <Badge
+                  className={`px-3 py-1 font-bold text-white ${
+                    selectedCrane.grade === 'A' ? 'bg-blue-600' : 
+                    selectedCrane.grade === 'B' ? 'bg-green-600' : 
+                    selectedCrane.grade === 'C' ? 'bg-orange-600' : 'bg-gray-500'
+                  }`}
+                >
+                  등급: {selectedCrane.grade || "미분류"}
+                </Badge>
                 <Badge
                   className={`px-3 py-1 ${getStatusBadgeColor(selectedCrane.status)}`}
                 >
