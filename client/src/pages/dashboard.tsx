@@ -249,6 +249,25 @@ export default function Dashboard() {
     enabled: !!filters.selectedCrane && filters.selectedCrane !== 'all'
   });
 
+  // Fetch monthly repair time statistics data
+  const { data: monthlyRepairTimeData = [] } = useQuery({
+    queryKey: ['/api/analytics/monthly-repair-time-stats', filters.selectedCrane, filters.selectedFactory],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.selectedCrane && filters.selectedCrane !== 'all') {
+        params.append('craneId', crane?.craneId || '');
+      }
+      if (filters.selectedFactory && filters.selectedFactory !== 'all') {
+        params.append('factory', filters.selectedFactory);
+      }
+
+      const response = await fetch(`/api/analytics/monthly-repair-time-stats?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch monthly repair time data');
+      return response.json();
+    },
+    enabled: !!filters.selectedCrane && filters.selectedCrane !== 'all'
+  });
+
   const DonutChart = ({ data, title, total }: { data: any[], title: string, total: number }) => {
     if (!data || data.length === 0 || total === 0) {
       return (
@@ -420,6 +439,100 @@ export default function Dashboard() {
             {data.reduce((sum, item) => sum + item.count, 0)}
           </div>
           <div className="text-sm text-gray-500">총 고장 건수</div>
+        </div>
+      </div>
+    );
+  };
+
+  const RepairTimeLineChart = ({ data }: { data: { month: string, avgRepairTime: number }[] }) => {
+    if (!data || data.length === 0) {
+      return (
+        <div className="h-48 flex items-center justify-center text-gray-500">
+          <div className="text-center">
+            <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p>데이터가 없습니다</p>
+          </div>
+        </div>
+      );
+    }
+
+    const maxValue = Math.max(...data.map(d => d.avgRepairTime), 1);
+    const chartHeight = 200;
+    const chartWidth = 400;
+    const padding = 50;
+
+    // Create SVG path for the line
+    const points = data.map((item, index) => {
+      const x = padding + (index * (chartWidth - 2 * padding)) / Math.max(data.length - 1, 1);
+      const y = chartHeight - padding - ((item.avgRepairTime / maxValue) * (chartHeight - 2 * padding));
+      return `${x},${y}`;
+    }).join(' ');
+
+    return (
+      <div className="space-y-4">
+        <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-48">
+          {/* Grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((percent, i) => (
+            <line
+              key={i}
+              x1={padding}
+              y1={chartHeight - padding - percent * (chartHeight - 2 * padding)}
+              x2={chartWidth - padding}
+              y2={chartHeight - padding - percent * (chartHeight - 2 * padding)}
+              stroke="#e5e7eb"
+              strokeWidth="1"
+            />
+          ))}
+          
+          {/* Line */}
+          <polyline
+            points={points}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          
+          {/* Data points */}
+          {data.map((item, index) => {
+            const x = padding + (index * (chartWidth - 2 * padding)) / Math.max(data.length - 1, 1);
+            const y = chartHeight - padding - ((item.avgRepairTime / maxValue) * (chartHeight - 2 * padding));
+            return (
+              <circle
+                key={index}
+                cx={x}
+                cy={y}
+                r="4"
+                fill="#3b82f6"
+                stroke="white"
+                strokeWidth="2"
+              />
+            );
+          })}
+          
+          {/* Y-axis labels */}
+          {[0, 0.5, 1].map((percent, i) => (
+            <text
+              key={i}
+              x={padding - 10}
+              y={chartHeight - padding - percent * (chartHeight - 2 * padding) + 5}
+              textAnchor="end"
+              className="fill-gray-500 text-xs"
+            >
+              {Math.round(maxValue * percent * 10) / 10}h
+            </text>
+          ))}
+        </svg>
+        
+        {/* Average repair time display */}
+        <div className="text-center">
+          <div className="text-2xl font-bold text-blue-600">
+            {data.length > 0 
+              ? Math.round((data.reduce((sum, item) => sum + item.avgRepairTime, 0) / data.length) * 10) / 10
+              : 0}h
+          </div>
+          <div className="text-sm text-gray-500">평균 수리시간</div>
         </div>
       </div>
     );
@@ -958,6 +1071,19 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <FailureLineChart data={monthlyFailureData} />
+          </CardContent>
+        </Card>
+
+        {/* Average Repair Time */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <Clock className="w-5 h-5 text-blue-600" />
+              <span>평균 수리시간</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RepairTimeLineChart data={monthlyRepairTimeData} />
           </CardContent>
         </Card>
 

@@ -51,6 +51,7 @@ export interface IStorage {
   getFailureStats(): Promise<MaintenanceStats[]>;
   getMonthlyTrends(): Promise<MonthlyTrend[]>;
   getMonthlyFailureStats(craneId?: string, factory?: string): Promise<MonthlyTrend[]>;
+  getMonthlyRepairTimeStats(craneId?: string, factory?: string): Promise<{ month: string; avgRepairTime: number }[]>;
   
   // Factory and crane filters
   getUniqueFactories(): Promise<string[]>;
@@ -538,6 +539,50 @@ export class MemStorage implements IStorage {
     return Array.from(craneNames).sort();
   }
 
+  async getMonthlyRepairTimeStats(craneId?: string, factory?: string): Promise<{ month: string; avgRepairTime: number }[]> {
+    let records = Array.from(this.maintenanceRecords.values());
+    
+    // Filter by crane if specified
+    if (craneId && craneId !== 'all') {
+      records = records.filter(record => record.craneId === craneId);
+    }
+    
+    // Filter by factory if specified
+    if (factory && factory !== 'all') {
+      const cranesList = Array.from(this.cranes.values());
+      const factoryCranes = cranesList.filter(crane => crane.plantSection === factory);
+      const factoryCraneIds = factoryCranes.map(crane => crane.craneId);
+      records = records.filter(record => factoryCraneIds.includes(record.craneId));
+    }
+    
+    const monthlyData = new Map<string, { totalTime: number; count: number }>();
+    
+    records.forEach(record => {
+      // Only include records with valid totalWorkTime
+      if (record.totalWorkTime && record.totalWorkTime > 0) {
+        const date = new Date(record.date);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        
+        const existing = monthlyData.get(monthKey) || { totalTime: 0, count: 0 };
+        existing.totalTime += record.totalWorkTime;
+        existing.count += 1;
+        monthlyData.set(monthKey, existing);
+      }
+    });
+    
+    // Calculate averages and format for display
+    return Array.from(monthlyData.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, data]) => {
+        const [year, monthNum] = month.split('-');
+        const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('ko-KR', { month: 'short' });
+        return { 
+          month: `${year}년 ${monthName}`, 
+          avgRepairTime: Math.round((data.totalTime / data.count) * 10) / 10 
+        };
+      });
+  }
+
   async getCranesByFactoryAndName(factory?: string, craneName?: string): Promise<Crane[]> {
     let cranes = Array.from(this.cranes.values());
     
@@ -878,6 +923,50 @@ export class DatabaseStorage implements IStorage {
     });
     
     return Array.from(trends.entries()).map(([month, count]) => ({ month, count }));
+  }
+
+  async getMonthlyRepairTimeStats(craneId?: string, factory?: string): Promise<{ month: string; avgRepairTime: number }[]> {
+    let records = await this.getMaintenanceRecords();
+    
+    // Filter by crane if specified
+    if (craneId && craneId !== 'all') {
+      records = records.filter(record => record.craneId === craneId);
+    }
+    
+    // Filter by factory if specified
+    if (factory && factory !== 'all') {
+      const cranesList = await this.getCranes();
+      const factoryCranes = cranesList.filter(crane => crane.plantSection === factory);
+      const factoryCraneIds = factoryCranes.map(crane => crane.craneId);
+      records = records.filter(record => factoryCraneIds.includes(record.craneId));
+    }
+    
+    const monthlyData = new Map<string, { totalTime: number; count: number }>();
+    
+    records.forEach(record => {
+      // Only include records with valid totalWorkTime
+      if (record.totalWorkTime && record.totalWorkTime > 0) {
+        const date = new Date(record.date);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        
+        const existing = monthlyData.get(monthKey) || { totalTime: 0, count: 0 };
+        existing.totalTime += record.totalWorkTime;
+        existing.count += 1;
+        monthlyData.set(monthKey, existing);
+      }
+    });
+    
+    // Calculate averages and format for display
+    return Array.from(monthlyData.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, data]) => {
+        const [year, monthNum] = month.split('-');
+        const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('ko-KR', { month: 'short' });
+        return { 
+          month: `${year}년 ${monthName}`, 
+          avgRepairTime: Math.round((data.totalTime / data.count) * 10) / 10 
+        };
+      });
   }
 
   async getMonthlyFailureStats(craneId?: string, factory?: string): Promise<MonthlyTrend[]> {

@@ -406,6 +406,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get monthly repair time statistics
+  app.get("/api/analytics/monthly-repair-time-stats", async (req, res) => {
+    try {
+      const { craneId, factory } = req.query;
+      const stats = await storage.getMonthlyRepairTimeStats(
+        craneId as string,
+        factory as string
+      );
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching monthly repair time stats:", error);
+      res.status(500).json({ message: "Failed to fetch monthly repair time stats" });
+    }
+  });
+
   // Get active alerts
   app.get("/api/alerts", async (req, res) => {
     try {
