@@ -1003,27 +1003,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         고장_원인_분포: failureCauses
       };
 
-      const prompt = `다음은 산업용 크레인 관리 시스템의 실시간 데이터입니다. 이 데이터를 분석하여 한국어로 종합적인 요약 보고서를 작성해주세요:
+      const prompt = `당신은 산업 현장의 스마트 유지보수 시스템 'PoCrane'의 데이터 분석 AI입니다.
+
+다음의 전체 크레인 대시보드 데이터를 기반으로 운영 및 정비 요약 보고서를 작성해주세요:
 
 ${JSON.stringify(analysisData, null, 2)}
 
-다음 항목들을 포함한 상세 분석 보고서를 작성해주세요:
+포함해야 할 항목:
+1. 총 관리 크레인 수
+2. 최근 1개월간 크레인 고장 건수 및 추이 요약
+3. 가장 많이 고장 발생한 크레인 TOP 3 및 주요 고장 장치
+4. 평균 고장 처리 시간 (조치 소요 시간)
+5. 다음 점검 예정 크레인 및 D-Day
+6. 최근 완료된 정비 항목 요약
+7. 데이터 기반 개선 제안 (예: 점검 주기 단축, 장치 교체 등)
 
-1. 📊 전체 시스템 현황 요약
-2. 🏭 공장별 운영 현황 분석
-3. 🔧 정비 및 고장 트렌드 분석
-4. ⚠️ 주요 위험 요소 및 우선순위
-5. 💡 개선 권장사항
-6. 📈 향후 예측 및 대응 방안
+보고서 형태:
+- 제목: PoCrane 크레인 유지보수 요약 보고서
+- 날짜 기준: 현재 날짜 기준
+- 문장형 설명 (불필요한 표나 코드 제외)
+- 각 항목별 소제목 포함
+- 최종적으로 간결하고 관리자 회의에 바로 활용 가능한 문서 느낌으로 작성
 
-각 섹션은 구체적인 수치와 함께 명확하고 실용적인 통찰을 제공해주세요. 경영진이 이해하기 쉽도록 핵심 포인트를 강조해주세요.`;
+예시 톤:
+- 전문적이고 정돈된 문체
+- 불필요한 반복 없이 핵심 위주 서술`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           {
             role: "system",
-            content: "당신은 산업용 크레인 관리 전문가입니다. 데이터를 분석하여 실용적이고 통찰력 있는 보고서를 작성합니다."
+            content: "당신은 산업 현장의 스마트 유지보수 시스템 'PoCrane'의 데이터 분석 AI입니다. 실시간 데이터를 분석하여 관리자 회의에서 바로 활용 가능한 전문적인 보고서를 작성합니다."
           },
           {
             role: "user",
