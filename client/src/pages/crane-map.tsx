@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, MapPin, Wrench, AlertTriangle } from "lucide-react";
 import type { Crane } from "@shared/schema";
@@ -236,6 +236,9 @@ export default function CraneMap() {
               <MapPin className="h-5 w-5 text-teal-600" />
               <span>크레인 정보</span>
             </DialogTitle>
+            <DialogDescription>
+              크레인의 상세 정보와 현재 상태를 확인할 수 있습니다.
+            </DialogDescription>
           </DialogHeader>
           
           {selectedCrane && (
@@ -270,17 +273,17 @@ export default function CraneMap() {
                 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">등급(Grade)</span>
-                  <span className="font-medium">{selectedCrane.grade || "N/A"}</span>
+                  <span className="font-medium">{selectedCrane.grade || "정보 없음"}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">운전방식(DriveType)</span>
-                  <span className="font-medium">{selectedCrane.driveType || "N/A"}</span>
+                  <span className="font-medium">{selectedCrane.driveType || "정보 없음"}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">유/무인(UnmannedOperation)</span>
-                  <span className="font-medium">{selectedCrane.unmannedOperation || "N/A"}</span>
+                  <span className="font-medium">{selectedCrane.unmannedOperation || "정보 없음"}</span>
                 </div>
 
                 {selectedCrane.location && (
