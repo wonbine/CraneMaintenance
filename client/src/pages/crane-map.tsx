@@ -46,6 +46,9 @@ export default function CraneMap() {
     return { x, y };
   };
 
+  // Calculate S57 cell position for special marking
+  const s57Position = convertCoordinateToPosition("S57");
+
   // Create crane markers from all coordinate data, handling duplicates
   const cranesWithPositions = (craneCoordinates as CraneCoordinate[]).map((coord, index) => {
     const position = convertCoordinateToPosition(coord.좌표);
@@ -336,6 +339,23 @@ export default function CraneMap() {
                     </div>
                   </button>
                 ))}
+
+                {/* S57 Cell Special Marking */}
+                <div
+                  className="absolute border-2 border-red-500 bg-red-100 bg-opacity-30 pointer-events-none z-10"
+                  style={{
+                    left: `${s57Position.x}px`,
+                    top: `${s57Position.y}px`,
+                    width: '30px',
+                    height: '25px',
+                  }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-red-700 font-bold text-xs bg-white bg-opacity-90 px-1 rounded">
+                      S57
+                    </span>
+                  </div>
+                </div>
 
                 {/* Grid lines for reference */}
                 <div className="absolute inset-0 pointer-events-none opacity-10">
