@@ -141,19 +141,24 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
     percentage: Math.round(((count as number) / totalFailures) * 100)
   }));
 
-  // Prepare monthly trend data
+  // Prepare monthly trend data based on actual database records
   const monthlyTrendData = Array.from({ length: 6 }, (_, i) => {
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
     const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
     const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
     
+    // Count failure records (돌발작업) for this month
     const monthFailures = failureRecords.filter((record: any) => {
-      const recordDate = new Date(record.failureDate);
+      if (!record.date) return false;
+      const recordDate = new Date(record.date);
       return recordDate >= monthStart && recordDate <= monthEnd;
     }).length;
 
+    // Count maintenance records (일상수리) for this month
     const monthMaintenance = maintenanceRecords.filter((record: any) => {
-      const recordDate = new Date(record.actualStartDateTime || record.date);
+      const dateToUse = record.actualStartDateTime || record.date;
+      if (!dateToUse) return false;
+      const recordDate = new Date(dateToUse);
       return recordDate >= monthStart && recordDate <= monthEnd;
     }).length;
 
