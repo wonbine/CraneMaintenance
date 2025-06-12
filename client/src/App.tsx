@@ -8,8 +8,8 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import Dashboard from "@/pages/dashboard";
 import CraneMap from "@/pages/crane-map";
-import FailureHistory from "@/pages/failure-history";
 import MaintenanceHistory from "@/pages/maintenance-history";
+import FailureHistory from "@/pages/failure-history";
 import NotFound from "@/pages/not-found";
 
 function Router() {
