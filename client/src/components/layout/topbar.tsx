@@ -35,7 +35,37 @@ export function Topbar() {
   };
 
   const handlePeriodSelect = (period: string) => {
-    updateFilters({ selectedPeriod: period, dateMode: "period" });
+    const today = new Date();
+    const endDate = today.toISOString().split('T')[0];
+    
+    let startDate = '';
+    if (period) {
+      const start = new Date(today);
+      
+      switch (period) {
+        case '1개월':
+          start.setMonth(today.getMonth() - 1);
+          break;
+        case '3개월':
+          start.setMonth(today.getMonth() - 3);
+          break;
+        case '6개월':
+          start.setMonth(today.getMonth() - 6);
+          break;
+        case '1년':
+          start.setFullYear(today.getFullYear() - 1);
+          break;
+      }
+      
+      startDate = start.toISOString().split('T')[0];
+    }
+    
+    updateFilters({ 
+      selectedPeriod: period, 
+      dateMode: "period",
+      startDate: startDate,
+      endDate: endDate
+    });
   };
 
   const handleDateRangeMode = () => {
