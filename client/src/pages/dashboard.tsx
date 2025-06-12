@@ -86,6 +86,26 @@ export default function Dashboard() {
     },
   });
 
+  const testMutation = useMutation({
+    mutationFn: async (config: { spreadsheetId: string; sheetName?: string }) => {
+      const response = await apiRequest("POST", "/api/test-sheets", config);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "연결 테스트 성공",
+        description: `${data.rowCount}개 행을 찾았습니다. 헤더: ${data.headers.join(', ')}`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "연결 테스트 실패",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleRefresh = () => {
     if (cranesSpreadsheetId && failureSpreadsheetId && maintenanceSpreadsheetId) {
       refreshMutation.mutate({ 
@@ -170,12 +190,31 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <Label htmlFor="cranes-sheet">크레인 목록 시트명 (선택사항)</Label>
-                      <Input
-                        id="cranes-sheet"
-                        placeholder="Sheet1"
-                        value={cranesSheetName}
-                        onChange={(e) => setCranesSheetName(e.target.value)}
-                      />
+                      <div className="flex space-x-2">
+                        <Input
+                          id="cranes-sheet"
+                          placeholder="Sheet1"
+                          value={cranesSheetName}
+                          onChange={(e) => setCranesSheetName(e.target.value)}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (cranesSpreadsheetId) {
+                              testMutation.mutate({ 
+                                spreadsheetId: cranesSpreadsheetId, 
+                                sheetName: cranesSheetName 
+                              });
+                            }
+                          }}
+                          disabled={!cranesSpreadsheetId || testMutation.isPending}
+                        >
+                          테스트
+                        </Button>
+                      </div>
                     </div>
                     
                     <div>

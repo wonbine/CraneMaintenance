@@ -246,13 +246,33 @@ export function SampleDataGuide() {
         </div>
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h5 className="font-medium text-blue-900 mb-2">구글 스프레드시트 설정 방법:</h5>
-          <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-            <li>위의 샘플 데이터를 참고하여 3개의 시트를 생성하세요</li>
-            <li>각 시트를 "링크가 있는 모든 사용자" 권한으로 공유하세요</li>
-            <li>CSV 내보내기 URL을 복사하세요</li>
-            <li>대시보드의 "Configure" 버튼을 클릭하여 URL을 입력하세요</li>
-            <li>"Sync Data" 버튼을 눌러 데이터를 동기화하세요</li>
+          <h5 className="font-medium text-blue-900 mb-2">Google Sheets API 설정 방법:</h5>
+          <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+            <li>
+              <strong>스프레드시트 생성 및 데이터 입력</strong>
+              <br />위의 샘플 데이터를 참고하여 3개의 시트를 생성하세요
+            </li>
+            <li>
+              <strong>스프레드시트 공유 설정</strong>
+              <br />각 시트에서 '공유' → '일반 액세스' → '링크가 있는 모든 사용자'로 설정
+            </li>
+            <li>
+              <strong>스프레드시트 ID 복사</strong>
+              <br />URL에서 /d/ 뒤의 긴 문자열이 스프레드시트 ID입니다
+              <br />예: docs.google.com/spreadsheets/d/<span className="font-mono bg-blue-100 px-1">1A2B3C4D5E6F...</span>/edit
+            </li>
+            <li>
+              <strong>API 키 확인</strong>
+              <br />Google Cloud Console에서 Sheets API가 활성화되어 있는지 확인
+            </li>
+            <li>
+              <strong>연결 테스트</strong>
+              <br />각 스프레드시트 ID 옆의 '테스트' 버튼으로 연결을 확인하세요
+            </li>
+            <li>
+              <strong>데이터 동기화</strong>
+              <br />'Sync Data' 버튼을 눌러 데이터를 동기화하세요
+            </li>
           </ol>
         </div>
       </CardContent>
