@@ -1522,9 +1522,8 @@ export class DatabaseStorage implements IStorage {
     const currentDate = new Date();
     
     // If latest data is more than 6 months old, use latest data date as reference
-    const referenceDate = latestDataDate < new Date(currentDate.getTime() - (6 * 30 * 24 * 60 * 60 * 1000)) 
-      ? latestDataDate 
-      : currentDate;
+    const sixMonthsAgo = new Date(currentDate.getTime() - (6 * 30 * 24 * 60 * 60 * 1000));
+    const referenceDate = latestDataDate < sixMonthsAgo ? latestDataDate : currentDate;
     
     const startDate = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - 5, 1);
 
