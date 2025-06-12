@@ -282,6 +282,9 @@ export class MemStorage implements IStorage {
       status: insertCrane.status,
       location: insertCrane.location,
       model: insertCrane.model,
+      grade: insertCrane.grade || null,
+      driveType: insertCrane.driveType || null,
+      unmannedOperation: insertCrane.unmannedOperation || null,
       lastMaintenanceDate: insertCrane.lastMaintenanceDate || null,
       nextMaintenanceDate: insertCrane.nextMaintenanceDate || null,
       isUrgent: insertCrane.isUrgent || false

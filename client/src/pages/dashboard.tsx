@@ -408,16 +408,16 @@ export default function Dashboard() {
                 <span className="text-sm font-medium">{crane?.craneId || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">모델</span>
-                <span className="text-sm font-medium">{crane?.model || 'N/A'}</span>
+                <span className="text-sm text-gray-600">등급(Grade)</span>
+                <span className="text-sm font-medium">{crane?.grade || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">위치</span>
-                <span className="text-sm font-medium">{crane?.location || 'N/A'}</span>
+                <span className="text-sm text-gray-600">운전방식(DriveType)</span>
+                <span className="text-sm font-medium">{crane?.driveType || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">공장/구역</span>
-                <span className="text-sm font-medium">{crane?.plantSection || 'N/A'}</span>
+                <span className="text-sm text-gray-600">유/무인(UnmannedOperation)</span>
+                <span className="text-sm font-medium">{crane?.unmannedOperation || 'N/A'}</span>
               </div>
             </div>
           </CardContent>

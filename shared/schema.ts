@@ -10,6 +10,9 @@ export const cranes = pgTable("cranes", {
   status: text("status").notNull(), // 'operating', 'maintenance', 'urgent'
   location: text("location").notNull(),
   model: text("model").notNull(),
+  grade: text("grade"), // Grade field
+  driveType: text("drive_type"), // DriveType field
+  unmannedOperation: text("unmanned_operation"), // UnmannedOperation field
   lastMaintenanceDate: text("last_maintenance_date"),
   nextMaintenanceDate: text("next_maintenance_date"),
   isUrgent: boolean("is_urgent").default(false),
