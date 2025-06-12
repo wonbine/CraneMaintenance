@@ -770,31 +770,11 @@ export class DatabaseStorage implements IStorage {
     for (const data of cranesData) {
       const equipmentCode = data.EquipmentCode || data.crane_id || data.CraneID || data.equipment_code;
       if (equipmentCode) {
-        // Extract plant section from available data
-        let plantSection = data['Plant/Section'] || data.PlantSection || data.plant_section || data.Plant || data.plant || data.Section || data.section || data.Factory || data.factory;
-        
-        // If no plant section found, try to extract from CraneName pattern like "Roll Shop #1(RS01)" -> "RS01"
+        // Get Plant/Section data - prioritize the exact field name from Google Sheets
+        const plantSection = data['Plant/Section'] || data.PlantSection || data.plant_section || data.Plant || data.plant || data.Section || data.section || data.Factory || data.factory;
         const craneName = data.CraneName || data.crane_name || data.Name || data.name;
-        if (!plantSection && craneName) {
-          const match = craneName.match(/\(([^)]+)\)$/);
-          if (match) {
-            plantSection = match[1]; // Extract text within parentheses at the end
-          } else if (craneName.includes('냉연')) {
-            plantSection = '냉연공장';
-          } else if (craneName.includes('Roll Shop') || craneName.includes('RS')) {
-            plantSection = 'Roll Shop';
-          } else if (craneName.includes('Slab Yard') || craneName.includes('SY')) {
-            plantSection = 'Slab Yard';
-          } else if (craneName.includes('CT')) {
-            plantSection = 'CT공장';
-          } else if (craneName.includes('TC')) {
-            plantSection = 'TC공장';
-          } else if (craneName.includes('TP')) {
-            plantSection = 'TP공장';
-          } else if (craneName.includes('UST')) {
-            plantSection = 'UST공장';
-          }
-        }
+        
+        console.log('Plant/Section mapping for', equipmentCode, ':', plantSection, '| CraneName:', craneName);
         
         await this.createCrane({
           craneId: equipmentCode,

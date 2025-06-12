@@ -110,8 +110,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/crane-names", async (req, res) => {
     try {
-      const craneNames = await storage.getUniqueCraneNames();
-      res.json(craneNames);
+      const { factory } = req.query;
+      if (factory) {
+        // Get crane names filtered by factory
+        const cranes = await storage.getCranesByFactoryAndName(factory as string);
+        const craneNames = cranes.map(crane => crane.craneName).filter(Boolean);
+        res.json([...new Set(craneNames)].sort());
+      } else {
+        const craneNames = await storage.getUniqueCraneNames();
+        res.json(craneNames);
+      }
     } catch (error) {
       console.error("Error fetching crane names:", error);
       res.status(500).json({ message: "Failed to fetch crane names" });

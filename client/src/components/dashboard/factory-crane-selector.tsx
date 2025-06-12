@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -16,13 +16,30 @@ export function FactoryCraneSelector({ onSelectionChange }: FactoryCraneSelector
     queryKey: ["/api/factories"],
   });
 
+  // Get crane names filtered by selected factory
   const { data: craneNames = [] } = useQuery<string[]>({
-    queryKey: ["/api/crane-names"],
+    queryKey: ["/api/crane-names", selectedFactory],
+    queryFn: async () => {
+      const url = selectedFactory && selectedFactory !== "all" 
+        ? `/api/crane-names?factory=${encodeURIComponent(selectedFactory)}`
+        : '/api/crane-names';
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch crane names');
+      return response.json();
+    },
   });
+
+  // Reset crane selection when factory changes
+  useEffect(() => {
+    if (selectedFactory) {
+      setSelectedCrane(""); // Reset crane selection when factory changes
+    }
+  }, [selectedFactory]);
 
   const handleFactoryChange = (factory: string) => {
     setSelectedFactory(factory);
-    onSelectionChange(factory === "all" ? undefined : factory, selectedCrane === "all" ? undefined : selectedCrane);
+    setSelectedCrane(""); // Clear crane selection when factory changes
+    onSelectionChange(factory === "all" ? undefined : factory, undefined);
   };
 
   const handleCraneChange = (crane: string) => {
