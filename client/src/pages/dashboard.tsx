@@ -7,6 +7,7 @@ import { Factory, Settings, AlertCircle, CheckCircle, Clock, MapPin, Calendar, A
 import { useSearch } from '../contexts/SearchContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line } from 'recharts';
 import { AISummaryButton } from '../components/dashboard/ai-summary-button';
+import { CraneDetailKPI } from '../components/dashboard/crane-detail-kpi';
 
 export default function Dashboard() {
   const { filters } = useSearch();
@@ -1232,7 +1233,7 @@ export default function Dashboard() {
             </div>
           </div>
         ) : (
-          <CraneDetailView craneId={filters.selectedCrane} />
+          <CraneDetailKPI selectedCraneId={filters.selectedCrane} />
         )}
       </div>
     </div>
