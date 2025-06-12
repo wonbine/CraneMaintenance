@@ -1031,7 +1031,7 @@ export default function Dashboard() {
           <div className="space-y-6">
             {/* System Summary */}
             {systemOverviewData && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100">
                   <CardContent className="p-6 text-center">
                     <div className="text-3xl font-bold text-blue-600">{systemOverviewData.totalFactories}</div>
