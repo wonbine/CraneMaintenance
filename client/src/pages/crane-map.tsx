@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, MapPin, Wrench, AlertTriangle, Calendar, Clock, Settings, User, HelpCircle } from "lucide-react";
+import { Loader2, MapPin, Wrench, AlertTriangle, Calendar, Clock, Settings, User, HelpCircle, ExternalLink } from "lucide-react";
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import { useLocation } from "wouter";
 import type { Crane } from "@shared/schema";
 import craneCoordinates from "../data/crane-coordinates-complete.json";
 
@@ -18,6 +19,7 @@ interface CraneCoordinate {
 export default function CraneMap() {
   const [selectedCrane, setSelectedCrane] = useState<Crane | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   const { data: cranes = [], isLoading } = useQuery<Crane[]>({
     queryKey: ["/api/cranes"],
@@ -107,6 +109,14 @@ export default function CraneMap() {
   const handleCraneClick = (crane: Crane) => {
     setSelectedCrane(crane);
     setIsModalOpen(true);
+  };
+
+  const handleViewDetails = () => {
+    if (selectedCrane) {
+      // Navigate to dashboard with selected crane
+      setLocation(`/dashboard?crane=${encodeURIComponent(selectedCrane.craneId)}`);
+      setIsModalOpen(false);
+    }
   };
 
   // Calculate next inspection date and D-day countdown
@@ -571,6 +581,14 @@ export default function CraneMap() {
                   onClick={() => setIsModalOpen(false)}
                 >
                   닫기
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleViewDetails}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  상세정보
                 </Button>
               </div>
             </div>

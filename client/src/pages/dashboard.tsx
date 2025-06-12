@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -10,7 +10,20 @@ import { AISummaryButton } from '../components/dashboard/ai-summary-button';
 import { CraneDetailKPI } from '../components/dashboard/crane-detail-kpi';
 
 export default function Dashboard() {
-  const { filters } = useSearch();
+  const { filters, updateFilters } = useSearch();
+
+  // Handle URL query parameters for crane selection
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const craneParam = urlParams.get('crane');
+    
+    if (craneParam && craneParam !== filters.selectedCrane) {
+      // Update the selected crane based on URL parameter
+      updateFilters({
+        selectedCrane: decodeURIComponent(craneParam)
+      });
+    }
+  }, [filters.selectedCrane, updateFilters]);
 
   // Fetch factory overview data for when no specific selection is made
   const { data: factoryOverviewData = [] } = useQuery({
