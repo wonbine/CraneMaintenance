@@ -15,6 +15,8 @@ import {
   type MaintenanceStats,
   type MonthlyTrend
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Crane operations
@@ -537,4 +539,266 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// DatabaseStorage implementation
+export class DatabaseStorage implements IStorage {
+  async getCranes(): Promise<Crane[]> {
+    return await db.select().from(cranes);
+  }
+
+  async getCrane(id: number): Promise<Crane | undefined> {
+    const [crane] = await db.select().from(cranes).where(eq(cranes.id, id));
+    return crane || undefined;
+  }
+
+  async getCraneByCraneId(craneId: string): Promise<Crane | undefined> {
+    const [crane] = await db.select().from(cranes).where(eq(cranes.craneId, craneId));
+    return crane || undefined;
+  }
+
+  async createCrane(insertCrane: InsertCrane): Promise<Crane> {
+    const [crane] = await db
+      .insert(cranes)
+      .values(insertCrane)
+      .returning();
+    return crane;
+  }
+
+  async updateCrane(id: number, updates: Partial<InsertCrane>): Promise<Crane | undefined> {
+    const [crane] = await db
+      .update(cranes)
+      .set(updates)
+      .where(eq(cranes.id, id))
+      .returning();
+    return crane || undefined;
+  }
+
+  async getFailureRecords(): Promise<FailureRecord[]> {
+    return await db.select().from(failureRecords);
+  }
+
+  async getFailureRecord(id: number): Promise<FailureRecord | undefined> {
+    const [record] = await db.select().from(failureRecords).where(eq(failureRecords.id, id));
+    return record || undefined;
+  }
+
+  async getFailureRecordsByCraneId(craneId: string): Promise<FailureRecord[]> {
+    return await db.select().from(failureRecords).where(eq(failureRecords.craneId, craneId));
+  }
+
+  async createFailureRecord(insertRecord: InsertFailureRecord): Promise<FailureRecord> {
+    const [record] = await db
+      .insert(failureRecords)
+      .values(insertRecord)
+      .returning();
+    return record;
+  }
+
+  async getMaintenanceRecords(): Promise<MaintenanceRecord[]> {
+    return await db.select().from(maintenanceRecords);
+  }
+
+  async getMaintenanceRecord(id: number): Promise<MaintenanceRecord | undefined> {
+    const [record] = await db.select().from(maintenanceRecords).where(eq(maintenanceRecords.id, id));
+    return record || undefined;
+  }
+
+  async getMaintenanceRecordsByCraneId(craneId: string): Promise<MaintenanceRecord[]> {
+    return await db.select().from(maintenanceRecords).where(eq(maintenanceRecords.craneId, craneId));
+  }
+
+  async createMaintenanceRecord(insertRecord: InsertMaintenanceRecord): Promise<MaintenanceRecord> {
+    const [record] = await db
+      .insert(maintenanceRecords)
+      .values(insertRecord)
+      .returning();
+    return record;
+  }
+
+  async getAlerts(): Promise<Alert[]> {
+    return await db.select().from(alerts);
+  }
+
+  async getActiveAlerts(): Promise<Alert[]> {
+    return await db.select().from(alerts).where(eq(alerts.isActive, true));
+  }
+
+  async createAlert(insertAlert: InsertAlert): Promise<Alert> {
+    const [alert] = await db
+      .insert(alerts)
+      .values(insertAlert)
+      .returning();
+    return alert;
+  }
+
+  async deactivateAlert(id: number): Promise<void> {
+    await db
+      .update(alerts)
+      .set({ isActive: false })
+      .where(eq(alerts.id, id));
+  }
+
+  async getDashboardSummary(): Promise<DashboardSummary> {
+    const allCranes = await this.getCranes();
+    
+    return {
+      totalCranes: allCranes.length,
+      operatingCranes: allCranes.filter(c => c.status === 'operating').length,
+      maintenanceCranes: allCranes.filter(c => c.status === 'maintenance').length,
+      urgentCranes: allCranes.filter(c => c.status === 'urgent' || c.isUrgent).length,
+    };
+  }
+
+  async getMaintenanceStats(): Promise<MaintenanceStats[]> {
+    const records = await this.getMaintenanceRecords();
+    const stats = new Map<string, number>();
+    
+    records.forEach(record => {
+      const count = stats.get(record.type) || 0;
+      stats.set(record.type, count + 1);
+    });
+    
+    return Array.from(stats.entries()).map(([type, count]) => ({ type, count }));
+  }
+
+  async getFailureStats(): Promise<MaintenanceStats[]> {
+    const records = await this.getFailureRecords();
+    const stats = new Map<string, number>();
+    
+    records.forEach(record => {
+      const count = stats.get(record.failureType) || 0;
+      stats.set(record.failureType, count + 1);
+    });
+    
+    return Array.from(stats.entries()).map(([type, count]) => ({ type, count }));
+  }
+
+  async getMonthlyTrends(): Promise<MonthlyTrend[]> {
+    const records = await this.getMaintenanceRecords();
+    const trends = new Map<string, number>();
+    
+    records.forEach(record => {
+      const date = new Date(record.date);
+      const monthKey = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+      const count = trends.get(monthKey) || 0;
+      trends.set(monthKey, count + 1);
+    });
+    
+    return Array.from(trends.entries()).map(([month, count]) => ({ month, count }));
+  }
+
+  async syncDataFromSheets(cranesData: any[], failureData: any[], maintenanceData: any[]): Promise<void> {
+    // Clear existing data
+    await db.delete(alerts);
+    await db.delete(maintenanceRecords);
+    await db.delete(failureRecords);
+    await db.delete(cranes);
+    
+    // Process cranes data
+    for (const data of cranesData) {
+      if (data.crane_id) {
+        await this.createCrane({
+          craneId: data.crane_id,
+          status: data.status || 'operating',
+          location: data.location || '',
+          model: data.model || '',
+          lastMaintenanceDate: data.last_maintenance_date || null,
+          nextMaintenanceDate: data.next_maintenance_date || null,
+          isUrgent: data.is_urgent === 'true' || data.is_urgent === true,
+        });
+      }
+    }
+    
+    // Process failure records
+    for (const data of failureData) {
+      if (data.crane_id && data.date) {
+        await this.createFailureRecord({
+          craneId: data.crane_id,
+          date: data.date,
+          failureType: data.failure_type || 'mechanical',
+          description: data.description || '',
+          severity: data.severity || 'medium',
+          downtime: data.downtime ? parseInt(data.downtime) : null,
+          cause: data.cause || null,
+          reportedBy: data.reported_by || null,
+        });
+      }
+    }
+    
+    // Process maintenance records
+    for (const data of maintenanceData) {
+      if (data.crane_id && data.date) {
+        await this.createMaintenanceRecord({
+          craneId: data.crane_id,
+          date: data.date,
+          type: data.type || 'routine',
+          technician: data.technician || '',
+          status: data.status || 'completed',
+          notes: data.notes || null,
+          duration: data.duration ? parseInt(data.duration) : null,
+          cost: data.cost ? parseInt(data.cost) : null,
+          relatedFailureId: data.related_failure_id ? parseInt(data.related_failure_id) : null,
+        });
+      }
+    }
+    
+    // Generate alerts based on data
+    await this.generateAlerts();
+  }
+  
+  private async generateAlerts(): Promise<void> {
+    const cranes = await this.getCranes();
+    const now = new Date();
+    
+    for (const crane of cranes) {
+      // Check for overdue maintenance
+      if (crane.nextMaintenanceDate) {
+        const nextDate = new Date(crane.nextMaintenanceDate);
+        if (nextDate < now) {
+          const daysPastDue = Math.floor((now.getTime() - nextDate.getTime()) / (1000 * 60 * 60 * 24));
+          await this.createAlert({
+            craneId: crane.craneId,
+            type: 'overdue',
+            message: `Crane ${crane.craneId} is ${daysPastDue} days overdue for maintenance`,
+            severity: daysPastDue > 7 ? 'critical' : 'high',
+            isActive: true,
+            createdAt: now.toISOString(),
+          });
+        } else {
+          // Check for maintenance due soon
+          const daysUntilDue = Math.floor((nextDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          if (daysUntilDue <= 3) {
+            await this.createAlert({
+              craneId: crane.craneId,
+              type: 'due_soon',
+              message: `Crane ${crane.craneId} has maintenance due in ${daysUntilDue} days`,
+              severity: 'medium',
+              isActive: true,
+              createdAt: now.toISOString(),
+            });
+          }
+        }
+      }
+      
+      // Check for high maintenance frequency
+      const recentRecords = await this.getMaintenanceRecordsByCraneId(crane.craneId);
+      const recentFailures = recentRecords.filter(record => {
+        const recordDate = new Date(record.date);
+        const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+        return recordDate >= thirtyDaysAgo;
+      });
+        
+      if (recentFailures.length >= 4) {
+        await this.createAlert({
+          craneId: crane.craneId,
+          type: 'high_frequency',
+          message: `Crane ${crane.craneId} has required maintenance ${recentFailures.length} times this month`,
+          severity: 'medium',
+          isActive: true,
+          createdAt: now.toISOString(),
+        });
+      }
+    }
+  }
+}
+
+export const storage = new DatabaseStorage();
