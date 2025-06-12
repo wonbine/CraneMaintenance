@@ -795,6 +795,10 @@ export class DatabaseStorage implements IStorage {
           grade: data.Grade || data.grade || null,
           driveType: data.DriveType || data.drive_type || data['운전방식'] || null,
           unmannedOperation: data.UnmannedOperation || data.unmanned_operation || data['유무인'] || null,
+          installationDate: data.InstallationDate || data.installation_date || null,
+          inspectionReferenceDate: data.InspectionReferenceDate || data.inspection_reference_date || null,
+          inspectionCycle: data.InspectionCycle ? parseInt(data.InspectionCycle) : (data.inspection_cycle ? parseInt(data.inspection_cycle) : null),
+          leadTime: data['LeadTime\n(Days)'] ? parseInt(data['LeadTime\n(Days)']) : (data.LeadTime ? parseInt(data.LeadTime) : (data.lead_time ? parseInt(data.lead_time) : null)),
         });
       }
     }

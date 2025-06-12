@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, MapPin, Wrench, AlertTriangle } from "lucide-react";
+import { Loader2, MapPin, Wrench, AlertTriangle, Calendar, Clock } from "lucide-react";
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 import type { Crane } from "@shared/schema";
 import craneCoordinates from "../data/crane-coordinates-complete.json";
 
@@ -83,6 +85,34 @@ export default function CraneMap() {
   const handleCraneClick = (crane: Crane) => {
     setSelectedCrane(crane);
     setIsModalOpen(true);
+  };
+
+  // Calculate next inspection date and D-day countdown
+  const calculateInspectionData = (crane: Crane) => {
+    if (!crane.inspectionReferenceDate || !crane.inspectionCycle) {
+      return { nextInspectionDate: null, daysUntilInspection: null, progressPercentage: 0 };
+    }
+
+    const referenceDate = new Date(crane.inspectionReferenceDate);
+    const nextInspectionDate = new Date(referenceDate);
+    nextInspectionDate.setDate(referenceDate.getDate() + crane.inspectionCycle);
+    
+    const today = new Date();
+    const timeDiff = nextInspectionDate.getTime() - today.getTime();
+    const daysUntilInspection = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    
+    // Calculate progress percentage (how much of the cycle has passed)
+    const cycleStart = referenceDate;
+    const cycleEnd = nextInspectionDate;
+    const totalCycleDays = crane.inspectionCycle;
+    const daysPassed = Math.floor((today.getTime() - cycleStart.getTime()) / (1000 * 3600 * 24));
+    const progressPercentage = Math.min(100, Math.max(0, (daysPassed / totalCycleDays) * 100));
+
+    return {
+      nextInspectionDate: nextInspectionDate.toISOString().split('T')[0],
+      daysUntilInspection,
+      progressPercentage
+    };
   };
 
   const getGradeColor = (grade: string) => {

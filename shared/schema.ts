@@ -13,6 +13,10 @@ export const cranes = pgTable("cranes", {
   grade: text("grade"), // Grade field
   driveType: text("drive_type"), // DriveType field
   unmannedOperation: text("unmanned_operation"), // UnmannedOperation field
+  installationDate: text("installation_date"), // InstallationDate from CraneList
+  inspectionReferenceDate: text("inspection_reference_date"), // InspectionReferenceDate from CraneList
+  inspectionCycle: integer("inspection_cycle"), // InspectionCycle from CraneList (days)
+  leadTime: integer("lead_time"), // LeadTime from CraneList (days)
   lastMaintenanceDate: text("last_maintenance_date"),
   nextMaintenanceDate: text("next_maintenance_date"),
   isUrgent: boolean("is_urgent").default(false),
