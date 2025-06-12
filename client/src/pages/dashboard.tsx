@@ -417,7 +417,8 @@ export default function Dashboard() {
                             outerRadius={110}
                             paddingAngle={2}
                             dataKey="value"
-                            label={false}
+                            label={({ percentage, value }) => `${percentage}%\n(${value}건)`}
+                            labelLine={false}
                           >
                             {failureCauseChartData.map((entry: any, index: number) => (
                               <Cell key={`cell-${index}`} fill={entry.fill} />
