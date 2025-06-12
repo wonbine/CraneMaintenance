@@ -239,6 +239,8 @@ export default function Dashboard() {
                             outerRadius={100}
                             paddingAngle={5}
                             dataKey="value"
+                            label={({ name, value, percentage }) => `${name}\n${value}대\n${percentage}%`}
+                            labelLine={false}
                           >
                             {operationChartData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={OPERATION_COLORS[index % OPERATION_COLORS.length]} />
@@ -250,20 +252,10 @@ export default function Dashboard() {
                               name
                             ]}
                           />
-                          <Legend />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
-                    <div className="mt-4 flex justify-center space-x-6">
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
-                        <span className="text-sm">유인: {operationTypeData.manned}대 ({operationTypeData.mannedPercentage}%)</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 bg-red-500 rounded mr-2"></div>
-                        <span className="text-sm">무인: {operationTypeData.unmanned}대 ({operationTypeData.unmannedPercentage}%)</span>
-                      </div>
-                    </div>
+
                   </CardContent>
                 </Card>
               )}
@@ -287,6 +279,8 @@ export default function Dashboard() {
                             outerRadius={100}
                             paddingAngle={2}
                             dataKey="value"
+                            label={({ name, value, percentage }) => `${name}급\n${value}대\n${percentage}%`}
+                            labelLine={false}
                           >
                             {gradeChartData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -298,21 +292,10 @@ export default function Dashboard() {
                               name
                             ]}
                           />
-                          <Legend />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
-                    <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-                      {gradeChartData.map((item, index) => (
-                        <div key={item.name} className="flex items-center">
-                          <div 
-                            className="w-3 h-3 rounded mr-2" 
-                            style={{ backgroundColor: item.fill }}
-                          ></div>
-                          <span>{item.name}: {item.value}대 ({item.percentage}%)</span>
-                        </div>
-                      ))}
-                    </div>
+
                   </CardContent>
                 </Card>
               )}
