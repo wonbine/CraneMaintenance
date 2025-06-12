@@ -70,6 +70,9 @@ export interface IStorage {
   getSystemOverview(): Promise<SystemOverview>;
   getCraneGradeStats(): Promise<CraneGradeStats[]>;
   getOperationTypeStats(): Promise<OperationTypeStats>;
+  
+  // Recent maintenance statistics
+  getRecentMaintenanceStats(): Promise<{ month: string; failureCount: number; maintenanceCount: number; total: number }[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -808,6 +811,60 @@ export class MemStorage implements IStorage {
       }
     }
   }
+
+  async getRecentMaintenanceStats(): Promise<{ month: string; failureCount: number; maintenanceCount: number; total: number }[]> {
+    // Get current date and calculate 6 months ago
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+    // Create map for monthly stats
+    const monthlyStats = new Map<string, { failureCount: number; maintenanceCount: number }>();
+
+    // Initialize last 6 months
+    for (let i = 0; i < 6; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      monthlyStats.set(monthKey, { failureCount: 0, maintenanceCount: 0 });
+    }
+
+    // Count failure records by month
+    Array.from(this.failureRecords.values()).forEach(record => {
+      if (record.date) {
+        const recordDate = new Date(record.date);
+        if (recordDate >= sixMonthsAgo) {
+          const monthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
+          const stats = monthlyStats.get(monthKey);
+          if (stats) {
+            stats.failureCount++;
+          }
+        }
+      }
+    });
+
+    // Count maintenance records by month
+    Array.from(this.maintenanceRecords.values()).forEach(record => {
+      if (record.date) {
+        const recordDate = new Date(record.date);
+        if (recordDate >= sixMonthsAgo) {
+          const monthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
+          const stats = monthlyStats.get(monthKey);
+          if (stats) {
+            stats.maintenanceCount++;
+          }
+        }
+      }
+    });
+
+    // Convert to result format and sort by month (oldest first)
+    return Array.from(monthlyStats.entries())
+      .map(([monthKey, stats]) => ({
+        month: monthKey,
+        failureCount: stats.failureCount,
+        maintenanceCount: stats.maintenanceCount,
+        total: stats.failureCount + stats.maintenanceCount
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+  }
 }
 
 // DatabaseStorage implementation
@@ -1372,6 +1429,71 @@ export class DatabaseStorage implements IStorage {
       mannedPercentage: totalCranes > 0 ? Math.round((mannedCranes / totalCranes) * 100) : 0,
       unmannedPercentage: totalCranes > 0 ? Math.round((unmannedCranes / totalCranes) * 100) : 0
     };
+
+    cache.set(cacheKey, result);
+    return result;
+  }
+
+  async getRecentMaintenanceStats(): Promise<{ month: string; failureCount: number; maintenanceCount: number; total: number }[]> {
+    const cacheKey = 'recent-maintenance-stats';
+    const cached = cache.get<{ month: string; failureCount: number; maintenanceCount: number; total: number }[]>(cacheKey);
+    if (cached) return cached;
+
+    // Get current date and calculate 6 months ago
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+    // Get failure and maintenance records
+    const failureRecords = await this.getFailureRecords();
+    const maintenanceRecords = await this.getMaintenanceRecords();
+
+    // Create map for monthly stats
+    const monthlyStats = new Map<string, { failureCount: number; maintenanceCount: number }>();
+
+    // Initialize last 6 months
+    for (let i = 0; i < 6; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      monthlyStats.set(monthKey, { failureCount: 0, maintenanceCount: 0 });
+    }
+
+    // Count failure records by month
+    failureRecords.forEach(record => {
+      if (record.date) {
+        const recordDate = new Date(record.date);
+        if (recordDate >= sixMonthsAgo) {
+          const monthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
+          const stats = monthlyStats.get(monthKey);
+          if (stats) {
+            stats.failureCount++;
+          }
+        }
+      }
+    });
+
+    // Count maintenance records by month
+    maintenanceRecords.forEach(record => {
+      if (record.date) {
+        const recordDate = new Date(record.date);
+        if (recordDate >= sixMonthsAgo) {
+          const monthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
+          const stats = monthlyStats.get(monthKey);
+          if (stats) {
+            stats.maintenanceCount++;
+          }
+        }
+      }
+    });
+
+    // Convert to result format and sort by month (oldest first)
+    const result = Array.from(monthlyStats.entries())
+      .map(([monthKey, stats]) => ({
+        month: monthKey,
+        failureCount: stats.failureCount,
+        maintenanceCount: stats.maintenanceCount,
+        total: stats.failureCount + stats.maintenanceCount
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
 
     cache.set(cacheKey, result);
     return result;

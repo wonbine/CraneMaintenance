@@ -529,6 +529,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get recent 6 months maintenance stats
+  app.get("/api/analytics/recent-maintenance-stats", async (req, res) => {
+    try {
+      const recentStats = await storage.getRecentMaintenanceStats();
+      res.json(recentStats);
+    } catch (error) {
+      console.error("Error fetching recent maintenance stats:", error);
+      res.status(500).json({ error: "Failed to fetch recent maintenance stats" });
+    }
+  });
+
   // Get crane details by crane name
   app.get("/api/crane-details", async (req, res) => {
     try {
