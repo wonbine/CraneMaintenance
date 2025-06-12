@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, MapPin, Wrench, AlertTriangle, Calendar, Clock } from "lucide-react";
+import { Loader2, MapPin, Wrench, AlertTriangle, Calendar, Clock, Settings, User, HelpCircle } from "lucide-react";
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import type { Crane } from "@shared/schema";
@@ -187,6 +187,44 @@ export default function CraneMap() {
     }
   };
 
+  const getGradeBadgeColor = (grade: string | null | undefined) => {
+    switch (grade) {
+      case "A급":
+      case "A":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "B급":
+      case "B":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "C급":
+      case "C":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const getUnmannedBadgeColor = (unmannedOperation: string | null | undefined) => {
+    switch (unmannedOperation) {
+      case "무인":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "유인":
+        return "bg-indigo-100 text-indigo-800 border-indigo-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const getUnmannedIcon = (unmannedOperation: string | null | undefined) => {
+    switch (unmannedOperation) {
+      case "무인":
+        return <Settings className="h-3 w-3" />;
+      case "유인":
+        return <User className="h-3 w-3" />;
+      default:
+        return <HelpCircle className="h-3 w-3" />;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -366,9 +404,16 @@ export default function CraneMap() {
                   <span className="font-medium">{selectedCrane.craneId}</span>
                 </div>
                 
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">등급(Grade)</span>
-                  <span className="font-medium">{selectedCrane.grade || "정보 없음"}</span>
+                {/* Grade - Enhanced Visual Display */}
+                <div className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">등급(Grade)</span>
+                  <div className="flex items-center space-x-2">
+                    <Badge 
+                      className={`px-3 py-1 text-sm font-bold ${getGradeBadgeColor(selectedCrane.grade)}`}
+                    >
+                      {selectedCrane.grade || "미분류"}
+                    </Badge>
+                  </div>
                 </div>
                 
                 <div className="flex justify-between items-center">
@@ -376,9 +421,19 @@ export default function CraneMap() {
                   <span className="font-medium">{selectedCrane.driveType || "정보 없음"}</span>
                 </div>
                 
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">유/무인(UnmannedOperation)</span>
-                  <span className="font-medium">{selectedCrane.unmannedOperation || "정보 없음"}</span>
+                {/* Unmanned Operation - Enhanced Visual Display */}
+                <div className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">유/무인(UnmannedOperation)</span>
+                  <div className="flex items-center space-x-2">
+                    <Badge 
+                      className={`px-3 py-1 text-sm font-bold ${getUnmannedBadgeColor(selectedCrane.unmannedOperation)}`}
+                    >
+                      <span className="flex items-center space-x-1">
+                        {getUnmannedIcon(selectedCrane.unmannedOperation)}
+                        <span>{selectedCrane.unmannedOperation || "정보 없음"}</span>
+                      </span>
+                    </Badge>
+                  </div>
                 </div>
 
                 {/* Installation and Inspection Data */}
