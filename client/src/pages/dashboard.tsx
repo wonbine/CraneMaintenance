@@ -412,7 +412,7 @@ export default function Dashboard() {
                 <span className="text-sm font-medium">{crane?.grade || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">운전방식(DriveType)</span>
+                <span className="text-sm text-gray-600">운전방식</span>
                 <span className="text-sm font-medium">{crane?.driveType || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
