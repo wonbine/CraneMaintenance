@@ -19,44 +19,51 @@ export function Sidebar() {
   const [location] = useLocation();
 
   return (
-    <div className="flex h-screen w-64 flex-col bg-gradient-to-b from-teal-600 to-teal-800 text-white">
+    <div className="flex h-screen w-64 flex-col bg-white border-r border-gray-200">
       {/* Header */}
-      <div className="flex h-16 items-center justify-center border-b border-teal-500/30">
-        <h1 className="text-xl font-bold">크레인 관리 시스템</h1>
+      <div className="flex h-16 items-center px-6 border-b border-gray-100">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">CM</span>
+          </div>
+          <h1 className="text-lg font-semibold text-gray-900">크레인 관리</h1>
+        </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-4">
-        {navigation.map((item) => {
-          const isActive = location === item.href;
-          return (
-            <Link key={item.name} href={item.href}>
-              <div
-                className={cn(
-                  "group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer",
-                  isActive
-                    ? "bg-teal-700 text-white shadow-lg border-r-2 border-white"
-                    : "text-teal-100 hover:bg-teal-700/60 hover:text-white hover:shadow-md hover:scale-105"
-                )}
-              >
-                <item.icon
+      <nav className="flex-1 px-4 py-6">
+        <div className="space-y-1">
+          {navigation.map((item) => {
+            const isActive = location === item.href;
+            return (
+              <Link key={item.name} href={item.href}>
+                <div
                   className={cn(
-                    "mr-3 h-5 w-5 flex-shrink-0",
-                    isActive ? "text-white" : "text-teal-200"
+                    "group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer",
+                    isActive
+                      ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   )}
-                />
-                {item.name}
-              </div>
-            </Link>
-          );
-        })}
+                >
+                  <item.icon
+                    className={cn(
+                      "mr-3 h-5 w-5 flex-shrink-0",
+                      isActive ? "text-blue-600" : "text-gray-400 group-hover:text-gray-500"
+                    )}
+                  />
+                  {item.name}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-teal-500/30 p-4">
-        <div className="flex items-center rounded-lg bg-teal-700/50 px-3 py-2">
-          <Settings className="mr-3 h-4 w-4 text-teal-200" />
-          <span className="text-sm text-teal-100">설정</span>
+      <div className="border-t border-gray-100 p-4">
+        <div className="flex items-center rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-50 cursor-pointer">
+          <Settings className="mr-3 h-4 w-4 text-gray-400" />
+          <span className="text-sm">설정</span>
         </div>
       </div>
     </div>

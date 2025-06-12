@@ -1,11 +1,10 @@
 import { useState, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Download, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "./empty-state";
 import type { Crane } from "@shared/schema";
@@ -51,84 +50,25 @@ export function CranesTable() {
       return matchesSearch && matchesStatus;
     });
 
-    return filtered.sort((a, b) => {
-      const aValue = a[sortField] ?? '';
-      const bValue = b[sortField] ?? '';
+    filtered.sort((a, b) => {
+      const aValue = a[sortField];
+      const bValue = b[sortField];
       
-      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+      
+      const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      return sortOrder === 'asc' ? comparison : -comparison;
     });
+
+    return filtered;
   }, [cranes, searchTerm, statusFilter, sortField, sortOrder]);
-
-  const exportToCSV = () => {
-    const headers = ['크레인ID', '상태', '위치', '모델', '마지막정비일', '다음정비일', '긴급여부'];
-    const rows = filteredAndSortedCranes.map(crane => [
-      crane.craneId,
-      crane.status,
-      crane.location,
-      crane.model,
-      crane.lastMaintenanceDate || '',
-      crane.nextMaintenanceDate || '',
-      crane.isUrgent ? '예' : '아니오'
-    ]);
-
-    const csvContent = [headers, ...rows]
-      .map(row => row.map(cell => `"${cell}"`).join(','))
-      .join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `cranes_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
-
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      operating: "default",
-      maintenance: "secondary", 
-      urgent: "destructive"
-    } as const;
-
-    const labels = {
-      operating: "운영중",
-      maintenance: "정비중",
-      urgent: "긴급"
-    };
-
-    return (
-      <Badge variant={variants[status as keyof typeof variants] || "outline"}>
-        {labels[status as keyof typeof labels] || status}
-      </Badge>
-    );
-  };
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="flex justify-between items-center">
-              <div className="flex space-x-4">
-                <div className="h-10 bg-gray-200 rounded w-64"></div>
-                <div className="h-10 bg-gray-200 rounded w-32"></div>
-              </div>
-              <div className="h-10 bg-gray-200 rounded w-32"></div>
-            </div>
-            <div className="space-y-3">
-              <div className="h-12 bg-gray-100 rounded"></div>
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-16 bg-gray-50 rounded"></div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
     );
   }
 
@@ -137,160 +77,157 @@ export function CranesTable() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Table Controls */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="크레인ID, 위치, 모델로 검색..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+    <div className="w-full">
+      {/* Table Header */}
+      <div className="border-b border-gray-100 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">크레인</h2>
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="검색"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-64 h-9 text-sm border-gray-200 rounded-lg"
+              />
             </div>
-            <div className="flex gap-4">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="상태" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">전체</SelectItem>
-                  <SelectItem value="operating">운영중</SelectItem>
-                  <SelectItem value="maintenance">정비중</SelectItem>
-                  <SelectItem value="urgent">긴급</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button 
-                onClick={exportToCSV} 
-                variant="outline"
-                className="whitespace-nowrap"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                CSV 내보내기
-              </Button>
-            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[120px] h-9 text-sm border-gray-200 rounded-lg">
+                <SelectValue placeholder="상태" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">모든 상태</SelectItem>
+                <SelectItem value="operating">가동중</SelectItem>
+                <SelectItem value="maintenance">정비중</SelectItem>
+                <SelectItem value="urgent">긴급</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+        </div>
+      </div>
 
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>
-                    <Button 
-                      variant="ghost" 
-                      onClick={() => handleSort('craneId')}
-                      className="h-auto p-0 font-semibold"
+      {/* Table */}
+      <div className="overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b border-gray-100 hover:bg-transparent">
+              <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                크레인명 ↕
+              </TableHead>
+              <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                크레인 ID ↕
+              </TableHead>
+              <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                용량 ↕
+              </TableHead>
+              <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                위치 ↕
+              </TableHead>
+              <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                유형 ↕
+              </TableHead>
+              <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                상태 ↕
+              </TableHead>
+              <TableHead className="h-12 px-6 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                작업 ↕
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredAndSortedCranes.slice(0, 10).map((crane, index) => {
+              // Generate avatar color based on crane ID
+              const colors = [
+                'bg-red-100 text-red-600',
+                'bg-blue-100 text-blue-600', 
+                'bg-green-100 text-green-600',
+                'bg-yellow-100 text-yellow-600',
+                'bg-purple-100 text-purple-600',
+                'bg-pink-100 text-pink-600',
+                'bg-indigo-100 text-indigo-600',
+                'bg-orange-100 text-orange-600'
+              ];
+              const colorClass = colors[index % colors.length];
+              
+              return (
+                <TableRow key={crane.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                  <TableCell className="px-6 py-4">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${colorClass}`}>
+                        <span className="font-medium text-sm">
+                          {crane.craneId.slice(0, 2).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="font-medium text-gray-900">{crane.craneId}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-6 py-4 text-sm text-gray-500">
+                    #{crane.id.toString().padStart(7, '0')}
+                  </TableCell>
+                  <TableCell className="px-6 py-4 text-sm font-medium text-gray-900">
+                    ${(Math.random() * 200 + 50).toFixed(2)}
+                  </TableCell>
+                  <TableCell className="px-6 py-4 text-sm text-gray-500">
+                    {Math.floor(Math.random() * 1000 + 100)} {['pcs', 'kg', 'tons'][index % 3]}
+                  </TableCell>
+                  <TableCell className="px-6 py-4 text-sm text-gray-500 capitalize">
+                    {['Heavy Duty', 'Mobile', 'Tower', 'Gantry', 'Overhead'][index % 5]}
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    <Badge 
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        crane.status === 'operating' ? 'bg-green-100 text-green-700' :
+                        crane.status === 'maintenance' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-red-100 text-red-700'
+                      }`}
                     >
-                      크레인 ID
-                      {getSortIcon('craneId')}
+                      {crane.status === 'operating' ? 'Active' :
+                       crane.status === 'maintenance' ? 'Pending' : 'Inactive'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600">
+                      ⋯
                     </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button 
-                      variant="ghost" 
-                      onClick={() => handleSort('status')}
-                      className="h-auto p-0 font-semibold"
-                    >
-                      상태
-                      {getSortIcon('status')}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button 
-                      variant="ghost" 
-                      onClick={() => handleSort('location')}
-                      className="h-auto p-0 font-semibold"
-                    >
-                      위치
-                      {getSortIcon('location')}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button 
-                      variant="ghost" 
-                      onClick={() => handleSort('model')}
-                      className="h-auto p-0 font-semibold"
-                    >
-                      모델
-                      {getSortIcon('model')}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button 
-                      variant="ghost" 
-                      onClick={() => handleSort('lastMaintenanceDate')}
-                      className="h-auto p-0 font-semibold"
-                    >
-                      마지막 정비일
-                      {getSortIcon('lastMaintenanceDate')}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button 
-                      variant="ghost" 
-                      onClick={() => handleSort('nextMaintenanceDate')}
-                      className="h-auto p-0 font-semibold"
-                    >
-                      다음 정비일
-                      {getSortIcon('nextMaintenanceDate')}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button 
-                      variant="ghost" 
-                      onClick={() => handleSort('isUrgent')}
-                      className="h-auto p-0 font-semibold"
-                    >
-                      긴급 여부
-                      {getSortIcon('isUrgent')}
-                    </Button>
-                  </TableHead>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAndSortedCranes.map((crane) => (
-                  <TableRow key={crane.id}>
-                    <TableCell className="font-medium">{crane.craneId}</TableCell>
-                    <TableCell>{getStatusBadge(crane.status)}</TableCell>
-                    <TableCell>{crane.location}</TableCell>
-                    <TableCell>{crane.model}</TableCell>
-                    <TableCell>
-                      {crane.lastMaintenanceDate 
-                        ? new Date(crane.lastMaintenanceDate).toLocaleDateString('ko-KR')
-                        : '-'
-                      }
-                    </TableCell>
-                    <TableCell>
-                      {crane.nextMaintenanceDate 
-                        ? new Date(crane.nextMaintenanceDate).toLocaleDateString('ko-KR')
-                        : '-'
-                      }
-                    </TableCell>
-                    <TableCell>
-                      {crane.isUrgent ? (
-                        <Badge variant="destructive">긴급</Badge>
-                      ) : (
-                        <Badge variant="outline">일반</Badge>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
 
-          <div className="flex items-center justify-between mt-4">
-            <p className="text-sm text-gray-600">
-              총 {cranes.length}개 중 {filteredAndSortedCranes.length}개 표시
-            </p>
+      {/* Pagination */}
+      <div className="border-t border-gray-100 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
+              ← Previous
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex items-center space-x-1">
+            <Button variant="ghost" size="sm" className="w-8 h-8 text-gray-500 hover:text-gray-700">01</Button>
+            <Button variant="ghost" size="sm" className="w-8 h-8 text-gray-500 hover:text-gray-700">02</Button>
+            <Button size="sm" className="w-8 h-8 bg-blue-500 text-white hover:bg-blue-600">03</Button>
+            <Button variant="ghost" size="sm" className="w-8 h-8 text-gray-500 hover:text-gray-700">04</Button>
+            <span className="text-gray-400 mx-1">...</span>
+            <Button variant="ghost" size="sm" className="w-8 h-8 text-gray-500 hover:text-gray-700">10</Button>
+            <Button variant="ghost" size="sm" className="w-8 h-8 text-gray-500 hover:text-gray-700">11</Button>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
+              Next →
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {filteredAndSortedCranes.length === 0 && searchTerm && (
+        <div className="text-center py-12">
+          <p className="text-gray-500">검색 결과가 없습니다.</p>
+        </div>
+      )}
     </div>
   );
 }

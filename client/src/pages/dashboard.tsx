@@ -338,39 +338,40 @@ export default function Dashboard() {
       {showEmptyState ? (
         <EmptyState type="general" />
       ) : (
-        <Card className="border-0 shadow-lg">
-          <Tabs defaultValue="analytics" className="w-full">
-            <CardHeader className="border-b bg-gradient-to-r from-gray-50 to-gray-100">
-              <TabsList className="grid w-full grid-cols-5 bg-white">
-                <TabsTrigger value="analytics" className="flex items-center space-x-2">
+        <div className="bg-white rounded-lg border border-gray-200">
+          <Tabs defaultValue="cranes" className="w-full">
+            <div className="border-b border-gray-100 px-6 py-4">
+              <TabsList className="bg-gray-50 p-1 rounded-lg">
+                <TabsTrigger value="cranes" className="flex items-center space-x-2 px-4 py-2">
+                  <Factory className="w-4 h-4" />
+                  <span>크레인</span>
+                </TabsTrigger>
+                <TabsTrigger value="analytics" className="flex items-center space-x-2 px-4 py-2">
                   <BarChart3 className="w-4 h-4" />
                   <span>분석</span>
                 </TabsTrigger>
-                <TabsTrigger value="cranes" className="flex items-center space-x-2">
-                  <Factory className="w-4 h-4" />
-                  <span>크레인 목록</span>
-                </TabsTrigger>
-                <TabsTrigger value="failures" className="flex items-center space-x-2">
+                <TabsTrigger value="failures" className="flex items-center space-x-2 px-4 py-2">
                   <AlertTriangle className="w-4 h-4" />
                   <span>고장 이력</span>
                 </TabsTrigger>
-                <TabsTrigger value="maintenance" className="flex items-center space-x-2">
+                <TabsTrigger value="maintenance" className="flex items-center space-x-2 px-4 py-2">
                   <Wrench className="w-4 h-4" />
                   <span>정비 이력</span>
                 </TabsTrigger>
-                <TabsTrigger value="alerts" className="flex items-center space-x-2">
+                <TabsTrigger value="alerts" className="flex items-center space-x-2 px-4 py-2">
                   <Calendar className="w-4 h-4" />
                   <span>알림</span>
                 </TabsTrigger>
               </TabsList>
-            </CardHeader>
-            <CardContent className="p-6">
-              <TabsContent value="analytics" className="mt-0">
-                <AnalyticsTab summary={summary || defaultSummary} />
-              </TabsContent>
-              
+            </div>
+            
+            <div className="p-0">
               <TabsContent value="cranes" className="mt-0">
                 <CranesTable />
+              </TabsContent>
+              
+              <TabsContent value="analytics" className="mt-0 p-6">
+                <AnalyticsTab summary={summary || defaultSummary} />
               </TabsContent>
               
               <TabsContent value="failures" className="mt-0">
@@ -381,12 +382,12 @@ export default function Dashboard() {
                 <MaintenanceTable />
               </TabsContent>
               
-              <TabsContent value="alerts" className="mt-0">
+              <TabsContent value="alerts" className="mt-0 p-6">
                 <AlertsTab />
               </TabsContent>
-            </CardContent>
+            </div>
           </Tabs>
-        </Card>
+        </div>
       )}
     </div>
   );

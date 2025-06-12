@@ -35,10 +35,22 @@ export function Topbar() {
     setShowResults(value.length > 0);
   };
   return (
-    <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-      {/* Left side - could be used for breadcrumbs or additional navigation */}
-      <div className="flex items-center space-x-4">
-        <span className="text-sm text-gray-500">관리자 대시보드</span>
+    <div className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6">
+      {/* Left side - Page title and filters */}
+      <div className="flex items-center space-x-6">
+        <h1 className="text-xl font-semibold text-gray-900">대시보드</h1>
+        <div className="flex items-center space-x-4">
+          <Button variant="outline" size="sm" className="text-gray-600 border-gray-200">
+            <span className="mr-2">표시 중</span>
+            <span className="font-medium">10</span>
+          </Button>
+          <Button variant="outline" size="sm" className="text-gray-600 border-gray-200">
+            필터
+          </Button>
+          <Button variant="outline" size="sm" className="text-gray-600 border-gray-200">
+            내보내기
+          </Button>
+        </div>
       </div>
 
       {/* Center - Search */}
@@ -107,67 +119,45 @@ export function Topbar() {
         )}
       </div>
 
-      {/* Right side - Notifications and Profile */}
+      {/* Right side - Add New Product and Profile */}
       <div className="flex items-center space-x-4">
+        <Button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+          + 새 크레인 추가
+        </Button>
+        
         {/* Notifications */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="h-5 w-5" />
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs p-0"
-              >
-                3
-              </Badge>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel>알림</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">크레인 4P1001183 정비 필요</p>
-                <p className="text-xs text-gray-500">다음 정비까지 2일 남음</p>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">긴급 고장 발생</p>
-                <p className="text-xs text-gray-500">크레인 4P1029392에서 전기적 문제 발생</p>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">월간 정비 보고서 완료</p>
-                <p className="text-xs text-gray-500">11월 정비 현황 업데이트됨</p>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-center">
-              <span className="text-sm text-teal-600">모든 알림 보기</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button variant="ghost" size="sm" className="relative text-gray-400 hover:text-gray-600">
+          <Bell className="h-5 w-5" />
+          <Badge 
+            variant="destructive" 
+            className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center text-xs p-0"
+          >
+            3
+          </Badge>
+        </Button>
 
         {/* User Profile */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Button variant="ghost" className="flex items-center space-x-2 hover:bg-gray-50">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="" alt="관리자" />
-                <AvatarFallback className="bg-teal-100 text-teal-700">
-                  관리
+                <AvatarImage src="" alt="Jane Cooper" />
+                <AvatarFallback className="bg-blue-100 text-blue-700 text-sm">
+                  JC
                 </AvatarFallback>
               </Avatar>
+              <div className="text-left">
+                <p className="text-sm font-medium text-gray-900">Jane Cooper</p>
+                <p className="text-xs text-gray-500">jane@example.com</p>
+              </div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">시스템 관리자</p>
+                <p className="text-sm font-medium leading-none">Jane Cooper</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  admin@company.com
+                  jane@example.com
                 </p>
               </div>
             </DropdownMenuLabel>
