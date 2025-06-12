@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, User, Calendar, Filter, Search as SearchIcon } from "lucide-react";
+import { Bell, User, Calendar, Filter, Search as SearchIcon, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -9,6 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,10 +31,26 @@ export function Topbar() {
   const [selectedPeriod, setSelectedPeriod] = useState("1개월");
   const [selectedFactory, setSelectedFactory] = useState("");
   const [selectedCrane, setSelectedCrane] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [dateMode, setDateMode] = useState<"period" | "range">("period");
 
   const handleSearch = () => {
     // 조회 로직 실행
-    console.log("Searching with:", { selectedFactory, selectedCrane, selectedPeriod });
+    if (dateMode === "period") {
+      console.log("Searching with period:", { selectedFactory, selectedCrane, selectedPeriod });
+    } else {
+      console.log("Searching with date range:", { selectedFactory, selectedCrane, startDate, endDate });
+    }
+  };
+
+  const handlePeriodSelect = (period: string) => {
+    setSelectedPeriod(period);
+    setDateMode("period");
+  };
+
+  const handleDateRangeMode = () => {
+    setDateMode("range");
   };
 
   const handleSelectionChange = (factory?: string, crane?: string) => {
@@ -45,20 +67,106 @@ export function Topbar() {
 
       {/* Right side - Date Selection, Search Button and Profile */}
       <div className="flex items-center space-x-4">
-        {/* Date Period Selection */}
+        {/* Period Selection Buttons */}
         <div className="flex items-center space-x-2">
           <Calendar className="w-4 h-4 text-gray-500" />
-          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger className="w-[120px] h-9 text-sm">
-              <SelectValue placeholder="기간 선택" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1개월">최근 1개월</SelectItem>
-              <SelectItem value="3개월">최근 3개월</SelectItem>
-              <SelectItem value="6개월">최근 6개월</SelectItem>
-              <SelectItem value="1년">최근 1년</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex space-x-1">
+            <Button
+              variant={dateMode === "period" && selectedPeriod === "1개월" ? "default" : "outline"}
+              size="sm"
+              onClick={() => handlePeriodSelect("1개월")}
+              className="h-8 px-3 text-xs"
+            >
+              1개월
+            </Button>
+            <Button
+              variant={dateMode === "period" && selectedPeriod === "3개월" ? "default" : "outline"}
+              size="sm"
+              onClick={() => handlePeriodSelect("3개월")}
+              className="h-8 px-3 text-xs"
+            >
+              3개월
+            </Button>
+            <Button
+              variant={dateMode === "period" && selectedPeriod === "6개월" ? "default" : "outline"}
+              size="sm"
+              onClick={() => handlePeriodSelect("6개월")}
+              className="h-8 px-3 text-xs"
+            >
+              6개월
+            </Button>
+            <Button
+              variant={dateMode === "period" && selectedPeriod === "1년" ? "default" : "outline"}
+              size="sm"
+              onClick={() => handlePeriodSelect("1년")}
+              className="h-8 px-3 text-xs"
+            >
+              1년
+            </Button>
+          </div>
+        </div>
+
+        {/* Date Range Selection */}
+        <div className="flex items-center space-x-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={dateMode === "range" ? "default" : "outline"}
+                size="sm"
+                onClick={handleDateRangeMode}
+                className="h-8 px-3 text-xs flex items-center space-x-1"
+              >
+                <CalendarDays className="w-3 h-3" />
+                <span>기간 지정</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4" align="end">
+              <div className="space-y-4">
+                <div className="text-sm font-medium">기간 설정</div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">시작일자</label>
+                    <Input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="h-8 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">종료일자</label>
+                    <Input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="h-8 text-xs"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setStartDate("");
+                      setEndDate("");
+                      setDateMode("period");
+                    }}
+                    className="h-7 px-3 text-xs"
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setDateMode("range")}
+                    className="h-7 px-3 text-xs"
+                  >
+                    적용
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Search Button */}
@@ -70,17 +178,6 @@ export function Topbar() {
           <span>조회</span>
         </Button>
         
-        {/* Notifications */}
-        <Button variant="ghost" size="sm" className="relative text-gray-400 hover:text-gray-600">
-          <Bell className="h-5 w-5" />
-          <Badge 
-            variant="destructive" 
-            className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center text-xs p-0"
-          >
-            3
-          </Badge>
-        </Button>
-
         {/* User Profile */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
