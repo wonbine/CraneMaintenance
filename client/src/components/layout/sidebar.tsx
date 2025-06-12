@@ -19,21 +19,21 @@ export function Sidebar() {
   const [location] = useLocation();
 
   return (
-    <div className="flex h-screen w-64 flex-col bg-white border-r border-gray-200">
+    <div className="flex h-screen w-80 flex-col bg-white border-r border-gray-200">
       {/* Header */}
-      <div className="flex h-16 items-center px-6 border-b border-gray-100">
+      <div className="flex h-20 items-center px-8 border-b border-gray-100">
         <div className="flex items-center space-x-3">
           <img 
             src="/src/assets/pocrane-logo.png" 
             alt="PoCRANE Logo" 
-            className="h-10 w-auto max-w-[180px] object-contain"
+            className="h-12 w-auto max-w-[220px] object-contain"
           />
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6">
-        <div className="space-y-1">
+      <nav className="flex-1 px-6 py-8">
+        <div className="space-y-2">
           {navigation.map((item) => {
             const isActive = location === item.href;
             return (
@@ -41,7 +41,7 @@ export function Sidebar() {
                 key={item.name} 
                 href={item.href}
                 className={cn(
-                  "group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer",
+                  "group flex items-center rounded-lg px-4 py-3.5 text-base font-medium transition-all duration-200 cursor-pointer",
                   isActive
                     ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -49,7 +49,7 @@ export function Sidebar() {
               >
                 <item.icon
                   className={cn(
-                    "mr-3 h-5 w-5 flex-shrink-0",
+                    "mr-4 h-6 w-6 flex-shrink-0",
                     isActive ? "text-blue-600" : "text-gray-400 group-hover:text-gray-500"
                   )}
                 />
