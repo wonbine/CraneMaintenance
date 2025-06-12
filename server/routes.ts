@@ -155,6 +155,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get maintenance records by crane ID
+  app.get("/api/maintenance-records/:craneId", async (req, res) => {
+    try {
+      const { craneId } = req.params;
+      const records = await storage.getMaintenanceRecordsByCraneId(craneId);
+      res.json(records);
+    } catch (error) {
+      console.error("Error fetching maintenance records for crane:", error);
+      res.status(500).json({ message: "Failed to fetch maintenance records for crane" });
+    }
+  });
+
   // Get maintenance statistics
   app.get("/api/analytics/maintenance-stats", async (req, res) => {
     try {

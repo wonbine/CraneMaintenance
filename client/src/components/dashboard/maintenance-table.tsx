@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Settings, Clock, Users, Wrench } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import type { Crane } from "@shared/schema";
 
 interface MaintenanceRecord {
   id: number;
@@ -28,7 +29,7 @@ export function MaintenanceTable() {
   const [selectedCrane, setSelectedCrane] = useState("");
 
   // Fetch crane data for the dropdowns
-  const { data: cranes = [] } = useQuery({
+  const { data: cranes = [] } = useQuery<Crane[]>({
     queryKey: ["/api/cranes"],
   });
 
@@ -40,20 +41,20 @@ export function MaintenanceTable() {
 
   // Get unique factories from cranes
   const factories = useMemo(() => {
-    const uniqueFactories = [...new Set(cranes.map((crane: any) => crane.plantSection).filter(Boolean))];
+    const uniqueFactories = Array.from(new Set(cranes.map(crane => crane.plantSection).filter((f): f is string => Boolean(f))));
     return uniqueFactories.sort();
   }, [cranes]);
 
   // Get cranes for selected factory
   const filteredCranes = useMemo(() => {
     if (!selectedFactory) return cranes;
-    return cranes.filter((crane: any) => crane.plantSection === selectedFactory);
+    return cranes.filter(crane => crane.plantSection === selectedFactory);
   }, [cranes, selectedFactory]);
 
   // Reset crane selection when factory changes
   useEffect(() => {
     if (selectedFactory && selectedCrane) {
-      const craneExists = filteredCranes.some((crane: any) => crane.craneId === selectedCrane);
+      const craneExists = filteredCranes.some(crane => crane.craneId === selectedCrane);
       if (!craneExists) {
         setSelectedCrane("");
       }
