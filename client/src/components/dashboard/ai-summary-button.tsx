@@ -28,22 +28,28 @@ export function AISummaryButton() {
   const generateSummary = async () => {
     setIsGenerating(true);
     try {
-      const response = await apiRequest("/api/ai-summary", {
+      const response = await fetch("/api/ai-summary", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-      }) as AISummaryResponse;
+      });
 
-      if (response.success) {
-        setSummaryData(response);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: AISummaryResponse = await response.json();
+
+      if (data.success) {
+        setSummaryData(data);
         setIsDialogOpen(true);
         toast({
           title: "AI 요약 보고서 생성 완료",
           description: "대시보드 데이터 분석이 완료되었습니다.",
         });
       } else {
-        throw new Error(response.error || "요약 생성 실패");
+        throw new Error(data.error || "요약 생성 실패");
       }
     } catch (error) {
       console.error("AI Summary generation failed:", error);
