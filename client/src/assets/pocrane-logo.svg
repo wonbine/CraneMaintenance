@@ -1,0 +1,27 @@
+<svg width="120" height="32" viewBox="0 0 400 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Crane illustration -->
+  <g transform="translate(0, 10)">
+    <!-- Main crane body -->
+    <path d="M20 45 L35 30 L50 45 L65 25 L80 40 L95 20 L110 35" stroke="#2C5F5F" stroke-width="3" fill="none"/>
+    <!-- Crane base -->
+    <rect x="15" y="45" width="25" height="15" rx="2" fill="#2C5F5F"/>
+    <!-- Chart/Analytics box -->
+    <rect x="18" y="35" width="15" height="12" rx="1" fill="#2C5F5F"/>
+    <!-- Chart bars -->
+    <rect x="20" y="40" width="2" height="5" fill="white"/>
+    <rect x="23" y="38" width="2" height="7" fill="white"/>
+    <rect x="26" y="36" width="2" height="9" fill="white"/>
+    <rect x="29" y="39" width="2" height="6" fill="white"/>
+    <!-- Hook -->
+    <circle cx="110" cy="35" r="2" fill="#2C5F5F"/>
+    <line x1="110" y1="37" x2="110" y2="45" stroke="#2C5F5F" stroke-width="2"/>
+  </g>
+  
+  <!-- PoCRANE Text -->
+  <g transform="translate(130, 15)">
+    <!-- Po -->
+    <text x="0" y="35" font-family="Arial, sans-serif" font-size="40" font-weight="bold" fill="#FF8C42">Po</text>
+    <!-- CRANE -->
+    <text x="65" y="35" font-family="Arial, sans-serif" font-size="40" font-weight="bold" fill="#1E4A72">CRANE</text>
+  </g>
+</svg>

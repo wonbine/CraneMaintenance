@@ -22,11 +22,12 @@ export function Sidebar() {
     <div className="flex h-screen w-64 flex-col bg-white border-r border-gray-200">
       {/* Header */}
       <div className="flex h-16 items-center px-6 border-b border-gray-100">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">CM</span>
-          </div>
-          <h1 className="text-lg font-semibold text-gray-900">크레인 관리</h1>
+        <div className="flex items-center space-x-3">
+          <img 
+            src="/src/assets/pocrane-logo.svg" 
+            alt="PoCRANE Logo" 
+            className="h-8 w-auto"
+          />
         </div>
       </div>
 
