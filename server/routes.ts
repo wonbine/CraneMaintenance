@@ -264,9 +264,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         maintenanceSheetName
       } = req.body;
       
-      if (!cranesSpreadsheetId || !failureSpreadsheetId || !maintenanceSpreadsheetId) {
+      if (!cranesSpreadsheetId) {
         return res.status(400).json({ 
-          message: "모든 스프레드시트 ID가 필요합니다: 크레인, 고장, 수리 이력" 
+          message: "크레인 스프레드시트 ID가 필요합니다." 
         });
       }
 
@@ -277,12 +277,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Fetch data from all sheets
-      const [cranesData, failureData, maintenanceData] = await Promise.all([
-        fetchGoogleSheetData(cranesSpreadsheetId, apiKey, cranesSheetName),
-        fetchGoogleSheetData(failureSpreadsheetId, apiKey, failureSheetName),
-        fetchGoogleSheetData(maintenanceSpreadsheetId, apiKey, maintenanceSheetName)
-      ]);
+      // Fetch crane data (required) and optional failure/maintenance data
+      const cranesData = await fetchGoogleSheetData(cranesSpreadsheetId, apiKey, cranesSheetName);
+      
+      let failureData = [];
+      let maintenanceData = [];
+      
+      // Fetch optional failure and maintenance data if provided
+      if (failureSpreadsheetId && failureSheetName) {
+        try {
+          failureData = await fetchGoogleSheetData(failureSpreadsheetId, apiKey, failureSheetName);
+        } catch (error) {
+          console.log('Failure data not available:', error.message);
+        }
+      }
+      
+      if (maintenanceSpreadsheetId && maintenanceSheetName) {
+        try {
+          maintenanceData = await fetchGoogleSheetData(maintenanceSpreadsheetId, apiKey, maintenanceSheetName);
+        } catch (error) {
+          console.log('Maintenance data not available:', error.message);
+        }
+      }
       
       // Sync to storage
       await storage.syncDataFromSheets(cranesData, failureData, maintenanceData);
