@@ -206,6 +206,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test Google Sheets connection
+  app.post("/api/test-sheets", async (req, res) => {
+    try {
+      const { spreadsheetId, sheetName } = req.body;
+      
+      if (!spreadsheetId) {
+        return res.status(400).json({ 
+          message: "스프레드시트 ID가 필요합니다." 
+        });
+      }
+
+      const apiKey = process.env.GOOGLE_SHEETS_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ 
+          message: "Google Sheets API 키가 설정되지 않았습니다." 
+        });
+      }
+
+      const data = await fetchGoogleSheetData(spreadsheetId, apiKey, sheetName);
+      
+      if (data.length === 0) {
+        return res.json({ 
+          message: "데이터를 찾을 수 없습니다.",
+          rowCount: 0,
+          headers: []
+        });
+      }
+
+      const headers = Object.keys(data[0]);
+      
+      res.json({ 
+        message: "연결 성공",
+        rowCount: data.length,
+        headers: headers,
+        sampleData: data.slice(0, 3) // First 3 rows as sample
+      });
+    } catch (error) {
+      console.error("Error testing sheets connection:", error);
+      res.status(500).json({ message: error instanceof Error ? error.message : "Google Sheets 연결 테스트 실패" });
+    }
+  });
+
   // Sync data from Google Sheets API
   app.post("/api/sync-sheets", async (req, res) => {
     try {

@@ -30,9 +30,9 @@ export default function Dashboard() {
   const [cranesSpreadsheetId, setCranesSpreadsheetId] = useState("");
   const [failureSpreadsheetId, setFailureSpreadsheetId] = useState("");
   const [maintenanceSpreadsheetId, setMaintenanceSpreadsheetId] = useState("");
-  const [cranesSheetName, setCranesSheetName] = useState("");
-  const [failureSheetName, setFailureSheetName] = useState("");
-  const [maintenanceSheetName, setMaintenanceSheetName] = useState("");
+  const [cranesSheetName, setCranesSheetName] = useState("CraneList");
+  const [failureSheetName, setFailureSheetName] = useState("FailureHistory");
+  const [maintenanceSheetName, setMaintenanceSheetName] = useState("MaintenanceHistory");
 
   const { toast } = useToast();
 
