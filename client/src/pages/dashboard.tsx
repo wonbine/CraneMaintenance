@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RefreshCw, Factory, BarChart3, Table, Bell, Settings } from "lucide-react";
+import { RefreshCw, Factory, BarChart3, Table, Bell, Settings, AlertTriangle } from "lucide-react";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { AnalyticsTab } from "@/components/dashboard/analytics-tab";
 import { MaintenanceTable } from "@/components/dashboard/maintenance-table";
+import { FailureTable } from "@/components/dashboard/failure-table";
 import { AlertsTab } from "@/components/dashboard/alerts-tab";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -30,8 +31,8 @@ export default function Dashboard() {
   });
 
   const refreshMutation = useMutation({
-    mutationFn: async (urls?: { cranesUrl: string; failureUrl: string; maintenanceUrl: string }) => {
-      const response = await apiRequest("POST", "/api/refresh-data", urls);
+    mutationFn: async (urls?: { cranesUrl?: string; failureUrl?: string; maintenanceUrl?: string }) => {
+      const response = await apiRequest("POST", "/api/refresh-data", urls || {});
       return response.json();
     },
     onSuccess: (data) => {
@@ -83,15 +84,15 @@ export default function Dashboard() {
   };
 
   const handleSync = () => {
-    if (!cranesUrl || !maintenanceUrl) {
+    if (!cranesUrl || !failureUrl || !maintenanceUrl) {
       toast({
         title: "Configuration Required",
-        description: "Please provide both Google Sheets URLs.",
+        description: "Please provide all three Google Sheets URLs.",
         variant: "destructive",
       });
       return;
     }
-    syncMutation.mutate({ cranesUrl, maintenanceUrl });
+    syncMutation.mutate({ cranesUrl, failureUrl, maintenanceUrl });
   };
 
   const defaultSummary: DashboardSummary = {
@@ -129,7 +130,7 @@ export default function Dashboard() {
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="cranes-url">Cranes Sheet CSV URL</Label>
+                      <Label htmlFor="cranes-url">크레인 목록 시트 CSV URL</Label>
                       <Input
                         id="cranes-url"
                         placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv"
@@ -138,7 +139,16 @@ export default function Dashboard() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="maintenance-url">Maintenance Sheet CSV URL</Label>
+                      <Label htmlFor="failure-url">고장 이력 시트 CSV URL</Label>
+                      <Input
+                        id="failure-url"
+                        placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv"
+                        value={failureUrl}
+                        onChange={(e) => setFailureUrl(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="maintenance-url">수리 이력 시트 CSV URL</Label>
                       <Input
                         id="maintenance-url"
                         placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv"
@@ -200,27 +210,34 @@ export default function Dashboard() {
           <Tabs defaultValue="analytics" className="w-full">
             <div className="border-b border-gray-200">
               <div className="px-6">
-                <TabsList className="grid w-full grid-cols-3 bg-transparent">
+                <TabsList className="grid w-full grid-cols-4 bg-transparent">
                   <TabsTrigger 
                     value="analytics" 
                     className="flex items-center space-x-2 data-[state=active]:border-b-2 data-[state=active]:border-primary-500 data-[state=active]:text-primary-600"
                   >
                     <BarChart3 className="w-4 h-4" />
-                    <span>Analytics</span>
+                    <span>분석</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="failures"
+                    className="flex items-center space-x-2 data-[state=active]:border-b-2 data-[state=active]:border-primary-500 data-[state=active]:text-primary-600"
+                  >
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>고장 이력</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="maintenance"
                     className="flex items-center space-x-2 data-[state=active]:border-b-2 data-[state=active]:border-primary-500 data-[state=active]:text-primary-600"
                   >
                     <Table className="w-4 h-4" />
-                    <span>Maintenance History</span>
+                    <span>수리 이력</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="alerts"
                     className="flex items-center space-x-2 data-[state=active]:border-b-2 data-[state=active]:border-primary-500 data-[state=active]:text-primary-600"
                   >
                     <Bell className="w-4 h-4" />
-                    <span>Alerts</span>
+                    <span>알림</span>
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -229,6 +246,10 @@ export default function Dashboard() {
             <CardContent className="p-6">
               <TabsContent value="analytics" className="mt-0">
                 <AnalyticsTab summary={summary || defaultSummary} />
+              </TabsContent>
+              
+              <TabsContent value="failures" className="mt-0">
+                <FailureTable />
               </TabsContent>
               
               <TabsContent value="maintenance" className="mt-0">
