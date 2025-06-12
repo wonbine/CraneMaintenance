@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Factory } from 'lucide-react';
 import { useSearch } from '../contexts/SearchContext';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line } from 'recharts';
 
 export default function Dashboard() {
   const { filters } = useSearch();
@@ -345,13 +345,13 @@ export default function Dashboard() {
                             label={({ name, value, percentage }) => `${name}급\n${value}대\n${percentage}%`}
                             labelLine={false}
                           >
-                            {gradeChartData.map((entry, index) => (
+                            {gradeChartData.map((entry: any, index: number) => (
                               <Cell key={`cell-${index}`} fill={entry.fill} />
                             ))}
                           </Pie>
                           <Tooltip 
                             formatter={(value: any, name: string) => [
-                              `${value}대 (${gradeChartData.find(d => d.name === name)?.percentage}%)`,
+                              `${value}대 (${gradeChartData.find((d: any) => d.name === name)?.percentage}%)`,
                               name
                             ]}
                           />
