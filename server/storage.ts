@@ -1410,13 +1410,15 @@ export class DatabaseStorage implements IStorage {
 
   async getSystemOverview(): Promise<SystemOverview> {
     const cacheKey = 'system-overview';
-    // Clear cache to ensure fresh data
-    cache.clearKey(cacheKey);
     const cached = cache.get<SystemOverview>(cacheKey);
     if (cached) return cached;
 
     const cranes = await this.getCranes();
-    const factories = new Set(cranes.map(crane => crane.plantSection || '미분류'));
+    // Count only factories with actual plant sections (exclude null/undefined)
+    const factories = new Set(cranes
+      .map(crane => crane.plantSection)
+      .filter(section => section !== null && section !== undefined)
+    );
     
     const totalCranes = cranes.length;
     const mannedCranes = cranes.filter(crane => 
