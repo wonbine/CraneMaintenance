@@ -330,68 +330,6 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
         </Card>
       </div>
 
-      {/* 차트 섹션 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 월별 작업 추이 */}
-        <Card className="shadow-lg border-0 rounded-xl">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <BarChart3 className="w-5 h-5 text-blue-600" />
-              <span>월별 작업 추이</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={monthlyTrendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="돌발작업" fill="#ef4444" name="돌발작업" />
-                <Bar dataKey="일상수리" fill="#3b82f6" name="일상수리" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* 고장 원인 분포 */}
-        <Card className="shadow-lg border-0 rounded-xl">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <PieChartIcon className="w-5 h-5 text-purple-600" />
-              <span>고장 원인 분포</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {failureCauseData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={failureCauseData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percentage }) => `${name} (${percentage}%)`}
-                  >
-                    {failureCauseData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-500">
-                고장 데이터가 없습니다
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
       {/* 상세 정보 섹션 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 크레인 세부 정보 */}
@@ -431,6 +369,68 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                 </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* 월별 작업 추이 */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <BarChart3 className="w-5 h-5 text-blue-600" />
+              <span>월별 작업 추이</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={monthlyTrendData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="돌발작업" fill="#ef4444" name="돌발작업" />
+                <Bar dataKey="일상수리" fill="#3b82f6" name="일상수리" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 차트 섹션 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 고장 원인 분포 */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <PieChartIcon className="w-5 h-5 text-purple-600" />
+              <span>고장 원인 분포</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {failureCauseData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={failureCauseData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, percentage }) => `${name} (${percentage}%)`}
+                  >
+                    {failureCauseData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-500">
+                고장 데이터가 없습니다
+              </div>
+            )}
           </CardContent>
         </Card>
 
