@@ -1410,6 +1410,8 @@ export class DatabaseStorage implements IStorage {
 
   async getSystemOverview(): Promise<SystemOverview> {
     const cacheKey = 'system-overview';
+    // Clear cache to ensure fresh data after crane import
+    cache.clearKey(cacheKey);
     const cached = cache.get<SystemOverview>(cacheKey);
     if (cached) return cached;
 
