@@ -11,6 +11,7 @@ import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { AnalyticsTab } from "@/components/dashboard/analytics-tab";
 import { MaintenanceTable } from "@/components/dashboard/maintenance-table";
 import { FailureTable } from "@/components/dashboard/failure-table";
+import { CranesTable } from "@/components/dashboard/cranes-table";
 import { AlertsTab } from "@/components/dashboard/alerts-tab";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";

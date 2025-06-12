@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Download, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { EmptyState } from "./empty-state";
 import type { MaintenanceRecord } from "@shared/schema";
 
 type SortField = keyof MaintenanceRecord;
@@ -155,6 +156,10 @@ export function MaintenanceTable() {
         </CardContent>
       </Card>
     );
+  }
+
+  if (records.length === 0) {
+    return <EmptyState type="maintenance" />;
   }
 
   return (

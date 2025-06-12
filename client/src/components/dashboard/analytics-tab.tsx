@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from "recharts";
 import { useQuery } from "@tanstack/react-query";
+import { EmptyState, SampleDataGuide } from "./empty-state";
 import type { MaintenanceStats, MonthlyTrend, DashboardSummary } from "@shared/schema";
 
 interface AnalyticsTabProps {
@@ -53,6 +54,20 @@ export function AnalyticsTab({ summary }: AnalyticsTabProps) {
             <div className="h-64 bg-gray-100 rounded"></div>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  // Check if data is empty
+  const hasMaintenanceData = maintenanceStats && maintenanceStats.length > 0;
+  const hasTrendData = monthlyTrends && monthlyTrends.length > 0;
+  const hasAnyData = summary.totalCranes > 0;
+
+  if (!hasAnyData) {
+    return (
+      <div className="space-y-6">
+        <EmptyState type="general" />
+        <SampleDataGuide />
       </div>
     );
   }
