@@ -97,6 +97,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Factory and crane selection endpoints
+  app.get("/api/factories", async (req, res) => {
+    try {
+      const factories = await storage.getUniqueFactories();
+      res.json(factories);
+    } catch (error) {
+      console.error("Error fetching factories:", error);
+      res.status(500).json({ message: "Failed to fetch factories" });
+    }
+  });
+
+  app.get("/api/crane-names", async (req, res) => {
+    try {
+      const craneNames = await storage.getUniqueCraneNames();
+      res.json(craneNames);
+    } catch (error) {
+      console.error("Error fetching crane names:", error);
+      res.status(500).json({ message: "Failed to fetch crane names" });
+    }
+  });
+
+  app.get("/api/cranes/filtered", async (req, res) => {
+    try {
+      const { factory, craneName } = req.query;
+      const cranes = await storage.getCranesByFactoryAndName(
+        factory as string,
+        craneName as string
+      );
+      res.json(cranes);
+    } catch (error) {
+      console.error("Error fetching filtered cranes:", error);
+      res.status(500).json({ message: "Failed to fetch filtered cranes" });
+    }
+  });
+
   // Get maintenance records
   app.get("/api/maintenance-records", async (req, res) => {
     try {

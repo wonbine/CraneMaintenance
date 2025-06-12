@@ -16,7 +16,7 @@ import {
   type MonthlyTrend
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and, isNotNull } from "drizzle-orm";
 
 export interface IStorage {
   // Crane operations
@@ -733,27 +733,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUniqueFactories(): Promise<string[]> {
-    const result = await db.selectDistinct({ plantSection: cranes.plantSection }).from(cranes).where(isNotNull(cranes.plantSection));
+    const result = await db.selectDistinct({ plantSection: cranes.plantSection }).from(cranes);
     return result.map(r => r.plantSection).filter(Boolean).sort();
   }
 
   async getUniqueCraneNames(): Promise<string[]> {
-    const result = await db.selectDistinct({ craneName: cranes.craneName }).from(cranes).where(isNotNull(cranes.craneName));
+    const result = await db.selectDistinct({ craneName: cranes.craneName }).from(cranes);
     return result.map(r => r.craneName).filter(Boolean).sort();
   }
 
   async getCranesByFactoryAndName(factory?: string, craneName?: string): Promise<Crane[]> {
-    let query = db.select().from(cranes);
-    
     if (factory && craneName) {
-      query = query.where(and(eq(cranes.plantSection, factory), eq(cranes.craneName, craneName)));
+      return await db.select().from(cranes).where(eq(cranes.plantSection, factory));
     } else if (factory) {
-      query = query.where(eq(cranes.plantSection, factory));
+      return await db.select().from(cranes).where(eq(cranes.plantSection, factory));
     } else if (craneName) {
-      query = query.where(eq(cranes.craneName, craneName));
+      return await db.select().from(cranes).where(eq(cranes.craneName, craneName));
     }
     
-    return await query;
+    return await db.select().from(cranes);
   }
 
   async syncDataFromSheets(cranesData: any[], failureData: any[], maintenanceData: any[]): Promise<void> {
