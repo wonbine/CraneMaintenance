@@ -120,16 +120,16 @@ export function FailureTable() {
                   <TableRow className="bg-gray-50">
                     <TableHead className="text-center">순번</TableHead>
                     <TableHead>발생일</TableHead>
-                    <TableHead>증상</TableHead>
+                    <TableHead>고장내용</TableHead>
                     <TableHead>시작시간</TableHead>
                     <TableHead>종료시간</TableHead>
                     <TableHead className="text-center">작업시간</TableHead>
-                    <TableHead>교대조</TableHead>
-                    <TableHead>기계/전기</TableHead>
-                    <TableHead>부위</TableHead>
+                    <TableHead>정지시간</TableHead>
                     <TableHead>고장유형</TableHead>
-                    <TableHead>고장내용</TableHead>
-                    <TableHead>조치사항</TableHead>
+                    <TableHead>부위</TableHead>
+                    <TableHead>심각도</TableHead>
+                    <TableHead>상세내용</TableHead>
+                    <TableHead>원인</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -147,38 +147,42 @@ export function FailureTable() {
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">
-                        {record.symptom || '-'}
+                        {record.description || '-'}
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {record.startTime || '-'}
+                          {record.date ? new Date(record.date).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '-'}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {record.endTime || '-'}
+                          {record.date && record.worktime ? 
+                            new Date(new Date(record.date).getTime() + (parseFloat(record.worktime.toString()) * 60 * 60 * 1000)).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+                            : '-'}
                         </div>
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-1">
                           <Clock className="h-4 w-4 text-gray-400" />
                           <span className="font-medium">
-                            {record.workTime || 0}시간
+                            {record.worktime || 0}시간
                           </span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary" className="bg-blue-50 text-blue-700">
-                          {record.shiftType || '-'}
+                          {record.downtime ? `${record.downtime}H` : '-'}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={
-                          record.mechanicalElectrical === 'Mechanical' 
+                          record.failureType === 'Mechanical' 
                             ? 'bg-green-50 text-green-700 border-green-200'
-                            : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                            : record.failureType === 'Electrical'
+                            ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                            : 'bg-blue-50 text-blue-700 border-blue-200'
                         }>
-                          {record.mechanicalElectrical || '-'}
+                          {record.failureType || '-'}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -187,18 +191,23 @@ export function FailureTable() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm">
-                          {record.type || '-'}
+                        <Badge variant="outline" className={
+                          record.severity === 'critical' ? 'bg-red-50 text-red-700 border-red-200' :
+                          record.severity === 'high' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                          record.severity === 'medium' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                          'bg-green-50 text-green-700 border-green-200'
+                        }>
+                          {record.severity || '-'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="max-w-xs">
+                        <div className="truncate" title={record.description || ''}>
+                          {record.description || '-'}
                         </div>
                       </TableCell>
                       <TableCell className="max-w-xs">
-                        <div className="truncate" title={record.failureDetails || ''}>
-                          {record.failureDetails || '-'}
-                        </div>
-                      </TableCell>
-                      <TableCell className="max-w-xs">
-                        <div className="truncate" title={record.actionTaken || ''}>
-                          {record.actionTaken || '-'}
+                        <div className="truncate" title={record.cause || ''}>
+                          {record.cause || '-'}
                         </div>
                       </TableCell>
                     </TableRow>
