@@ -267,6 +267,20 @@ export default function Dashboard() {
     );
   }
 
+  // Helper function to format dates to yyyy-mm-dd
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return null;
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return null;
+      
+      return date.toISOString().split('T')[0]; // Returns yyyy-mm-dd format
+    } catch {
+      return dateString.split('T')[0]; // Fallback for already formatted strings
+    }
+  };
+
   const crane = craneDetails?.crane;
   const dailyRepairData = craneDetails ? [
     { type: "정기점검", count: craneDetails.dailyRepairBreakdown.routine, color: "#3b82f6" },
@@ -366,14 +380,14 @@ export default function Dashboard() {
               {crane?.installationDate && (
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">설치일자</span>
-                  <span className="text-sm font-medium">{crane.installationDate.split('T')[0]}</span>
+                  <span className="text-sm font-medium">{formatDate(crane.installationDate)}</span>
                 </div>
               )}
               
               {crane?.inspectionReferenceDate && (
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">점검기준일</span>
-                  <span className="text-sm font-medium">{crane.inspectionReferenceDate.split('T')[0]}</span>
+                  <span className="text-sm font-medium">{formatDate(crane.inspectionReferenceDate)}</span>
                 </div>
               )}
               
@@ -416,7 +430,7 @@ export default function Dashboard() {
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm text-gray-600">다음 점검일</span>
-                      <span className="text-sm font-medium">{nextInspectionDate.toISOString().split('T')[0]}</span>
+                      <span className="text-sm font-medium">{formatDate(nextInspectionDate.toISOString())}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">점검까지</span>

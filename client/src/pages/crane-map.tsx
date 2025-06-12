@@ -90,6 +90,20 @@ export default function CraneMap() {
     };
   });
 
+  // Helper function to format dates to yyyy-mm-dd
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return null;
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return null;
+      
+      return date.toISOString().split('T')[0]; // Returns yyyy-mm-dd format
+    } catch {
+      return dateString.split('T')[0]; // Fallback for already formatted strings
+    }
+  };
+
   const handleCraneClick = (crane: Crane) => {
     setSelectedCrane(crane);
     setIsModalOpen(true);
@@ -377,14 +391,14 @@ export default function CraneMap() {
                   {selectedCrane.installationDate && (
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm text-gray-500">설치일자</span>
-                      <span className="font-medium">{selectedCrane.installationDate}</span>
+                      <span className="font-medium">{formatDate(selectedCrane.installationDate)}</span>
                     </div>
                   )}
                   
                   {selectedCrane.inspectionReferenceDate && (
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm text-gray-500">점검기준일</span>
-                      <span className="font-medium">{selectedCrane.inspectionReferenceDate}</span>
+                      <span className="font-medium">{formatDate(selectedCrane.inspectionReferenceDate)}</span>
                     </div>
                   )}
                   
@@ -443,7 +457,7 @@ export default function CraneMap() {
                             </div>
                             <div className="flex-1">
                               <div className="text-xs text-gray-500 mb-1">다음 점검일</div>
-                              <div className="font-medium">{inspectionData.nextInspectionDate}</div>
+                              <div className="font-medium">{formatDate(inspectionData.nextInspectionDate)}</div>
                               <div className={`text-xs mt-1 ${
                                 isOverdue ? 'text-red-600' : 
                                 isUrgent ? 'text-orange-600' : 'text-green-600'
