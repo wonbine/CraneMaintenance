@@ -268,6 +268,28 @@ export default function Dashboard() {
     enabled: !!filters.selectedCrane && filters.selectedCrane !== 'all'
   });
 
+  // Fetch factory overview data for when no specific selection is made
+  const { data: factoryOverviewData = [] } = useQuery({
+    queryKey: ['/api/analytics/factory-overview'],
+    queryFn: async () => {
+      const response = await fetch('/api/analytics/factory-overview');
+      if (!response.ok) throw new Error('Failed to fetch factory overview');
+      return response.json();
+    },
+    enabled: !filters.selectedCrane || filters.selectedCrane === 'all'
+  });
+
+  // Fetch system overview data for summary stats
+  const { data: systemOverviewData } = useQuery({
+    queryKey: ['/api/analytics/system-overview'],
+    queryFn: async () => {
+      const response = await fetch('/api/analytics/system-overview');
+      if (!response.ok) throw new Error('Failed to fetch system overview');
+      return response.json();
+    },
+    enabled: !filters.selectedCrane || filters.selectedCrane === 'all'
+  });
+
   const DonutChart = ({ data, title, total }: { data: any[], title: string, total: number }) => {
     if (!data || data.length === 0 || total === 0) {
       return (
@@ -535,6 +557,51 @@ export default function Dashboard() {
           <div className="text-sm text-gray-500">평균 수리시간</div>
         </div>
       </div>
+    );
+  };
+
+  const FactoryOverviewCard = ({ factory }: { factory: any }) => {
+    return (
+      <Card className="shadow-lg border-0 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-center text-lg font-bold text-gray-800">
+            {factory.factoryName}
+          </CardTitle>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-blue-600">{factory.totalCranes}</div>
+            <div className="text-sm text-gray-500">총 크레인</div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Manned Progress Bar */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">유인 {factory.mannedCranes}</span>
+              <span className="font-semibold text-green-600">{factory.mannedPercentage}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div 
+                className="bg-green-500 h-3 rounded-full transition-all duration-300" 
+                style={{ width: `${factory.mannedPercentage}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Unmanned Progress Bar */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">무인 {factory.unmannedCranes}</span>
+              <span className="font-semibold text-orange-600">{factory.unmannedPercentage}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div 
+                className="bg-orange-500 h-3 rounded-full transition-all duration-300" 
+                style={{ width: `${factory.unmannedPercentage}%` }}
+              ></div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   };
 

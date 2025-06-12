@@ -13,7 +13,9 @@ import {
   type InsertAlert,
   type DashboardSummary,
   type MaintenanceStats,
-  type MonthlyTrend
+  type MonthlyTrend,
+  type FactoryOverview,
+  type SystemOverview
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, isNotNull } from "drizzle-orm";
@@ -1229,6 +1231,64 @@ export class DatabaseStorage implements IStorage {
     await this.generateAlerts();
   }
   
+  async getFactoryOverview(): Promise<FactoryOverview[]> {
+    const cacheKey = 'factory-overview';
+    const cached = cache.get<FactoryOverview[]>(cacheKey);
+    if (cached) return cached;
+
+    const cranes = await this.getCranes();
+    const factoryMap = new Map<string, { total: number; manned: number; unmanned: number }>();
+    
+    cranes.forEach(crane => {
+      const factory = crane.plantSection || '미분류';
+      const existing = factoryMap.get(factory) || { total: 0, manned: 0, unmanned: 0 };
+      
+      existing.total += 1;
+      if (crane.unmannedOperation === '무인' || crane.unmannedOperation === 'Y') {
+        existing.unmanned += 1;
+      } else {
+        existing.manned += 1;
+      }
+      
+      factoryMap.set(factory, existing);
+    });
+    
+    const result = Array.from(factoryMap.entries()).map(([factoryName, data]) => ({
+      factoryName,
+      totalCranes: data.total,
+      mannedCranes: data.manned,
+      unmannedCranes: data.unmanned,
+      mannedPercentage: data.total > 0 ? Math.round((data.manned / data.total) * 100) : 0,
+      unmannedPercentage: data.total > 0 ? Math.round((data.unmanned / data.total) * 100) : 0
+    })).sort((a, b) => b.totalCranes - a.totalCranes);
+
+    cache.set(cacheKey, result);
+    return result;
+  }
+
+  async getSystemOverview(): Promise<SystemOverview> {
+    const cacheKey = 'system-overview';
+    const cached = cache.get<SystemOverview>(cacheKey);
+    if (cached) return cached;
+
+    const cranes = await this.getCranes();
+    const factories = new Set(cranes.map(crane => crane.plantSection || '미분류'));
+    
+    const totalCranes = cranes.length;
+    const mannedCranes = cranes.filter(crane => 
+      crane.unmannedOperation !== '무인' && crane.unmannedOperation !== 'Y'
+    ).length;
+    
+    const result = {
+      totalFactories: factories.size,
+      totalCranes,
+      totalMannedPercentage: totalCranes > 0 ? Math.round((mannedCranes / totalCranes) * 100) : 0
+    };
+
+    cache.set(cacheKey, result);
+    return result;
+  }
+
   private async generateAlerts(): Promise<void> {
     const cranes = await this.getCranes();
     const now = new Date();
