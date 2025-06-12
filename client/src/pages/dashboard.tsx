@@ -829,7 +829,7 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <BarChart data={failureTypeData.map(item => ({
+            <BarChart data={failureTypeData.map((item: any) => ({
               category: item.type,
               value: item.count,
               color: '#f97316'

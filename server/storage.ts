@@ -877,6 +877,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async syncDataFromSheets(cranesData: any[], failureData: any[], maintenanceData: any[]): Promise<void> {
+    // Clear relevant cache entries before syncing
+    cache.delete('cranes:all');
+    cache.delete('failure-records:all');
+    cache.delete('maintenance-records:all');
+    cache.delete('factories:unique');
+    cache.delete('crane-names:unique');
+    
     console.log('Syncing data from sheets...');
     console.log('Cranes data sample:', cranesData.slice(0, 2));
     console.log('Failure data sample:', failureData.slice(0, 2));

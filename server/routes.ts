@@ -748,6 +748,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cache management endpoints
+  app.post('/api/cache/refresh', async (req, res) => {
+    try {
+      const { backgroundSync } = await import('./background-sync');
+      await backgroundSync.refresh();
+      res.json({ message: 'Cache refreshed successfully' });
+    } catch (error) {
+      console.error('Cache refresh error:', error);
+      res.status(500).json({ error: 'Failed to refresh cache' });
+    }
+  });
+
+  app.get('/api/cache/force-sync', async (req, res) => {
+    try {
+      const { backgroundSync } = await import('./background-sync');
+      await backgroundSync.forceSync();
+      res.json({ message: 'Force sync completed successfully' });
+    } catch (error) {
+      console.error('Force sync error:', error);
+      res.status(500).json({ error: 'Failed to force sync' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
