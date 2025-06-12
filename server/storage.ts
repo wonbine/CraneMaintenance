@@ -882,6 +882,31 @@ export class MemStorage implements IStorage {
       }))
       .sort((a, b) => a.month.localeCompare(b.month));
   }
+
+  async getFailureCauseDistribution(): Promise<{ cause: string; count: number; percentage: number }[]> {
+    const failureRecords = Array.from(this.failureRecords.values());
+    
+    // Count failure types
+    const causeCount = new Map<string, number>();
+    let totalCount = 0;
+
+    failureRecords.forEach(record => {
+      if (record.failureType && record.failureType.trim() !== '') {
+        const cause = record.failureType.trim();
+        causeCount.set(cause, (causeCount.get(cause) || 0) + 1);
+        totalCount++;
+      }
+    });
+
+    // Convert to result format with percentages
+    return Array.from(causeCount.entries())
+      .map(([cause, count]) => ({
+        cause,
+        count,
+        percentage: totalCount > 0 ? Math.round((count / totalCount) * 100) : 0
+      }))
+      .sort((a, b) => b.count - a.count);
+  }
 }
 
 // DatabaseStorage implementation
@@ -1521,6 +1546,38 @@ export class DatabaseStorage implements IStorage {
         total: stats.failureCount + stats.maintenanceCount
       }))
       .sort((a, b) => a.month.localeCompare(b.month));
+
+    cache.set(cacheKey, result);
+    return result;
+  }
+
+  async getFailureCauseDistribution(): Promise<{ cause: string; count: number; percentage: number }[]> {
+    const cacheKey = 'failure-cause-distribution';
+    const cached = cache.get<{ cause: string; count: number; percentage: number }[]>(cacheKey);
+    if (cached) return cached;
+
+    const failureRecords = await this.getFailureRecords();
+    
+    // Count failure types
+    const causeCount = new Map<string, number>();
+    let totalCount = 0;
+
+    failureRecords.forEach(record => {
+      if (record.failureType && record.failureType.trim() !== '') {
+        const cause = record.failureType.trim();
+        causeCount.set(cause, (causeCount.get(cause) || 0) + 1);
+        totalCount++;
+      }
+    });
+
+    // Convert to result format with percentages
+    const result = Array.from(causeCount.entries())
+      .map(([cause, count]) => ({
+        cause,
+        count,
+        percentage: totalCount > 0 ? Math.round((count / totalCount) * 100) : 0
+      }))
+      .sort((a, b) => b.count - a.count);
 
     cache.set(cacheKey, result);
     return result;

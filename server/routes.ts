@@ -540,6 +540,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get failure cause distribution
+  app.get("/api/analytics/failure-cause-distribution", async (req, res) => {
+    try {
+      const distribution = await storage.getFailureCauseDistribution();
+      res.json(distribution);
+    } catch (error) {
+      console.error("Error fetching failure cause distribution:", error);
+      res.status(500).json({ error: "Failed to fetch failure cause distribution" });
+    }
+  });
+
   // Get crane details by crane name
   app.get("/api/crane-details", async (req, res) => {
     try {

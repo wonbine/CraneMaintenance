@@ -61,6 +61,16 @@ export default function Dashboard() {
     }
   });
 
+  // Fetch failure cause distribution
+  const { data: failureCauseData = [] } = useQuery({
+    queryKey: ['/api/analytics/failure-cause-distribution'],
+    queryFn: async () => {
+      const response = await fetch('/api/analytics/failure-cause-distribution');
+      if (!response.ok) throw new Error('Failed to fetch failure cause distribution');
+      return response.json();
+    }
+  });
+
   // Chart colors
   const OPERATION_COLORS = ['#22c55e', '#ef4444']; // Green for manned, Red for unmanned
   const GRADE_COLORS = {
@@ -70,6 +80,11 @@ export default function Dashboard() {
     'D': '#ef4444', // Red for D grade (worst)
     'E': '#8b5cf6', // Purple for E grade
     'F': '#f97316'  // Dark orange for F grade
+  };
+  const FAILURE_CAUSE_COLORS = {
+    '전기계통': '#ef4444', // Red for electrical system
+    '기계계통': '#3b82f6', // Blue for mechanical system  
+    '제어계통': '#f59e0b'  // Orange for control system
   };
 
   // Prepare operation type chart data
@@ -99,6 +114,14 @@ export default function Dashboard() {
       total: item.total
     };
   });
+
+  // Prepare failure cause distribution chart data
+  const failureCauseChartData = failureCauseData.map((item: any) => ({
+    name: item.cause,
+    value: item.count,
+    percentage: item.percentage,
+    fill: FAILURE_CAUSE_COLORS[item.cause as keyof typeof FAILURE_CAUSE_COLORS] || '#6b7280'
+  }));
 
   const FactoryOverviewCard = ({ factory }: { factory: any }) => {
     // Fetch factory-specific operation type stats
