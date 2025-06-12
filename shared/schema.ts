@@ -119,3 +119,18 @@ export type MonthlyTrend = {
   month: string;
   count: number;
 };
+
+export type FactoryOverview = {
+  factoryName: string;
+  totalCranes: number;
+  mannedCranes: number;
+  unmannedCranes: number;
+  mannedPercentage: number;
+  unmannedPercentage: number;
+};
+
+export type SystemOverview = {
+  totalFactories: number;
+  totalCranes: number;
+  totalMannedPercentage: number;
+};

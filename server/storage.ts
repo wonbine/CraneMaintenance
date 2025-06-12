@@ -60,6 +60,10 @@ export interface IStorage {
   
   // Google Sheets sync
   syncDataFromSheets(cranesData: any[], failureData: any[], maintenanceData: any[]): Promise<void>;
+  
+  // Factory and system overview
+  getFactoryOverview(): Promise<FactoryOverview[]>;
+  getSystemOverview(): Promise<SystemOverview>;
 }
 
 export class MemStorage implements IStorage {
@@ -595,6 +599,50 @@ export class MemStorage implements IStorage {
     }
     
     return cranes;
+  }
+
+  async getFactoryOverview(): Promise<FactoryOverview[]> {
+    const cranes = Array.from(this.cranes.values());
+    const factoryMap = new Map<string, { total: number; manned: number; unmanned: number }>();
+    
+    cranes.forEach(crane => {
+      const factory = crane.plantSection || '미분류';
+      const existing = factoryMap.get(factory) || { total: 0, manned: 0, unmanned: 0 };
+      
+      existing.total += 1;
+      if (crane.unmannedOperation === '무인' || crane.unmannedOperation === 'Y') {
+        existing.unmanned += 1;
+      } else {
+        existing.manned += 1;
+      }
+      
+      factoryMap.set(factory, existing);
+    });
+    
+    return Array.from(factoryMap.entries()).map(([factoryName, data]) => ({
+      factoryName,
+      totalCranes: data.total,
+      mannedCranes: data.manned,
+      unmannedCranes: data.unmanned,
+      mannedPercentage: data.total > 0 ? Math.round((data.manned / data.total) * 100) : 0,
+      unmannedPercentage: data.total > 0 ? Math.round((data.unmanned / data.total) * 100) : 0
+    })).sort((a, b) => b.totalCranes - a.totalCranes);
+  }
+
+  async getSystemOverview(): Promise<SystemOverview> {
+    const cranes = Array.from(this.cranes.values());
+    const factories = new Set(cranes.map(crane => crane.plantSection || '미분류'));
+    
+    const totalCranes = cranes.length;
+    const mannedCranes = cranes.filter(crane => 
+      crane.unmannedOperation !== '무인' && crane.unmannedOperation !== 'Y'
+    ).length;
+    
+    return {
+      totalFactories: factories.size,
+      totalCranes,
+      totalMannedPercentage: totalCranes > 0 ? Math.round((mannedCranes / totalCranes) * 100) : 0
+    };
   }
 
   async syncDataFromSheets(cranesData: any[], failureData: any[], maintenanceData: any[]): Promise<void> {

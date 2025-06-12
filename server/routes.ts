@@ -421,6 +421,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get factory overview statistics
+  app.get("/api/analytics/factory-overview", async (req, res) => {
+    try {
+      const factoryStats = await storage.getFactoryOverview();
+      res.json(factoryStats);
+    } catch (error) {
+      console.error("Error fetching factory overview:", error);
+      res.status(500).json({ message: "Failed to fetch factory overview" });
+    }
+  });
+
+  // Get overall system statistics
+  app.get("/api/analytics/system-overview", async (req, res) => {
+    try {
+      const systemStats = await storage.getSystemOverview();
+      res.json(systemStats);
+    } catch (error) {
+      console.error("Error fetching system overview:", error);
+      res.status(500).json({ message: "Failed to fetch system overview" });
+    }
+  });
+
   // Get active alerts
   app.get("/api/alerts", async (req, res) => {
     try {
