@@ -73,7 +73,13 @@ export class MemStorage implements IStorage {
 
   async createCrane(insertCrane: InsertCrane): Promise<Crane> {
     const id = this.currentCraneId++;
-    const crane: Crane = { ...insertCrane, id };
+    const crane: Crane = { 
+      ...insertCrane, 
+      id,
+      lastMaintenanceDate: insertCrane.lastMaintenanceDate || null,
+      nextMaintenanceDate: insertCrane.nextMaintenanceDate || null,
+      isUrgent: insertCrane.isUrgent || false
+    };
     this.cranes.set(id, crane);
     return crane;
   }
@@ -102,7 +108,13 @@ export class MemStorage implements IStorage {
 
   async createMaintenanceRecord(insertRecord: InsertMaintenanceRecord): Promise<MaintenanceRecord> {
     const id = this.currentMaintenanceId++;
-    const record: MaintenanceRecord = { ...insertRecord, id };
+    const record: MaintenanceRecord = { 
+      ...insertRecord, 
+      id,
+      notes: insertRecord.notes || null,
+      duration: insertRecord.duration || null,
+      cost: insertRecord.cost || null
+    };
     this.maintenanceRecords.set(id, record);
     return record;
   }
@@ -117,7 +129,11 @@ export class MemStorage implements IStorage {
 
   async createAlert(insertAlert: InsertAlert): Promise<Alert> {
     const id = this.currentAlertId++;
-    const alert: Alert = { ...insertAlert, id };
+    const alert: Alert = { 
+      ...insertAlert, 
+      id,
+      isActive: insertAlert.isActive !== undefined ? insertAlert.isActive : true
+    };
     this.alerts.set(id, alert);
     return alert;
   }

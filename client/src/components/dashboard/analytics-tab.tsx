@@ -84,7 +84,7 @@ export function AnalyticsTab({ summary }: AnalyticsTabProps) {
                   />
                   <Bar 
                     dataKey="count" 
-                    fill={(entry) => maintenanceColors[entry.type] || "#6B7280"}
+                    fill="#3B82F6"
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
@@ -157,7 +157,7 @@ export function AnalyticsTab({ summary }: AnalyticsTabProps) {
             </ResponsiveContainer>
           </div>
         </CardContent>
-      </div>
+      </Card>
     </div>
   );
 }
