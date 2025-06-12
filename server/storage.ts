@@ -822,8 +822,8 @@ export class DatabaseStorage implements IStorage {
           downtime: data.Downtime ? parseInt(data.Downtime) : (data.downtime ? parseInt(data.downtime) : null),
           cause: data.Cause || data.cause || null,
           reportedBy: data.ReportedBy || data.reported_by || null,
-          data: data.data ? parseFloat(data.data) : (data.Data ? parseFloat(data.Data) : null),
-          worktime: data.worktime ? parseFloat(data.worktime) : (data.Worktime ? parseFloat(data.Worktime) : null),
+          data: data.data ? parseFloat(data.data) : (data.Data ? parseFloat(data.Data) : (data.interval ? parseFloat(data.interval) : (data.Interval ? parseFloat(data.Interval) : (data.failureInterval ? parseFloat(data.failureInterval) : null)))),
+          worktime: data.worktime ? parseFloat(data.worktime) : (data.Worktime ? parseFloat(data.Worktime) : (data.WorkTime ? parseFloat(data.WorkTime) : (data.work_time ? parseFloat(data.work_time) : null))),
         });
       }
     }
