@@ -12,8 +12,12 @@ function cleanSpreadsheetId(id: string): string {
 // Helper function to fetch Google Sheets data with better error handling
 async function fetchGoogleSheetData(spreadsheetId: string, apiKey: string, sheetName?: string) {
   const cleanId = cleanSpreadsheetId(spreadsheetId);
-  const range = sheetName ? `${sheetName}!A:Z` : 'A:Z';
+  // Properly encode sheet name to handle Korean characters and special characters
+  const encodedSheetName = sheetName ? encodeURIComponent(sheetName) : '';
+  const range = sheetName ? `${encodedSheetName}!A:Z` : 'A:Z';
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${cleanId}/values/${range}?key=${apiKey}`;
+  
+  console.log(`Fetching sheet: "${sheetName}" (encoded: "${encodedSheetName}")`);
   
   const response = await fetch(url);
   if (!response.ok) {

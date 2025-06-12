@@ -201,21 +201,37 @@ export default function Dashboard() {
               </DialogHeader>
               <div className="space-y-4">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
-                  <p><strong>Google Sheets 연결 방법:</strong></p>
-                  <p>1. Google Sheets URL에서 스프레드시트 ID를 복사하세요</p>
-                  <p>2. 예시: https://docs.google.com/spreadsheets/d/<span className="font-mono bg-blue-100 px-1">1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms</span>/edit</p>
-                  <p>3. 스프레드시트를 "링크가 있는 모든 사용자"로 공유 설정해주세요</p>
-                  <p>4. "테스트" 버튼으로 연결 확인 후 "Sync Data" 실행</p>
+                  <p><strong>하나의 스프레드시트에 3개 시트가 있는 경우:</strong></p>
+                  <p>1. 스프레드시트 ID는 모두 동일하게 입력</p>
+                  <p>2. 각 시트명을 정확히 입력 (예: CraneList, FailureHistory, MaintenanceHistory)</p>
+                  <p>3. 스프레드시트를 "링크가 있는 모든 사용자"로 공유 설정</p>
+                  <p>4. URL 예시: https://docs.google.com/spreadsheets/d/<span className="font-mono bg-blue-100 px-1">YOUR_ID</span>/edit</p>
                 </div>
                 
                 <div>
                   <Label htmlFor="cranes-spreadsheet">크레인 목록 스프레드시트 ID</Label>
-                  <Input
-                    id="cranes-spreadsheet"
-                    placeholder="1A2B3C4D5E6F..."
-                    value={cranesSpreadsheetId}
-                    onChange={(e) => setCranesSpreadsheetId(e.target.value)}
-                  />
+                  <div className="flex space-x-2">
+                    <Input
+                      id="cranes-spreadsheet"
+                      placeholder="1A2B3C4D5E6F..."
+                      value={cranesSpreadsheetId}
+                      onChange={(e) => setCranesSpreadsheetId(e.target.value)}
+                      className="flex-1"
+                    />
+                    {cranesSpreadsheetId && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setFailureSpreadsheetId(cranesSpreadsheetId);
+                          setMaintenanceSpreadsheetId(cranesSpreadsheetId);
+                        }}
+                      >
+                        복사
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="cranes-sheet">크레인 목록 시트명 (선택사항)</Label>
