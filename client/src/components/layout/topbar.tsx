@@ -67,6 +67,34 @@ export function Topbar() {
 
       {/* Right side - Date Selection, Search Button and Profile */}
       <div className="flex items-center space-x-4">
+        {/* Date Range Selection */}
+        <div className="flex items-center space-x-3">
+          <CalendarDays className="w-5 h-5 text-gray-500" />
+          <div className="flex items-center space-x-2">
+            <Input
+              type="date"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setDateMode("range");
+              }}
+              placeholder="시작일자"
+              className="h-9 w-[140px] text-sm"
+            />
+            <span className="text-gray-400 text-sm">~</span>
+            <Input
+              type="date"
+              value={endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setDateMode("range");
+              }}
+              placeholder="종료일자"
+              className="h-9 w-[140px] text-sm"
+            />
+          </div>
+        </div>
+
         {/* Period Selection Buttons */}
         <div className="flex items-center space-x-3">
           <Calendar className="w-5 h-5 text-gray-500" />
@@ -103,34 +131,6 @@ export function Topbar() {
             >
               1년
             </Button>
-          </div>
-        </div>
-
-        {/* Date Range Selection */}
-        <div className="flex items-center space-x-3">
-          <CalendarDays className="w-5 h-5 text-gray-500" />
-          <div className="flex items-center space-x-2">
-            <Input
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                setDateMode("range");
-              }}
-              placeholder="시작일자"
-              className="h-9 w-[140px] text-sm"
-            />
-            <span className="text-gray-400 text-sm">~</span>
-            <Input
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                setDateMode("range");
-              }}
-              placeholder="종료일자"
-              className="h-9 w-[140px] text-sm"
-            />
           </div>
         </div>
 
