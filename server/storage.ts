@@ -1573,8 +1573,8 @@ export class DatabaseStorage implements IStorage {
 
   async getFailureCauseDistribution(): Promise<{ cause: string; count: number; percentage: number }[]> {
     const cacheKey = 'failure-cause-distribution';
-    // Clear cache to force refresh with new byDevice mapping
-    cache.delete(cacheKey);
+    const cached = cache.get<{ cause: string; count: number; percentage: number }[]>(cacheKey);
+    if (cached) return cached;
 
     const failureRecords = await this.getFailureRecords();
     
@@ -1592,20 +1592,20 @@ export class DatabaseStorage implements IStorage {
       // If byDevice is empty, extract device from description using Excel categories
       else if (record.description && record.description.trim() !== '') {
         const desc = record.description.trim();
-        // Map to actual byDevice categories from Excel: 전장품, Coil Lifter, 안전장치, Brake, Magnet, etc.
-        if (desc.includes('모터') || desc.includes('Motor')) device = 'Motor';
+        // Map Korean descriptions to actual byDevice categories from Excel
+        if (desc.includes('정기점검')) device = '정기점검';
+        else if (desc.includes('모터') || desc.includes('Motor')) device = 'Motor';
         else if (desc.includes('기어박스') || desc.includes('감속기') || desc.includes('Gear')) device = '감속기';
-        else if (desc.includes('센서') || desc.includes('LOAD CELL')) device = 'LOAD CELL';
-        else if (desc.includes('와이어로프') || desc.includes('Wire Rope')) device = 'Wire Rope';
-        else if (desc.includes('제어판') || desc.includes('접촉기') || desc.includes('Inverter')) device = 'Inverter';
         else if (desc.includes('베어링') || desc.includes('Wheel')) device = 'Wheel';
+        else if (desc.includes('와이어로프') || desc.includes('Wire Rope')) device = 'Wire Rope';
+        else if (desc.includes('제어판') || desc.includes('접촉기') || desc.includes('Inverter')) device = '전장품';
         else if (desc.includes('브레이크') || desc.includes('Brake')) device = 'Brake';
+        else if (desc.includes('센서') || desc.includes('LOAD CELL')) device = 'LOAD CELL';
         else if (desc.includes('안전') || desc.includes('Safety')) device = '안전장치';
         else if (desc.includes('전장') || desc.includes('전기')) device = '전장품';
         else if (desc.includes('Magnet')) device = 'Magnet';
         else if (desc.includes('Coil')) device = 'Coil Lifter';
         else if (desc.includes('Tong')) device = 'Tong';
-        else if (desc.includes('정기점검')) device = '정기점검';
         else device = '기타';
       }
 
