@@ -18,9 +18,12 @@ import { apiRequest } from "@/lib/queryClient";
 import type { DashboardSummary } from "@shared/schema";
 
 export default function Dashboard() {
-  const [cranesUrl, setCranesUrl] = useState("");
-  const [failureUrl, setFailureUrl] = useState("");
-  const [maintenanceUrl, setMaintenanceUrl] = useState("");
+  const [cranesSpreadsheetId, setCranesSpreadsheetId] = useState("");
+  const [failureSpreadsheetId, setFailureSpreadsheetId] = useState("");
+  const [maintenanceSpreadsheetId, setMaintenanceSpreadsheetId] = useState("");
+  const [cranesSheetName, setCranesSheetName] = useState("");
+  const [failureSheetName, setFailureSheetName] = useState("");
+  const [maintenanceSheetName, setMaintenanceSheetName] = useState("");
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>("Never");
   
@@ -32,21 +35,21 @@ export default function Dashboard() {
   });
 
   const refreshMutation = useMutation({
-    mutationFn: async (urls?: { cranesUrl?: string; failureUrl?: string; maintenanceUrl?: string }) => {
-      const response = await apiRequest("POST", "/api/refresh-data", urls || {});
+    mutationFn: async (config?: any) => {
+      const response = await apiRequest("POST", "/api/refresh-data", config || {});
       return response.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries();
       setLastUpdated(new Date().toLocaleString());
       toast({
-        title: "Data Refreshed",
-        description: "Dashboard data has been updated successfully.",
+        title: "데이터 새로고침 완료",
+        description: "대시보드 데이터가 성공적으로 업데이트되었습니다.",
       });
     },
     onError: (error) => {
       toast({
-        title: "Refresh Failed",
+        title: "새로고침 실패",
         description: error.message,
         variant: "destructive",
       });
@@ -54,8 +57,15 @@ export default function Dashboard() {
   });
 
   const syncMutation = useMutation({
-    mutationFn: async (urls: { cranesUrl: string; failureUrl: string; maintenanceUrl: string }) => {
-      const response = await apiRequest("POST", "/api/sync-sheets", urls);
+    mutationFn: async (config: { 
+      cranesSpreadsheetId: string; 
+      failureSpreadsheetId: string; 
+      maintenanceSpreadsheetId: string;
+      cranesSheetName?: string;
+      failureSheetName?: string;
+      maintenanceSheetName?: string;
+    }) => {
+      const response = await apiRequest("POST", "/api/sync-sheets", config);
       return response.json();
     },
     onSuccess: () => {
@@ -63,13 +73,13 @@ export default function Dashboard() {
       setLastUpdated(new Date().toLocaleString());
       setIsConfigOpen(false);
       toast({
-        title: "Sync Complete",
-        description: "Data has been synced from Google Sheets successfully.",
+        title: "동기화 완료",
+        description: "구글 스프레드시트에서 데이터가 성공적으로 동기화되었습니다.",
       });
     },
     onError: (error) => {
       toast({
-        title: "Sync Failed",
+        title: "동기화 실패",
         description: error.message,
         variant: "destructive",
       });
@@ -77,23 +87,37 @@ export default function Dashboard() {
   });
 
   const handleRefresh = () => {
-    if (cranesUrl && failureUrl && maintenanceUrl) {
-      refreshMutation.mutate({ cranesUrl, failureUrl, maintenanceUrl });
+    if (cranesSpreadsheetId && failureSpreadsheetId && maintenanceSpreadsheetId) {
+      refreshMutation.mutate({ 
+        cranesSpreadsheetId, 
+        failureSpreadsheetId, 
+        maintenanceSpreadsheetId,
+        cranesSheetName,
+        failureSheetName,
+        maintenanceSheetName
+      });
     } else {
       refreshMutation.mutate();
     }
   };
 
   const handleSync = () => {
-    if (!cranesUrl || !failureUrl || !maintenanceUrl) {
+    if (!cranesSpreadsheetId || !failureSpreadsheetId || !maintenanceSpreadsheetId) {
       toast({
-        title: "Configuration Required",
-        description: "Please provide all three Google Sheets URLs.",
+        title: "설정이 필요합니다",
+        description: "세 개의 구글 스프레드시트 ID를 모두 입력해주세요.",
         variant: "destructive",
       });
       return;
     }
-    syncMutation.mutate({ cranesUrl, failureUrl, maintenanceUrl });
+    syncMutation.mutate({ 
+      cranesSpreadsheetId, 
+      failureSpreadsheetId, 
+      maintenanceSpreadsheetId,
+      cranesSheetName,
+      failureSheetName,
+      maintenanceSheetName
+    });
   };
 
   const defaultSummary: DashboardSummary = {
@@ -130,31 +154,65 @@ export default function Dashboard() {
                     <DialogTitle>Google Sheets Configuration</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+                      <p><strong>Google Sheets API 사용:</strong> 스프레드시트 ID와 시트명을 입력하세요.</p>
+                      <p>URL 예시: https://docs.google.com/spreadsheets/d/<span className="font-mono bg-blue-100 px-1">YOUR_SPREADSHEET_ID</span>/edit</p>
+                    </div>
+                    
                     <div>
-                      <Label htmlFor="cranes-url">크레인 목록 시트 CSV URL</Label>
+                      <Label htmlFor="cranes-spreadsheet">크레인 목록 스프레드시트 ID</Label>
                       <Input
-                        id="cranes-url"
-                        placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv"
-                        value={cranesUrl}
-                        onChange={(e) => setCranesUrl(e.target.value)}
+                        id="cranes-spreadsheet"
+                        placeholder="1A2B3C4D5E6F..."
+                        value={cranesSpreadsheetId}
+                        onChange={(e) => setCranesSpreadsheetId(e.target.value)}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="failure-url">고장 이력 시트 CSV URL</Label>
+                      <Label htmlFor="cranes-sheet">크레인 목록 시트명 (선택사항)</Label>
                       <Input
-                        id="failure-url"
-                        placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv"
-                        value={failureUrl}
-                        onChange={(e) => setFailureUrl(e.target.value)}
+                        id="cranes-sheet"
+                        placeholder="Sheet1"
+                        value={cranesSheetName}
+                        onChange={(e) => setCranesSheetName(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="failure-spreadsheet">고장 이력 스프레드시트 ID</Label>
+                      <Input
+                        id="failure-spreadsheet"
+                        placeholder="1A2B3C4D5E6F..."
+                        value={failureSpreadsheetId}
+                        onChange={(e) => setFailureSpreadsheetId(e.target.value)}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="maintenance-url">수리 이력 시트 CSV URL</Label>
+                      <Label htmlFor="failure-sheet">고장 이력 시트명 (선택사항)</Label>
                       <Input
-                        id="maintenance-url"
-                        placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv"
-                        value={maintenanceUrl}
-                        onChange={(e) => setMaintenanceUrl(e.target.value)}
+                        id="failure-sheet"
+                        placeholder="Sheet1"
+                        value={failureSheetName}
+                        onChange={(e) => setFailureSheetName(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="maintenance-spreadsheet">수리 이력 스프레드시트 ID</Label>
+                      <Input
+                        id="maintenance-spreadsheet"
+                        placeholder="1A2B3C4D5E6F..."
+                        value={maintenanceSpreadsheetId}
+                        onChange={(e) => setMaintenanceSpreadsheetId(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="maintenance-sheet">수리 이력 시트명 (선택사항)</Label>
+                      <Input
+                        id="maintenance-sheet"
+                        placeholder="Sheet1"
+                        value={maintenanceSheetName}
+                        onChange={(e) => setMaintenanceSheetName(e.target.value)}
                       />
                     </div>
                     <div className="flex justify-end space-x-2">

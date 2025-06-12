@@ -1,114 +1,117 @@
-import Papa from "papaparse";
-
 export interface GoogleSheetsConfig {
-  cranesUrl: string;
-  maintenanceUrl: string;
+  cranesSpreadsheetId: string;
+  failureSpreadsheetId: string;
+  maintenanceSpreadsheetId: string;
+  cranesSheetName?: string;
+  failureSheetName?: string;
+  maintenanceSheetName?: string;
 }
 
 export class GoogleSheetsService {
   private config: GoogleSheetsConfig;
+  private apiKey: string;
 
-  constructor(config: GoogleSheetsConfig) {
+  constructor(config: GoogleSheetsConfig, apiKey: string) {
     this.config = config;
+    this.apiKey = apiKey;
   }
 
   async fetchCranesData(): Promise<any[]> {
-    try {
-      const response = await fetch(this.config.cranesUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch cranes data: ${response.statusText}`);
-      }
-      
-      const csvText = await response.text();
-      const parsed = Papa.parse(csvText, {
-        header: true,
-        skipEmptyLines: true,
-        transformHeader: (header) => header.toLowerCase().replace(/\s+/g, '_')
-      });
+    return this.fetchSheetData(this.config.cranesSpreadsheetId, this.config.cranesSheetName);
+  }
 
-      if (parsed.errors.length > 0) {
-        console.warn('CSV parsing errors:', parsed.errors);
-      }
-
-      return parsed.data;
-    } catch (error) {
-      console.error('Error fetching cranes data:', error);
-      throw new Error('Failed to fetch cranes data from Google Sheets');
-    }
+  async fetchFailureData(): Promise<any[]> {
+    return this.fetchSheetData(this.config.failureSpreadsheetId, this.config.failureSheetName);
   }
 
   async fetchMaintenanceData(): Promise<any[]> {
+    return this.fetchSheetData(this.config.maintenanceSpreadsheetId, this.config.maintenanceSheetName);
+  }
+
+  private async fetchSheetData(spreadsheetId: string, sheetName?: string): Promise<any[]> {
     try {
-      const response = await fetch(this.config.maintenanceUrl);
+      const range = sheetName ? `${sheetName}!A:Z` : 'A:Z';
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${this.apiKey}`;
+      
+      const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`Failed to fetch maintenance data: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Google Sheets API 오류: ${response.status} - ${errorData.error?.message || response.statusText}`);
       }
       
-      const csvText = await response.text();
-      const parsed = Papa.parse(csvText, {
-        header: true,
-        skipEmptyLines: true,
-        transformHeader: (header) => header.toLowerCase().replace(/\s+/g, '_')
-      });
-
-      if (parsed.errors.length > 0) {
-        console.warn('CSV parsing errors:', parsed.errors);
+      const data = await response.json();
+      
+      if (!data.values || data.values.length === 0) {
+        return [];
       }
 
-      return parsed.data;
+      // Convert array of arrays to array of objects using first row as headers
+      const [headers, ...rows] = data.values;
+      
+      if (!headers || headers.length === 0) {
+        throw new Error('시트에 헤더가 없습니다. 첫 번째 행에 컬럼명을 입력해주세요.');
+      }
+
+      return rows.map((row: any[]) => {
+        const obj: any = {};
+        headers.forEach((header: string, index: number) => {
+          obj[header.trim()] = row[index] || '';
+        });
+        return obj;
+      });
     } catch (error) {
-      console.error('Error fetching maintenance data:', error);
-      throw new Error('Failed to fetch maintenance data from Google Sheets');
+      throw new Error(`데이터 가져오기 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     }
   }
 
   async syncData(): Promise<void> {
     try {
-      const [cranesData, maintenanceData] = await Promise.all([
+      const [cranesData, failureData, maintenanceData] = await Promise.all([
         this.fetchCranesData(),
+        this.fetchFailureData(), 
         this.fetchMaintenanceData()
       ]);
 
+      // Send data to backend for processing
       const response = await fetch('/api/sync-sheets', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          cranesUrl: this.config.cranesUrl,
-          maintenanceUrl: this.config.maintenanceUrl
-        })
+          cranesData,
+          failureData,
+          maintenanceData
+        }),
       });
 
       if (!response.ok) {
-        throw new Error(`Sync failed: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`동기화 실패: ${errorData.message || response.statusText}`);
       }
-
-      return await response.json();
     } catch (error) {
-      console.error('Error syncing data:', error);
-      throw new Error('Failed to sync data with backend');
+      throw new Error(`동기화 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     }
   }
 
-  static createFromEnv(): GoogleSheetsService | null {
-    const cranesUrl = import.meta.env.VITE_GOOGLE_SHEETS_CRANES_URL;
-    const maintenanceUrl = import.meta.env.VITE_GOOGLE_SHEETS_MAINTENANCE_URL;
+  static createFromConfig(config: GoogleSheetsConfig): GoogleSheetsService | null {
+    const apiKey = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY;
 
-    if (!cranesUrl || !maintenanceUrl) {
+    if (!apiKey) {
+      console.error('VITE_GOOGLE_SHEETS_API_KEY가 설정되지 않았습니다.');
       return null;
     }
 
-    return new GoogleSheetsService({ cranesUrl, maintenanceUrl });
+    return new GoogleSheetsService(config, apiKey);
   }
 }
 
-// Utility function to create Google Sheets CSV export URL
-export function createGoogleSheetsUrl(spreadsheetId: string, sheetName?: string): string {
-  const baseUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
-  return sheetName ? `${baseUrl}&gid=${sheetName}` : baseUrl;
+export function extractSpreadsheetId(url: string): string | null {
+  const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  return match ? match[1] : null;
 }
 
-// Example URLs for documentation:
-// Cranes sheet: https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/export?format=csv&gid=0
-// Maintenance sheet: https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/export?format=csv&gid=1234567890
+export function createGoogleSheetsUrl(spreadsheetId: string, sheetName?: string): string {
+  const range = sheetName ? `${sheetName}!A:Z` : 'A:Z';
+  return `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`;
+}
