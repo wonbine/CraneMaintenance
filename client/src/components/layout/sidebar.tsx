@@ -69,11 +69,6 @@ export function Sidebar() {
         </button>
         
         <div className="pt-4 border-t border-gray-100">
-          <div className="text-center space-y-2">
-            <p className="text-sm font-medium text-gray-600">PoCRANE v2.0</p>
-            <p className="text-gray-500 font-medium text-[16px] leading-tight">스마트 크레인 정비<br />모니터링 시스템</p>
-            <p className="text-xs text-gray-400">© 2024 All rights reserved</p>
-          </div>
         </div>
       </div>
     </div>

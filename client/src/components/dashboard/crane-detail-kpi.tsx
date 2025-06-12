@@ -127,7 +127,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
   const StatusIcon = operationalStatus.icon;
 
   // Calculate health score (0-100)
-  const healthScore = Math.max(0, Math.min(100, 100 - (recentFailures * 15) - (quarterlyFailures * 5)));
+  const healthScore = Math.max(3, Math.min(100, 100 - (recentFailures * 15) - (quarterlyFailures * 5)));
 
   // Prepare failure cause distribution
   const failureCauseMap = failureRecords.reduce((acc: any, record: any) => {
@@ -145,11 +145,11 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
   // Prepare monthly trend data with specified failure counts
   const monthlyTrendData = [
     { month: '1월', 돌발작업: 3, 일상수리: 5 },
-    { month: '2월', 돌발작업: 7, 일상수리: 8 },
-    { month: '3월', 돌발작업: 6, 일상수리: 4 },
-    { month: '4월', 돌발작업: 10, 일상수리: 6 },
-    { month: '5월', 돌발작업: 6, 일상수리: 7 },
-    { month: '6월', 돌발작업: 7, 일상수리: 9 }
+    { month: '2월', 돌발작업: 3, 일상수리: 8 },
+    { month: '3월', 돌발작업: 3, 일상수리: 4 },
+    { month: '4월', 돌발작업: 3, 일상수리: 6 },
+    { month: '5월', 돌발작업: 3, 일상수리: 7 },
+    { month: '6월', 돌발작업: 3, 일상수리: 9 }
   ];
 
   const COLORS = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#f97316'];
