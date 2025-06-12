@@ -146,6 +146,102 @@ export default function Dashboard() {
     );
   };
 
+  const BarChart = ({ data }: { data: any[] }) => {
+    if (!data || data.length === 0) {
+      return (
+        <div className="h-32 flex items-center justify-center text-gray-500">
+          <span className="text-sm">데이터가 없습니다</span>
+        </div>
+      );
+    }
+
+    const maxCount = Math.max(...data.map(d => d.value || d.count || 0), 1);
+    
+    return (
+      <div className="space-y-3">
+        {data.map((item, index) => (
+          <div key={index} className="flex items-center space-x-3">
+            <span className="text-sm w-20 text-right">{item.category || item.type}</span>
+            <div className="flex-1 bg-gray-200 rounded-full h-4 relative">
+              <div 
+                className="h-4 rounded-full transition-all duration-500"
+                style={{ 
+                  width: `${((item.value || item.count || 0) / maxCount) * 100}%`,
+                  backgroundColor: item.color || '#3b82f6'
+                }}
+              />
+              <span className="absolute right-2 top-0 h-4 flex items-center text-xs text-white font-medium">
+                {item.value || item.count || 0}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const LineChart = ({ data }: { data: { months: string[], maintenance: number[], failures: number[], avgRepairTime: number[] } }) => {
+    if (!data || !data.months || data.months.length === 0) {
+      return (
+        <div className="h-48 flex items-center justify-center text-gray-500">
+          <span className="text-sm">데이터가 없습니다</span>
+        </div>
+      );
+    }
+
+    const maxValue = Math.max(...data.maintenance, ...data.failures, ...data.avgRepairTime, 1);
+    
+    return (
+      <div className="h-48 relative">
+        <svg className="w-full h-full">
+          {/* Grid lines */}
+          {[0, 25, 50, 75, 100].map(y => (
+            <line key={y} x1="40" y1={y * 1.6 + 20} x2="100%" y2={y * 1.6 + 20} stroke="#e5e7eb" strokeWidth="1"/>
+          ))}
+          
+          {/* Maintenance line */}
+          <polyline
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="2"
+            points={data.months.map((_: string, i: number) => 
+              `${40 + (i * 60)},${180 - ((data.maintenance[i] || 0) / maxValue) * 140}`
+            ).join(' ')}
+          />
+          
+          {/* Failures line */}
+          <polyline
+            fill="none"
+            stroke="#ef4444"
+            strokeWidth="2"
+            points={data.months.map((_: string, i: number) => 
+              `${40 + (i * 60)},${180 - ((data.failures[i] || 0) / maxValue) * 140}`
+            ).join(' ')}
+          />
+          
+          {/* X-axis labels */}
+          {data.months.map((month: string, i: number) => (
+            <text key={month} x={40 + (i * 60)} y="200" textAnchor="middle" className="text-xs fill-gray-500">
+              {month}
+            </text>
+          ))}
+        </svg>
+        
+        {/* Legend */}
+        <div className="absolute top-2 right-2 flex space-x-4 text-xs">
+          <div className="flex items-center space-x-1">
+            <div className="w-3 h-3 bg-blue-500 rounded"></div>
+            <span>정비</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <div className="w-3 h-3 bg-red-500 rounded"></div>
+            <span>고장</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Show message when no crane is selected
   if (!filters.selectedCrane || filters.selectedCrane === 'all') {
     return (
