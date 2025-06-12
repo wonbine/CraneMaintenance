@@ -770,9 +770,11 @@ export class DatabaseStorage implements IStorage {
     for (const data of cranesData) {
       const equipmentCode = data.EquipmentCode || data.crane_id || data.CraneID || data.equipment_code;
       if (equipmentCode) {
-        console.log('Processing crane:', equipmentCode, data);
+        console.log('Processing crane:', equipmentCode, 'Plant/Section:', data['Plant/Section'], 'CraneName:', data.CraneName);
         await this.createCrane({
           craneId: equipmentCode,
+          craneName: data.CraneName || data.crane_name || data.Name || data.name || null,
+          plantSection: data['Plant/Section'] || data.PlantSection || data.plant_section || data.Plant || data.plant || null,
           status: data.Status || data.status || 'operating',
           location: data.Location || data.location || '',
           model: data.Model || data.model || '',
