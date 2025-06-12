@@ -113,7 +113,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
     return total + (record.totalWorkTime || 0);
   }, 0);
 
-  const averageRepairTime = totalMaintenance > 0 ? Math.round(totalRepairHours / totalMaintenance) : 0;
+  const averageRepairTime = 13; // Fixed value as requested
 
   // Calculate operational status and health score
   const getOperationalStatus = () => {
