@@ -1498,8 +1498,6 @@ export class DatabaseStorage implements IStorage {
 
   async getRecentMaintenanceStats(): Promise<{ month: string; failureCount: number; maintenanceCount: number; total: number }[]> {
     const cacheKey = 'recent-maintenance-stats';
-    // Clear cache to ensure fresh data with current date logic
-    cache.clearKey(cacheKey);
     const cached = cache.get<{ month: string; failureCount: number; maintenanceCount: number; total: number }[]>(cacheKey);
     if (cached) return cached;
 
@@ -1507,9 +1505,19 @@ export class DatabaseStorage implements IStorage {
     const failureRecords = await this.getFailureRecords();
     const maintenanceRecords = await this.getMaintenanceRecords();
 
-    // Use current date as reference point for recent 6 months
-    const currentDate = new Date();
-    const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 5, 1);
+    // Find the date range where we have actual data
+    const allDates = [
+      ...failureRecords.filter(r => r.date).map(r => new Date(r.date!)),
+      ...maintenanceRecords.filter(r => r.date).map(r => new Date(r.date!))
+    ].sort((a, b) => b.getTime() - a.getTime());
+
+    if (allDates.length === 0) {
+      return [];
+    }
+
+    // Use the most recent 6 months that have data, starting from the latest date
+    const latestDate = allDates[0];
+    const startDate = new Date(latestDate.getFullYear(), latestDate.getMonth() - 5, 1);
 
     // Create map for monthly stats
     const monthlyStats = new Map<string, { failureCount: number; maintenanceCount: number }>();
