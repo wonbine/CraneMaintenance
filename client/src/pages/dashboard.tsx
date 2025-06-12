@@ -302,7 +302,7 @@ export default function Dashboard() {
                             outerRadius={100}
                             paddingAngle={5}
                             dataKey="value"
-                            label={({ name, value, percentage }) => `${name}\n${value}대\n${percentage}%`}
+                            label={({ name, value, percentage }) => `${name} 크레인\n${value}대 (${percentage}%)`}
                             labelLine={false}
                           >
                             {operationChartData.map((entry, index) => (
@@ -342,7 +342,7 @@ export default function Dashboard() {
                             outerRadius={100}
                             paddingAngle={2}
                             dataKey="value"
-                            label={({ name, value, percentage }) => `${name}급\n${value}대\n${percentage}%`}
+                            label={({ name, value, percentage }) => `${name}급 크레인\n${value}대 (${percentage}%)`}
                             labelLine={false}
                           >
                             {gradeChartData.map((entry: any, index: number) => (
@@ -417,7 +417,7 @@ export default function Dashboard() {
                             outerRadius={110}
                             paddingAngle={2}
                             dataKey="value"
-                            label={({ percentage, value }) => `${percentage}%\n(${value}건)`}
+                            label={({ name, percentage, value }) => `${name}\n${percentage}% (${value}건)`}
                             labelLine={false}
                           >
                             {failureCauseChartData.map((entry: any, index: number) => (
