@@ -1550,10 +1550,8 @@ export class DatabaseStorage implements IStorage {
     failureRecords.forEach(record => {
       if (record.date) {
         const recordDate = new Date(record.date);
-        // Extract only the date portion (ignore time)
-        const dateOnly = new Date(recordDate.getFullYear(), recordDate.getMonth(), recordDate.getDate());
-        if (dateOnly >= startDate && dateOnly <= referenceDate) {
-          const monthKey = `${dateOnly.getFullYear()}-${String(dateOnly.getMonth() + 1).padStart(2, '0')}`;
+        if (recordDate >= startDate && recordDate <= referenceDate) {
+          const monthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
           const stats = monthlyStats.get(monthKey);
           if (stats) {
             stats.failureCount++;
