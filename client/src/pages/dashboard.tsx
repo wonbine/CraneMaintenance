@@ -211,13 +211,20 @@ export default function Dashboard() {
           <Tabs defaultValue="analytics" className="w-full">
             <div className="border-b border-gray-200">
               <div className="px-6">
-                <TabsList className="grid w-full grid-cols-4 bg-transparent">
+                <TabsList className="grid w-full grid-cols-5 bg-transparent">
                   <TabsTrigger 
                     value="analytics" 
                     className="flex items-center space-x-2 data-[state=active]:border-b-2 data-[state=active]:border-primary-500 data-[state=active]:text-primary-600"
                   >
                     <BarChart3 className="w-4 h-4" />
                     <span>분석</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="cranes"
+                    className="flex items-center space-x-2 data-[state=active]:border-b-2 data-[state=active]:border-primary-500 data-[state=active]:text-primary-600"
+                  >
+                    <Factory className="w-4 h-4" />
+                    <span>크레인 목록</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="failures"
@@ -247,6 +254,10 @@ export default function Dashboard() {
             <CardContent className="p-6">
               <TabsContent value="analytics" className="mt-0">
                 <AnalyticsTab summary={summary || defaultSummary} />
+              </TabsContent>
+              
+              <TabsContent value="cranes" className="mt-0">
+                <CranesTable />
               </TabsContent>
               
               <TabsContent value="failures" className="mt-0">
