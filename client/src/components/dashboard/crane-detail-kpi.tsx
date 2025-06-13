@@ -477,11 +477,16 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
               {maintenanceRecords.slice(0, 5).map((record: any, index: number) => (
                 <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-medium text-sm">{record.taskName || '작업명 없음'}</div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <div className="font-medium text-sm">{record.taskName || '작업명 없음'}</div>
+                        <button className="ml-2 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border transition-colors">
+                          작업표준
+                        </button>
+                      </div>
                       <div className="text-xs text-gray-500">{formatDate(record.actualStartDateTime)}</div>
                     </div>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs ml-2">
                       {record.totalWorkTime ? `${record.totalWorkTime}시간` : '시간 미기록'}
                     </Badge>
                   </div>
