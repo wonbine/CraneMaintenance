@@ -111,13 +111,24 @@ export default function Dashboard() {
     'F': CHART_COLORS.secondary   // Gray
   };
   
-  // Failure cause colors - most frequent gets blue, others gray
+  // ColorBrewer Set2 palette - colorblind friendly
+  const COLORBREWER_SET2 = [
+    '#66c2a5', // teal
+    '#fc8d62', // orange
+    '#8da0cb', // blue
+    '#e78ac3', // pink
+    '#a6d854', // green
+    '#ffd92f', // yellow
+    '#e5c494', // tan
+    '#b3b3b3'  // gray
+  ];
+
+  // Failure cause colors using ColorBrewer Set2
   const getFailureCauseColors = (data: any[]) => {
-    const sortedData = [...data].sort((a, b) => b.count - a.count);
     const colors: Record<string, string> = {};
     
-    sortedData.forEach((item, index) => {
-      colors[item.cause] = index === 0 ? CHART_COLORS.primary : CHART_COLORS.secondary;
+    data.forEach((item, index) => {
+      colors[item.cause] = COLORBREWER_SET2[index % COLORBREWER_SET2.length];
     });
     
     return colors;
