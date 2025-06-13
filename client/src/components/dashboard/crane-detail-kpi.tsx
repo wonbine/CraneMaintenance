@@ -138,6 +138,37 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
 
   const averageRepairTime = 13; // Fixed value as requested
 
+  // Calculate inspection schedule data
+  const inspectionScheduleData = useMemo(() => {
+    if (!craneData.inspectionCycle || !craneData.inspectionReferenceDate) {
+      return [];
+    }
+
+    const referenceDate = new Date(craneData.inspectionReferenceDate);
+    const inspectionCycleDays = craneData.inspectionCycle;
+    const currentDate = new Date();
+    
+    // Generate next 6 inspection dates
+    const scheduleData = [];
+    for (let i = 0; i < 6; i++) {
+      const inspectionDate = new Date(referenceDate);
+      inspectionDate.setDate(referenceDate.getDate() + (inspectionCycleDays * (i + 1)));
+      
+      const isPast = inspectionDate < currentDate;
+      const isUpcoming = inspectionDate >= currentDate && inspectionDate <= new Date(currentDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // Next 30 days
+      
+      scheduleData.push({
+        cycle: `${i + 1}차`,
+        date: inspectionDate.toLocaleDateString('ko-KR'),
+        daysFromNow: Math.ceil((inspectionDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)),
+        status: isPast ? '완료' : (isUpcoming ? '예정' : '대기'),
+        color: isPast ? '#10B981' : (isUpcoming ? '#F59E0B' : '#6B7280')
+      });
+    }
+    
+    return scheduleData;
+  }, [craneData.inspectionCycle, craneData.inspectionReferenceDate]);
+
   // Calculate operational status and health score
   const getOperationalStatus = () => {
     if (recentFailures > 3) return { status: '주의', color: 'text-red-600', bgColor: 'bg-red-100', icon: AlertCircle };
@@ -470,6 +501,92 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
             ) : (
               <div className="h-[300px] flex items-center justify-center text-gray-500">
                 고장 데이터가 없습니다
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 점검 주기 일정 */}
+        <Card className="shadow-lg border-0 rounded-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Calendar className="w-5 h-5 text-indigo-600" />
+              <span>점검 주기 일정</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {inspectionScheduleData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={inspectionScheduleData} layout="horizontal">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" tick={{ fill: '#000000', fontSize: 12 }} />
+                  <YAxis 
+                    type="category" 
+                    dataKey="cycle" 
+                    tick={{ fill: '#000000', fontSize: 12 }}
+                    width={50}
+                  />
+                  <Tooltip 
+                    formatter={(value: any, name: string) => [
+                      `${value}일`, 
+                      '남은 일수'
+                    ]}
+                    labelFormatter={(label) => `${label} 점검`}
+                    contentStyle={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                      fontSize: '14px',
+                      color: '#000000'
+                    }}
+                  />
+                  <Bar 
+                    dataKey="daysFromNow" 
+                    fill="#4F46E5"
+                    radius={[0, 4, 4, 0]}
+                  >
+                    {inspectionScheduleData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-500">
+                <div className="text-center">
+                  <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                  <p>점검 주기 정보가 없습니다</p>
+                  <p className="text-sm text-gray-400">점검주기와 기준일자를 확인해주세요</p>
+                </div>
+              </div>
+            )}
+            
+            {/* 점검 일정 상세 정보 */}
+            {inspectionScheduleData.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <div className="text-sm font-medium text-gray-700 mb-3">점검 일정 상세</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {inspectionScheduleData.slice(0, 4).map((item, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span className="text-sm font-medium">{item.cycle}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs text-gray-600">{item.date}</div>
+                        <div className="text-xs font-medium" style={{ color: item.color }}>
+                          {item.daysFromNow > 0 ? `${item.daysFromNow}일 후` : 
+                           item.daysFromNow === 0 ? '오늘' : 
+                           `${Math.abs(item.daysFromNow)}일 전`}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </CardContent>
