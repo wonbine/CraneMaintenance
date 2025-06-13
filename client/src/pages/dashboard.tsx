@@ -89,49 +89,38 @@ export default function Dashboard() {
     }
   });
 
-  // Unified color palette - harmonious and professional
-  const PRIMARY_PALETTE = {
-    primary: '#334155',     // Slate-700 - primary dark
-    secondary: '#475569',   // Slate-600 - secondary medium
-    accent: '#64748b',      // Slate-500 - accent light
-    muted: '#94a3b8',       // Slate-400 - muted lighter
-    subtle: '#cbd5e1',      // Slate-300 - subtle lightest
-    success: '#059669',     // Emerald-600 - for positive states
-    warning: '#d97706',     // Amber-600 - for warning states
-    danger: '#dc2626'       // Red-600 - for error states
+  // Chart color scheme - Blue for most important, Gray for rest
+  const CHART_COLORS = {
+    primary: '#4F81BD',     // Blue for most important bars
+    secondary: '#C0C0C0',   // Gray for other bars
+    success: '#059669',     // Keep success color for positive states
+    warning: '#d97706',     // Keep warning color for alerts
+    danger: '#dc2626'       // Keep danger color for errors
   };
 
-  const OPERATION_COLORS = [PRIMARY_PALETTE.success, PRIMARY_PALETTE.secondary];
+  // Operation type colors - first (most important) gets blue
+  const OPERATION_COLORS = [CHART_COLORS.primary, CHART_COLORS.secondary];
+  
+  // Grade colors - A grade gets blue, others get gray
   const GRADE_COLORS = {
-    'A': PRIMARY_PALETTE.success,   // Best grade - success color
-    'B': PRIMARY_PALETTE.primary,   // Good grade - primary color
-    'C': PRIMARY_PALETTE.warning,   // Average grade - warning color
-    'D': PRIMARY_PALETTE.danger,    // Poor grade - danger color
-    'E': PRIMARY_PALETTE.secondary, // Fair grade - secondary color
-    'F': PRIMARY_PALETTE.accent     // Worst grade - accent color
+    'A': CHART_COLORS.primary,    // Best grade - blue
+    'B': CHART_COLORS.secondary,  // Gray
+    'C': CHART_COLORS.secondary,  // Gray
+    'D': CHART_COLORS.secondary,  // Gray
+    'E': CHART_COLORS.secondary,  // Gray
+    'F': CHART_COLORS.secondary   // Gray
   };
-  const FAILURE_CAUSE_COLORS = {
-    '전장품': PRIMARY_PALETTE.primary,
-    'Coil Lifter': PRIMARY_PALETTE.secondary,
-    '안전장치': PRIMARY_PALETTE.accent,
-    'Brake': PRIMARY_PALETTE.muted,
-    'Magnet': PRIMARY_PALETTE.subtle,
-    '기타': PRIMARY_PALETTE.primary,
-    'Inverter': PRIMARY_PALETTE.secondary,
-    '전원': PRIMARY_PALETTE.accent,
-    'Motor': PRIMARY_PALETTE.muted,
-    'Tong': PRIMARY_PALETTE.subtle,
-    'Wheel': PRIMARY_PALETTE.primary,
-    '무인': PRIMARY_PALETTE.secondary,
-    'PC': PRIMARY_PALETTE.accent,
-    '주행거리계': PRIMARY_PALETTE.muted,
-    '감속기': PRIMARY_PALETTE.subtle,
-    'LOAD CELL': PRIMARY_PALETTE.primary,
-    'Gear Coupling': PRIMARY_PALETTE.secondary,
-    '거리계': PRIMARY_PALETTE.accent,
-    '통신장치': PRIMARY_PALETTE.muted,
-    'Wire Rope': PRIMARY_PALETTE.subtle,
-    '정기점검': PRIMARY_PALETTE.success
+  
+  // Failure cause colors - most frequent gets blue, others gray
+  const getFailureCauseColors = (data: any[]) => {
+    const sortedData = [...data].sort((a, b) => b.count - a.count);
+    const colors: Record<string, string> = {};
+    
+    sortedData.forEach((item, index) => {
+      colors[item.cause] = index === 0 ? CHART_COLORS.primary : CHART_COLORS.secondary;
+    });
+    
+    return colors;
   };
 
   // Prepare operation type chart data
@@ -162,12 +151,13 @@ export default function Dashboard() {
     };
   });
 
-  // Prepare failure cause distribution chart data
+  // Prepare failure cause distribution chart data with dynamic colors
+  const failureCauseColors = getFailureCauseColors(failureCauseData);
   const failureCauseChartData = failureCauseData.map((item: any) => ({
     name: item.cause,
     value: item.count,
     percentage: item.percentage,
-    fill: FAILURE_CAUSE_COLORS[item.cause as keyof typeof FAILURE_CAUSE_COLORS] || '#6b7280'
+    fill: failureCauseColors[item.cause] || CHART_COLORS.secondary
   }));
 
   const FactoryOverviewCard = ({ factory }: { factory: any }) => {
@@ -339,13 +329,13 @@ export default function Dashboard() {
       total: (item.failureCount || 0) + (item.maintenanceCount || 0)
     }));
 
-    // Process failure cause chart data
-    const failureCauseChartData = failureCauseData.map((item: any, index: number) => ({
+    // Process failure cause chart data with blue/gray scheme
+    const factoryFailureCauseColors = getFailureCauseColors(failureCauseData);
+    const failureCauseChartData = failureCauseData.map((item: any) => ({
       name: item.cause,
       value: item.count,
       percentage: item.percentage,
-      fill: FAILURE_CAUSE_COLORS[item.cause as keyof typeof FAILURE_CAUSE_COLORS] || 
-            `hsl(${(index * 137.5) % 360}, 70%, 50%)`
+      fill: factoryFailureCauseColors[item.cause] || CHART_COLORS.secondary
     }));
 
     // Format date helper function
@@ -1163,8 +1153,8 @@ export default function Dashboard() {
                           formatter={(value: any, name: string) => [value, name]}
                           labelFormatter={(label) => `${label}`}
                         />
-                        <Bar dataKey="돌발작업" stackId="a" fill="#ef4444" />
-                        <Bar dataKey="일상수리" stackId="a" fill="#22c55e">
+                        <Bar dataKey="돌발작업" stackId="a" fill={CHART_COLORS.primary} />
+                        <Bar dataKey="일상수리" stackId="a" fill={CHART_COLORS.secondary}>
                           <LabelList dataKey="total" position="top" />
                         </Bar>
                       </BarChart>
@@ -1172,11 +1162,11 @@ export default function Dashboard() {
                   </div>
                   <div className="mt-4 flex justify-center space-x-6">
                     <div className="flex items-center">
-                      <div className="w-3 h-3 bg-red-500 rounded mr-2"></div>
+                      <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: CHART_COLORS.primary }}></div>
                       <span className="text-sm text-gray-600">돌발작업</span>
                     </div>
                     <div className="flex items-center">
-                      <div className="w-3 h-3 bg-green-500 rounded mr-2"></div>
+                      <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: CHART_COLORS.secondary }}></div>
                       <span className="text-sm text-gray-600">일상수리</span>
                     </div>
                   </div>
