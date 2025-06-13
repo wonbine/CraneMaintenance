@@ -1119,10 +1119,11 @@ export default function Dashboard() {
                             data={gradeChartData}
                             cx="50%"
                             cy="50%"
+                            innerRadius={60}
                             outerRadius={100}
-                            paddingAngle={2}
+                            paddingAngle={5}
                             dataKey="value"
-                            label={({ name, value, percentage }) => `${name}급 크레인\n${value}대 (${percentage}%)`}
+                            label={({ name, value, percentage }) => `${name}급\n${value}대 (${percentage}%)`}
                             labelLine={false}
                           >
                             {gradeChartData.map((entry: any, index: number) => (
@@ -1132,13 +1133,37 @@ export default function Dashboard() {
                           <Tooltip 
                             formatter={(value: any, name: string) => [
                               `${value}대 (${gradeChartData.find((d: any) => d.name === name)?.percentage}%)`,
-                              name
+                              `${name}급 크레인`
                             ]}
+                            contentStyle={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                              border: '1px solid #e5e7eb',
+                              borderRadius: '8px',
+                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                              fontSize: '14px'
+                            }}
+                          />
+                          <Legend 
+                            verticalAlign="bottom"
+                            height={36}
+                            wrapperStyle={{ 
+                              paddingTop: '20px',
+                              fontSize: '13px'
+                            }}
+                            iconType="circle"
+                            formatter={(value: string) => (
+                              <span style={{ 
+                                color: '#374151',
+                                fontSize: '13px',
+                                fontWeight: '500'
+                              }}>
+                                {value}급
+                              </span>
+                            )}
                           />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
-
                   </CardContent>
                 </Card>
               )}
