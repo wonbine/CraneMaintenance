@@ -1024,9 +1024,6 @@ export default function Dashboard() {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 {showOverview ? '공정별 크레인 현황' : '크레인 관리 대시보드'}
               </h1>
-              <p className="text-gray-600 mt-2">
-                {showOverview ? '각 공장의 크레인 수량 및 운전 방식 통계' : '실시간 크레인 상태 및 분석'}
-              </p>
             </div>
             <div className="flex items-center space-x-4">
               <AISummaryButton />
