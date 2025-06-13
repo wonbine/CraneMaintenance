@@ -1092,7 +1092,12 @@ export default function Dashboard() {
                             outerRadius={100}
                             paddingAngle={5}
                             dataKey="value"
-                            label={({ name, value, percentage }) => `${name} 크레인\n${value}대 (${percentage}%)`}
+                            label={({ name, value, percentage, x, y }) => (
+                              <text x={x} y={y} fill="#000000" fontSize="12" fontWeight="500" textAnchor="middle" dominantBaseline="middle">
+                                <tspan x={x} dy="-0.3em">{`${name} 크레인`}</tspan>
+                                <tspan x={x} dy="1.2em">{`${value}대 (${percentage}%)`}</tspan>
+                              </text>
+                            )}
                             labelLine={false}
                           >
                             {operationChartData.map((entry, index) => (
@@ -1141,7 +1146,12 @@ export default function Dashboard() {
                             outerRadius={100}
                             paddingAngle={5}
                             dataKey="value"
-                            label={({ name, value, percentage }) => `${name}급\n${value}대 (${percentage}%)`}
+                            label={({ name, value, percentage, x, y }) => (
+                              <text x={x} y={y} fill="#000000" fontSize="12" fontWeight="500" textAnchor="middle" dominantBaseline="middle">
+                                <tspan x={x} dy="-0.3em">{`${name}급`}</tspan>
+                                <tspan x={x} dy="1.2em">{`${value}대 (${percentage}%)`}</tspan>
+                              </text>
+                            )}
                             labelLine={false}
                           >
                             {gradeChartData.map((entry: any, index: number) => (
@@ -1213,7 +1223,7 @@ export default function Dashboard() {
                         />
                         <Bar dataKey="돌발작업" stackId="a" fill={CHART_COLORS.primary} />
                         <Bar dataKey="일상수리" stackId="a" fill={CHART_COLORS.secondary}>
-                          <LabelList dataKey="total" position="top" />
+                          <LabelList dataKey="total" position="top" style={{ fill: '#000000', fontSize: '12px', fontWeight: '500' }} />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -1251,7 +1261,12 @@ export default function Dashboard() {
                             outerRadius={110}
                             paddingAngle={2}
                             dataKey="value"
-                            label={({ name, percentage, value }) => `${name}\n${percentage}% (${value}건)`}
+                            label={({ name, percentage, value, x, y }) => (
+                              <text x={x} y={y} fill="#000000" fontSize="12" fontWeight="500" textAnchor="middle" dominantBaseline="middle">
+                                <tspan x={x} dy="-0.3em">{name}</tspan>
+                                <tspan x={x} dy="1.2em">{`${percentage}% (${value}건)`}</tspan>
+                              </text>
+                            )}
                             labelLine={false}
                           >
                             {failureCauseChartData.map((entry: any, index: number) => (
