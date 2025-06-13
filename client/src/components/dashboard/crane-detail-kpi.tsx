@@ -418,8 +418,8 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="돌발작업" fill="#ef4444" name="돌발작업" />
-                <Bar dataKey="일상수리" fill="#3b82f6" name="일상수리" />
+                <Bar dataKey="돌발작업" fill="#64748b" name="돌발작업" />
+                <Bar dataKey="일상수리" fill="#475569" name="일상수리" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

@@ -18,17 +18,17 @@ export function AnalyticsTab({ summary }: AnalyticsTabProps) {
   });
 
   const statusData = [
-    { name: "Operating", value: summary.operatingCranes, color: "#10B981" },
-    { name: "Under Maintenance", value: summary.maintenanceCranes, color: "#F59E0B" },
-    { name: "Urgent", value: summary.urgentCranes, color: "#EF4444" }
+    { name: "Operating", value: summary.operatingCranes, color: "#64748b" },
+    { name: "Under Maintenance", value: summary.maintenanceCranes, color: "#78716c" },
+    { name: "Urgent", value: summary.urgentCranes, color: "#6b7280" }
   ];
 
   const maintenanceColors = {
-    routine: "#3B82F6",
-    emergency: "#EF4444",
-    preventive: "#10B981",
-    repair: "#F59E0B",
-    inspection: "#8B5CF6"
+    routine: "#64748b",
+    emergency: "#6b7280",
+    preventive: "#475569",
+    repair: "#78716c",
+    inspection: "#71717a"
   };
 
   if (statsLoading || trendsLoading) {
