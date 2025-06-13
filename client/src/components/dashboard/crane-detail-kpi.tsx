@@ -524,7 +524,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                       // 샘플 데이터
                       const sampleDDay = 5; // D-5 (5일 남음)
                       const cycleDays = 14; // 14일 주기
-                      const daysSinceStart = 9; // 9일 경과
+                      const daysSinceStart = cycleDays - sampleDDay; // 9일 경과 (14 - 5 = 9)
                       const progress = Math.min(Math.max((daysSinceStart / cycleDays) * 180, 0), 180);
                       
                       // 게이지 색상 결정
