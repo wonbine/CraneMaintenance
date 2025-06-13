@@ -518,6 +518,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                     <TableHeader>
                       <TableRow className="bg-gray-50">
                         <TableHead className="text-center">발생일자</TableHead>
+                        {isFactoryView && <TableHead className="text-center">크레인</TableHead>}
                         <TableHead className="text-center">고장부위</TableHead>
                         <TableHead className="text-center">고장유형</TableHead>
                         <TableHead className="text-center">고장설명</TableHead>
@@ -527,36 +528,51 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {failureRecords.map((record: any, index: number) => (
-                        <TableRow key={index} className="hover:bg-gray-50">
-                          <TableCell className="text-center">
-                            {formatDate(record.date)}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {record.byDevice || '정보없음'}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {record.failureType || '정보없음'}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {record.description || '정보없음'}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {record.reportedBy || '정보없음'}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {record.downtime ? `${record.downtime}시간` : '정보없음'}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Badge 
-                              variant={record.severity === 'high' ? 'destructive' : record.severity === 'medium' ? 'secondary' : 'default'}
-                              className="text-xs"
-                            >
-                              {record.severity === 'high' ? '높음' : record.severity === 'medium' ? '중간' : '낮음'}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {failureRecords.map((record: any, index: number) => {
+                        // Find crane name for this record
+                        const recordCrane = allCranes.find((crane: any) => crane.craneId === record.craneId);
+                        
+                        return (
+                          <TableRow key={index} className="hover:bg-gray-50">
+                            <TableCell className="text-center">
+                              {formatDate(record.date)}
+                            </TableCell>
+                            {isFactoryView && (
+                              <TableCell className="text-center">
+                                <div className="text-sm font-medium">
+                                  {recordCrane?.craneName || record.craneId}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {record.craneId}
+                                </div>
+                              </TableCell>
+                            )}
+                            <TableCell className="text-center">
+                              {record.byDevice || '정보없음'}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {record.failureType || '정보없음'}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {record.description || '정보없음'}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {record.reportedBy || '정보없음'}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {record.downtime ? `${record.downtime}시간` : '정보없음'}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge 
+                                variant={record.severity === 'high' ? 'destructive' : record.severity === 'medium' ? 'secondary' : 'default'}
+                                className="text-xs"
+                              >
+                                {record.severity === 'high' ? '높음' : record.severity === 'medium' ? '중간' : '낮음'}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>
