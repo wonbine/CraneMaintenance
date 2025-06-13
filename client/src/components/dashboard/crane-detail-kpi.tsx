@@ -506,86 +506,117 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
           </CardContent>
         </Card>
 
-        {/* 점검 주기 일정 */}
+        {/* 점검 주기 게이지 */}
         <Card className="shadow-lg border-0 rounded-xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Calendar className="w-5 h-5 text-indigo-600" />
-              <span>점검 주기 일정</span>
+              <span>점검 주기 현황 - {craneData.craneId}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {inspectionScheduleData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={inspectionScheduleData} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" tick={{ fill: '#000000', fontSize: 12 }} />
-                  <YAxis 
-                    type="category" 
-                    dataKey="cycle" 
-                    tick={{ fill: '#000000', fontSize: 12 }}
-                    width={50}
-                  />
-                  <Tooltip 
-                    formatter={(value: any, name: string) => [
-                      `${value}일`, 
-                      '남은 일수'
-                    ]}
-                    labelFormatter={(label) => `${label} 점검`}
-                    contentStyle={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                      fontSize: '14px',
-                      color: '#000000'
-                    }}
-                  />
-                  <Bar 
-                    dataKey="daysFromNow" 
-                    fill="#4F46E5"
-                    radius={[0, 4, 4, 0]}
-                  >
-                    {inspectionScheduleData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            {craneData.inspectionCycle && craneData.inspectionReferenceDate ? (
+              <div className="space-y-6">
+                {/* 게이지 차트 */}
+                <div className="flex justify-center">
+                  <div className="relative w-64 h-32">
+                    {(() => {
+                      const referenceDate = new Date(craneData.inspectionReferenceDate);
+                      const currentDate = new Date();
+                      const cycleDays = craneData.inspectionCycle;
+                      const daysSinceReference = Math.floor((currentDate.getTime() - referenceDate.getTime()) / (24 * 60 * 60 * 1000));
+                      const progress = Math.min((daysSinceReference / cycleDays) * 100, 100);
+                      const nextInspectionDate = new Date(referenceDate.getTime() + cycleDays * 24 * 60 * 60 * 1000);
+                      const daysUntilInspection = Math.ceil((nextInspectionDate.getTime() - currentDate.getTime()) / (24 * 60 * 60 * 1000));
+                      
+                      return (
+                        <>
+                          {/* 반원 게이지 배경 */}
+                          <div className="absolute inset-0 flex items-end justify-center">
+                            <div className="w-56 h-28 rounded-t-full border-8 border-gray-200 relative overflow-hidden">
+                              {/* 진행률 표시 */}
+                              <div 
+                                className="absolute bottom-0 left-0 h-full rounded-t-full transition-all duration-1000"
+                                style={{
+                                  width: `${progress}%`,
+                                  background: progress >= 100 ? '#ef4444' : progress >= 80 ? '#f59e0b' : '#10b981'
+                                }}
+                              />
+                            </div>
+                          </div>
+                          
+                          {/* 게이지 중앙 정보 */}
+                          <div className="absolute inset-0 flex items-end justify-center pb-6">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-gray-800">
+                                {Math.max(0, daysUntilInspection)}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                {daysUntilInspection <= 0 ? '점검 필요' : '일 남음'}
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* 점검 정보 카드들 */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 bg-blue-50 rounded-lg text-center">
+                    <div className="text-sm text-blue-600 font-medium">점검 주기</div>
+                    <div className="text-lg font-bold text-blue-800">{craneData.inspectionCycle}일</div>
+                  </div>
+                  
+                  <div className="p-4 bg-green-50 rounded-lg text-center">
+                    <div className="text-sm text-green-600 font-medium">기준일</div>
+                    <div className="text-sm font-bold text-green-800">
+                      {new Date(craneData.inspectionReferenceDate).toLocaleDateString('ko-KR')}
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-orange-50 rounded-lg text-center">
+                    <div className="text-sm text-orange-600 font-medium">다음 점검일</div>
+                    <div className="text-sm font-bold text-orange-800">
+                      {new Date(new Date(craneData.inspectionReferenceDate).getTime() + craneData.inspectionCycle * 24 * 60 * 60 * 1000).toLocaleDateString('ko-KR')}
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-red-50 rounded-lg text-center">
+                    <div className="text-sm text-red-600 font-medium">경과 일수</div>
+                    <div className="text-lg font-bold text-red-800">
+                      {Math.floor((new Date().getTime() - new Date(craneData.inspectionReferenceDate).getTime()) / (24 * 60 * 60 * 1000))}일
+                    </div>
+                  </div>
+                </div>
+
+                {/* 점검 상태 표시 */}
+                <div className="flex justify-center">
+                  {(() => {
+                    const nextInspectionDate = new Date(new Date(craneData.inspectionReferenceDate).getTime() + craneData.inspectionCycle * 24 * 60 * 60 * 1000);
+                    const daysUntil = Math.ceil((nextInspectionDate.getTime() - new Date().getTime()) / (24 * 60 * 60 * 1000));
+                    
+                    return (
+                      <div className={`px-4 py-2 rounded-full text-sm font-medium ${
+                        daysUntil <= 0
+                          ? 'bg-red-100 text-red-800'
+                          : daysUntil <= 7
+                          ? 'bg-orange-100 text-orange-800'
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {daysUntil <= 0 ? '점검 필요' : daysUntil <= 7 ? '점검 예정' : '정상'}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
             ) : (
               <div className="h-[300px] flex items-center justify-center text-gray-500">
                 <div className="text-center">
                   <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-2" />
                   <p>점검 주기 정보가 없습니다</p>
-                  <p className="text-sm text-gray-400">점검주기와 기준일자를 확인해주세요</p>
-                </div>
-              </div>
-            )}
-            
-            {/* 점검 일정 상세 정보 */}
-            {inspectionScheduleData.length > 0 && (
-              <div className="mt-4 space-y-2">
-                <div className="text-sm font-medium text-gray-700 mb-3">점검 일정 상세</div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {inspectionScheduleData.slice(0, 4).map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <div 
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: item.color }}
-                        />
-                        <span className="text-sm font-medium">{item.cycle}</span>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs text-gray-600">{item.date}</div>
-                        <div className="text-xs font-medium" style={{ color: item.color }}>
-                          {item.daysFromNow > 0 ? `${item.daysFromNow}일 후` : 
-                           item.daysFromNow === 0 ? '오늘' : 
-                           `${Math.abs(item.daysFromNow)}일 전`}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  <p className="text-sm text-gray-400">설비코드: {craneData.craneId}</p>
                 </div>
               </div>
             )}
