@@ -515,29 +515,23 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {craneData.inspectionCycle && craneData.inspectionReferenceDate ? (
+            {true ? (
               <div className="space-y-6">
-                {/* D-Day 게이지 차트 */}
+                {/* D-Day 게이지 차트 (샘플 데이터) */}
                 <div className="flex justify-center">
                   <div className="relative w-80 h-40">
                     {(() => {
-                      const referenceDate = new Date(craneData.inspectionReferenceDate);
-                      const currentDate = new Date();
-                      const cycleDays = craneData.inspectionCycle;
-                      const nextInspectionDate = new Date(referenceDate.getTime() + cycleDays * 24 * 60 * 60 * 1000);
-                      const daysUntilInspection = Math.ceil((nextInspectionDate.getTime() - currentDate.getTime()) / (24 * 60 * 60 * 1000));
-                      const daysSinceReference = Math.floor((currentDate.getTime() - referenceDate.getTime()) / (24 * 60 * 60 * 1000));
-                      
-                      // D-Day 계산 (음수면 지남, 양수면 남음)
-                      const dDayValue = daysUntilInspection;
-                      const isOverdue = dDayValue <= 0;
-                      const progress = Math.min(Math.max((daysSinceReference / cycleDays) * 180, 0), 180);
+                      // 샘플 데이터
+                      const sampleDDay = 5; // D-5 (5일 남음)
+                      const cycleDays = 30; // 30일 주기
+                      const daysSinceStart = 25; // 25일 경과
+                      const progress = Math.min(Math.max((daysSinceStart / cycleDays) * 180, 0), 180);
                       
                       // 게이지 색상 결정
                       const getGaugeColor = () => {
-                        if (isOverdue) return '#ef4444'; // 빨간색 - 점검 필요
-                        if (dDayValue <= 7) return '#f59e0b'; // 주황색 - 임박
-                        if (dDayValue <= 30) return '#eab308'; // 노란색 - 주의
+                        if (sampleDDay <= 0) return '#ef4444'; // 빨간색 - 점검 필요
+                        if (sampleDDay <= 7) return '#f59e0b'; // 주황색 - 임박
+                        if (sampleDDay <= 15) return '#eab308'; // 노란색 - 주의
                         return '#10b981'; // 초록색 - 안전
                       };
                       
@@ -599,14 +593,14 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                           <div className="absolute inset-0 flex items-end justify-center pb-8">
                             <div className="text-center">
                               <div className={`text-3xl font-bold ${
-                                isOverdue ? 'text-red-600' : 
-                                dDayValue <= 7 ? 'text-orange-600' : 
-                                dDayValue <= 30 ? 'text-yellow-600' : 'text-green-600'
+                                sampleDDay <= 0 ? 'text-red-600' : 
+                                sampleDDay <= 7 ? 'text-orange-600' : 
+                                sampleDDay <= 15 ? 'text-yellow-600' : 'text-green-600'
                               }`}>
-                                {isOverdue ? `D+${Math.abs(dDayValue)}` : `D-${dDayValue}`}
+                                {sampleDDay <= 0 ? `D+${Math.abs(sampleDDay)}` : `D-${sampleDDay}`}
                               </div>
                               <div className="text-sm text-gray-600 mt-1">
-                                {isOverdue ? '점검 지연' : '점검까지'}
+                                {sampleDDay <= 0 ? '점검 지연' : '점검까지'}
                               </div>
                             </div>
                           </div>
@@ -630,53 +624,40 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                   </div>
                 </div>
 
-                {/* 점검 정보 카드들 */}
+                {/* 점검 정보 카드들 (샘플 데이터) */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="p-4 bg-blue-50 rounded-lg text-center">
                     <div className="text-sm text-blue-600 font-medium">점검 주기</div>
-                    <div className="text-lg font-bold text-blue-800">{craneData.inspectionCycle}일</div>
+                    <div className="text-lg font-bold text-blue-800">30일</div>
                   </div>
                   
                   <div className="p-4 bg-green-50 rounded-lg text-center">
                     <div className="text-sm text-green-600 font-medium">기준일</div>
                     <div className="text-sm font-bold text-green-800">
-                      {new Date(craneData.inspectionReferenceDate).toLocaleDateString('ko-KR')}
+                      2024. 12. 15.
                     </div>
                   </div>
                   
                   <div className="p-4 bg-orange-50 rounded-lg text-center">
                     <div className="text-sm text-orange-600 font-medium">다음 점검일</div>
                     <div className="text-sm font-bold text-orange-800">
-                      {new Date(new Date(craneData.inspectionReferenceDate).getTime() + craneData.inspectionCycle * 24 * 60 * 60 * 1000).toLocaleDateString('ko-KR')}
+                      2025. 1. 14.
                     </div>
                   </div>
                   
                   <div className="p-4 bg-red-50 rounded-lg text-center">
                     <div className="text-sm text-red-600 font-medium">경과 일수</div>
                     <div className="text-lg font-bold text-red-800">
-                      {Math.floor((new Date().getTime() - new Date(craneData.inspectionReferenceDate).getTime()) / (24 * 60 * 60 * 1000))}일
+                      25일
                     </div>
                   </div>
                 </div>
 
                 {/* 점검 상태 표시 */}
                 <div className="flex justify-center">
-                  {(() => {
-                    const nextInspectionDate = new Date(new Date(craneData.inspectionReferenceDate).getTime() + craneData.inspectionCycle * 24 * 60 * 60 * 1000);
-                    const daysUntil = Math.ceil((nextInspectionDate.getTime() - new Date().getTime()) / (24 * 60 * 60 * 1000));
-                    
-                    return (
-                      <div className={`px-4 py-2 rounded-full text-sm font-medium ${
-                        daysUntil <= 0
-                          ? 'bg-red-100 text-red-800'
-                          : daysUntil <= 7
-                          ? 'bg-orange-100 text-orange-800'
-                          : 'bg-green-100 text-green-800'
-                      }`}>
-                        {daysUntil <= 0 ? '점검 필요' : daysUntil <= 7 ? '점검 예정' : '정상'}
-                      </div>
-                    );
-                  })()}
+                  <div className="px-4 py-2 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                    점검 예정
+                  </div>
                 </div>
               </div>
             ) : (
