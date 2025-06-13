@@ -88,6 +88,37 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
     enabled: !!actualCraneId && actualCraneId !== 'all'
   });
 
+  // Calculate inspection schedule data - moved here to be before early returns
+  const inspectionScheduleData = useMemo(() => {
+    if (!craneData?.inspectionCycle || !craneData?.inspectionReferenceDate) {
+      return [];
+    }
+
+    const referenceDate = new Date(craneData.inspectionReferenceDate);
+    const inspectionCycleDays = craneData.inspectionCycle;
+    const currentDate = new Date();
+    
+    // Generate next 6 inspection dates
+    const scheduleData = [];
+    for (let i = 0; i < 6; i++) {
+      const inspectionDate = new Date(referenceDate);
+      inspectionDate.setDate(referenceDate.getDate() + (inspectionCycleDays * (i + 1)));
+      
+      const isPast = inspectionDate < currentDate;
+      const isUpcoming = inspectionDate >= currentDate && inspectionDate <= new Date(currentDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // Next 30 days
+      
+      scheduleData.push({
+        cycle: `${i + 1}차`,
+        date: inspectionDate.toLocaleDateString('ko-KR'),
+        daysFromNow: Math.ceil((inspectionDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)),
+        status: isPast ? '완료' : (isUpcoming ? '예정' : '대기'),
+        color: isPast ? '#10B981' : (isUpcoming ? '#F59E0B' : '#6B7280')
+      });
+    }
+    
+    return scheduleData;
+  }, [craneData?.inspectionCycle, craneData?.inspectionReferenceDate]);
+
   if (craneLoading) {
     return (
       <div className="text-center py-12">
@@ -137,37 +168,6 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
   }, 0);
 
   const averageRepairTime = 13; // Fixed value as requested
-
-  // Calculate inspection schedule data
-  const inspectionScheduleData = useMemo(() => {
-    if (!craneData?.inspectionCycle || !craneData?.inspectionReferenceDate) {
-      return [];
-    }
-
-    const referenceDate = new Date(craneData.inspectionReferenceDate);
-    const inspectionCycleDays = craneData.inspectionCycle;
-    const currentDate = new Date();
-    
-    // Generate next 6 inspection dates
-    const scheduleData = [];
-    for (let i = 0; i < 6; i++) {
-      const inspectionDate = new Date(referenceDate);
-      inspectionDate.setDate(referenceDate.getDate() + (inspectionCycleDays * (i + 1)));
-      
-      const isPast = inspectionDate < currentDate;
-      const isUpcoming = inspectionDate >= currentDate && inspectionDate <= new Date(currentDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // Next 30 days
-      
-      scheduleData.push({
-        cycle: `${i + 1}차`,
-        date: inspectionDate.toLocaleDateString('ko-KR'),
-        daysFromNow: Math.ceil((inspectionDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)),
-        status: isPast ? '완료' : (isUpcoming ? '예정' : '대기'),
-        color: isPast ? '#10B981' : (isUpcoming ? '#F59E0B' : '#6B7280')
-      });
-    }
-    
-    return scheduleData;
-  }, [craneData?.inspectionCycle, craneData?.inspectionReferenceDate]);
 
   // Calculate operational status and health score
   const getOperationalStatus = () => {
