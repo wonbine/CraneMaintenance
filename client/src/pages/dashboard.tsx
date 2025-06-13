@@ -89,37 +89,37 @@ export default function Dashboard() {
     }
   });
 
-  // Chart colors
-  const OPERATION_COLORS = ['#22c55e', '#ef4444']; // Green for manned, Red for unmanned
+  // Chart colors - Professional and subdued palette
+  const OPERATION_COLORS = ['#059669', '#dc2626']; // Subdued green for manned, subdued red for unmanned
   const GRADE_COLORS = {
-    'A': '#22c55e', // Bright green for A grade (best)
-    'B': '#3b82f6', // Blue for B grade  
-    'C': '#f59e0b', // Orange for C grade
-    'D': '#ef4444', // Red for D grade (worst)
-    'E': '#8b5cf6', // Purple for E grade
-    'F': '#f97316'  // Dark orange for F grade
+    'A': '#0f766e', // Dark teal for A grade (best)
+    'B': '#1e40af', // Deep blue for B grade  
+    'C': '#b45309', // Amber for C grade
+    'D': '#dc2626', // Red for D grade (worst)
+    'E': '#7c3aed', // Violet for E grade
+    'F': '#c2410c'  // Orange for F grade
   };
   const FAILURE_CAUSE_COLORS = {
-    '전장품': '#ef4444', // Red for electrical components (most common)
-    'Coil Lifter': '#3b82f6', // Blue for coil lifter
-    '안전장치': '#f59e0b', // Orange for safety devices
-    'Brake': '#8b5cf6', // Purple for brake
-    'Magnet': '#22c55e', // Green for magnet
-    '기타': '#f97316', // Orange for others
-    'Inverter': '#06b6d4', // Cyan for inverter
-    '전원': '#8b5cf6', // Purple for power supply
-    'Motor': '#ef4444', // Red for motor
-    'Tong': '#10b981', // Emerald for tong
-    'Wheel': '#f59e0b', // Orange for wheel
-    '무인': '#6b7280', // Gray for unmanned
-    'PC': '#3b82f6', // Blue for PC
-    '주행거리계': '#14b8a6', // Teal for distance meter
-    '감속기': '#8b5cf6', // Purple for reducer
-    'LOAD CELL': '#f97316', // Orange for load cell
-    'Gear Coupling': '#06b6d4', // Cyan for gear coupling
-    '거리계': '#22c55e', // Green for distance meter
-    '통신장치': '#f59e0b', // Orange for communication device
-    'Wire Rope': '#8b5cf6', // Purple for wire rope
+    '전장품': '#64748b', // Slate gray for electrical components
+    'Coil Lifter': '#475569', // Dark slate for coil lifter
+    '안전장치': '#78716c', // Stone for safety devices
+    'Brake': '#6b7280', // Gray for brake
+    'Magnet': '#57534e', // Neutral for magnet
+    '기타': '#71717a', // Zinc for others
+    'Inverter': '#52525b', // Neutral gray for inverter
+    '전원': '#737373', // Gray for power supply
+    'Motor': '#6b7280', // Gray for motor
+    'Tong': '#525252', // Neutral for tong
+    'Wheel': '#71717a', // Zinc for wheel
+    '무인': '#9ca3af', // Light gray for unmanned
+    'PC': '#6b7280', // Gray for PC
+    '주행거리계': '#64748b', // Slate for distance meter
+    '감속기': '#78716c', // Stone for reducer
+    'LOAD CELL': '#71717a', // Zinc for load cell
+    'Gear Coupling': '#6b7280', // Gray for gear coupling
+    '거리계': '#64748b', // Slate for distance meter
+    '통신장치': '#78716c', // Stone for communication device
+    'Wire Rope': '#737373', // Gray for wire rope
     '정기점검': '#14b8a6' // Teal for regular inspection
   };
 

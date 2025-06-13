@@ -259,7 +259,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                   text={`${healthScore}%`}
                   styles={buildStyles({
                     textSize: '20px',
-                    pathColor: healthScore > 80 ? '#10b981' : healthScore > 60 ? '#f59e0b' : '#ef4444',
+                    pathColor: healthScore > 80 ? '#059669' : healthScore > 60 ? '#b45309' : '#dc2626',
                     textColor: '#374151',
                     trailColor: '#e5e7eb'
                   })}
