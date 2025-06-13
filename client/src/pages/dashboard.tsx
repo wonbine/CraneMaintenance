@@ -89,38 +89,49 @@ export default function Dashboard() {
     }
   });
 
-  // Chart colors - Professional and subdued palette
-  const OPERATION_COLORS = ['#059669', '#dc2626']; // Subdued green for manned, subdued red for unmanned
+  // Unified color palette - harmonious and professional
+  const PRIMARY_PALETTE = {
+    primary: '#334155',     // Slate-700 - primary dark
+    secondary: '#475569',   // Slate-600 - secondary medium
+    accent: '#64748b',      // Slate-500 - accent light
+    muted: '#94a3b8',       // Slate-400 - muted lighter
+    subtle: '#cbd5e1',      // Slate-300 - subtle lightest
+    success: '#059669',     // Emerald-600 - for positive states
+    warning: '#d97706',     // Amber-600 - for warning states
+    danger: '#dc2626'       // Red-600 - for error states
+  };
+
+  const OPERATION_COLORS = [PRIMARY_PALETTE.success, PRIMARY_PALETTE.secondary];
   const GRADE_COLORS = {
-    'A': '#0f766e', // Dark teal for A grade (best)
-    'B': '#1e40af', // Deep blue for B grade  
-    'C': '#b45309', // Amber for C grade
-    'D': '#dc2626', // Red for D grade (worst)
-    'E': '#7c3aed', // Violet for E grade
-    'F': '#c2410c'  // Orange for F grade
+    'A': PRIMARY_PALETTE.success,   // Best grade - success color
+    'B': PRIMARY_PALETTE.primary,   // Good grade - primary color
+    'C': PRIMARY_PALETTE.warning,   // Average grade - warning color
+    'D': PRIMARY_PALETTE.danger,    // Poor grade - danger color
+    'E': PRIMARY_PALETTE.secondary, // Fair grade - secondary color
+    'F': PRIMARY_PALETTE.accent     // Worst grade - accent color
   };
   const FAILURE_CAUSE_COLORS = {
-    '전장품': '#64748b', // Slate gray for electrical components
-    'Coil Lifter': '#475569', // Dark slate for coil lifter
-    '안전장치': '#78716c', // Stone for safety devices
-    'Brake': '#6b7280', // Gray for brake
-    'Magnet': '#57534e', // Neutral for magnet
-    '기타': '#71717a', // Zinc for others
-    'Inverter': '#52525b', // Neutral gray for inverter
-    '전원': '#737373', // Gray for power supply
-    'Motor': '#6b7280', // Gray for motor
-    'Tong': '#525252', // Neutral for tong
-    'Wheel': '#71717a', // Zinc for wheel
-    '무인': '#9ca3af', // Light gray for unmanned
-    'PC': '#6b7280', // Gray for PC
-    '주행거리계': '#64748b', // Slate for distance meter
-    '감속기': '#78716c', // Stone for reducer
-    'LOAD CELL': '#71717a', // Zinc for load cell
-    'Gear Coupling': '#6b7280', // Gray for gear coupling
-    '거리계': '#64748b', // Slate for distance meter
-    '통신장치': '#78716c', // Stone for communication device
-    'Wire Rope': '#737373', // Gray for wire rope
-    '정기점검': '#14b8a6' // Teal for regular inspection
+    '전장품': PRIMARY_PALETTE.primary,
+    'Coil Lifter': PRIMARY_PALETTE.secondary,
+    '안전장치': PRIMARY_PALETTE.accent,
+    'Brake': PRIMARY_PALETTE.muted,
+    'Magnet': PRIMARY_PALETTE.subtle,
+    '기타': PRIMARY_PALETTE.primary,
+    'Inverter': PRIMARY_PALETTE.secondary,
+    '전원': PRIMARY_PALETTE.accent,
+    'Motor': PRIMARY_PALETTE.muted,
+    'Tong': PRIMARY_PALETTE.subtle,
+    'Wheel': PRIMARY_PALETTE.primary,
+    '무인': PRIMARY_PALETTE.secondary,
+    'PC': PRIMARY_PALETTE.accent,
+    '주행거리계': PRIMARY_PALETTE.muted,
+    '감속기': PRIMARY_PALETTE.subtle,
+    'LOAD CELL': PRIMARY_PALETTE.primary,
+    'Gear Coupling': PRIMARY_PALETTE.secondary,
+    '거리계': PRIMARY_PALETTE.accent,
+    '통신장치': PRIMARY_PALETTE.muted,
+    'Wire Rope': PRIMARY_PALETTE.subtle,
+    '정기점검': PRIMARY_PALETTE.success
   };
 
   // Prepare operation type chart data
