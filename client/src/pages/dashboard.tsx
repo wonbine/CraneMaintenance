@@ -89,49 +89,38 @@ export default function Dashboard() {
     }
   });
 
-  // Unified color palette - harmonious and professional
-  const PRIMARY_PALETTE = {
-    primary: '#334155',     // Slate-700 - primary dark
-    secondary: '#475569',   // Slate-600 - secondary medium
-    accent: '#64748b',      // Slate-500 - accent light
-    muted: '#94a3b8',       // Slate-400 - muted lighter
-    subtle: '#cbd5e1',      // Slate-300 - subtle lightest
-    success: '#059669',     // Emerald-600 - for positive states
-    warning: '#d97706',     // Amber-600 - for warning states
-    danger: '#dc2626'       // Red-600 - for error states
-  };
-
-  const OPERATION_COLORS = [PRIMARY_PALETTE.success, PRIMARY_PALETTE.secondary];
+  // Chart colors
+  const OPERATION_COLORS = ['#22c55e', '#ef4444']; // Green for manned, Red for unmanned
   const GRADE_COLORS = {
-    'A': PRIMARY_PALETTE.success,   // Best grade - success color
-    'B': PRIMARY_PALETTE.primary,   // Good grade - primary color
-    'C': PRIMARY_PALETTE.warning,   // Average grade - warning color
-    'D': PRIMARY_PALETTE.danger,    // Poor grade - danger color
-    'E': PRIMARY_PALETTE.secondary, // Fair grade - secondary color
-    'F': PRIMARY_PALETTE.accent     // Worst grade - accent color
+    'A': '#22c55e', // Bright green for A grade (best)
+    'B': '#3b82f6', // Blue for B grade  
+    'C': '#f59e0b', // Orange for C grade
+    'D': '#ef4444', // Red for D grade (worst)
+    'E': '#8b5cf6', // Purple for E grade
+    'F': '#f97316'  // Dark orange for F grade
   };
   const FAILURE_CAUSE_COLORS = {
-    '전장품': PRIMARY_PALETTE.primary,
-    'Coil Lifter': PRIMARY_PALETTE.secondary,
-    '안전장치': PRIMARY_PALETTE.accent,
-    'Brake': PRIMARY_PALETTE.muted,
-    'Magnet': PRIMARY_PALETTE.subtle,
-    '기타': PRIMARY_PALETTE.primary,
-    'Inverter': PRIMARY_PALETTE.secondary,
-    '전원': PRIMARY_PALETTE.accent,
-    'Motor': PRIMARY_PALETTE.muted,
-    'Tong': PRIMARY_PALETTE.subtle,
-    'Wheel': PRIMARY_PALETTE.primary,
-    '무인': PRIMARY_PALETTE.secondary,
-    'PC': PRIMARY_PALETTE.accent,
-    '주행거리계': PRIMARY_PALETTE.muted,
-    '감속기': PRIMARY_PALETTE.subtle,
-    'LOAD CELL': PRIMARY_PALETTE.primary,
-    'Gear Coupling': PRIMARY_PALETTE.secondary,
-    '거리계': PRIMARY_PALETTE.accent,
-    '통신장치': PRIMARY_PALETTE.muted,
-    'Wire Rope': PRIMARY_PALETTE.subtle,
-    '정기점검': PRIMARY_PALETTE.success
+    '전장품': '#ef4444', // Red for electrical components (most common)
+    'Coil Lifter': '#3b82f6', // Blue for coil lifter
+    '안전장치': '#f59e0b', // Orange for safety devices
+    'Brake': '#8b5cf6', // Purple for brake
+    'Magnet': '#22c55e', // Green for magnet
+    '기타': '#f97316', // Orange for others
+    'Inverter': '#06b6d4', // Cyan for inverter
+    '전원': '#8b5cf6', // Purple for power supply
+    'Motor': '#ef4444', // Red for motor
+    'Tong': '#10b981', // Emerald for tong
+    'Wheel': '#f59e0b', // Orange for wheel
+    '무인': '#6b7280', // Gray for unmanned
+    'PC': '#3b82f6', // Blue for PC
+    '주행거리계': '#14b8a6', // Teal for distance meter
+    '감속기': '#8b5cf6', // Purple for reducer
+    'LOAD CELL': '#f97316', // Orange for load cell
+    'Gear Coupling': '#06b6d4', // Cyan for gear coupling
+    '거리계': '#22c55e', // Green for distance meter
+    '통신장치': '#f59e0b', // Orange for communication device
+    'Wire Rope': '#8b5cf6', // Purple for wire rope
+    '정기점검': '#14b8a6' // Teal for regular inspection
   };
 
   // Prepare operation type chart data

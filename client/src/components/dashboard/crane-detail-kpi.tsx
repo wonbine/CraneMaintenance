@@ -259,7 +259,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                   text={`${healthScore}%`}
                   styles={buildStyles({
                     textSize: '20px',
-                    pathColor: healthScore > 80 ? '#059669' : healthScore > 60 ? '#d97706' : '#dc2626',
+                    pathColor: healthScore > 80 ? '#10b981' : healthScore > 60 ? '#f59e0b' : '#ef4444',
                     textColor: '#374151',
                     trailColor: '#e5e7eb'
                   })}
@@ -418,8 +418,8 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="돌발작업" fill="#334155" name="돌발작업" />
-                <Bar dataKey="일상수리" fill="#475569" name="일상수리" />
+                <Bar dataKey="돌발작업" fill="#ef4444" name="돌발작업" />
+                <Bar dataKey="일상수리" fill="#3b82f6" name="일상수리" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
