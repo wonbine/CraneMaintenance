@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { Button } from "../ui/button";
 import { 
   Factory, Settings, AlertCircle, CheckCircle, Clock, MapPin, Calendar, 
   Activity, AlertTriangle, Wrench, TrendingUp, Gauge, Users, Zap, 
-  FileText, BarChart3, PieChart as PieChartIcon, Timer, ClipboardList, Brain, Loader2
+  FileText, BarChart3, PieChart as PieChartIcon, Timer, ClipboardList
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
@@ -21,16 +19,6 @@ interface CraneDetailKPIProps {
 }
 
 export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
-  const [workStandardDialog, setWorkStandardDialog] = useState<{
-    isOpen: boolean;
-    taskName: string;
-    summary: string | null;
-  }>({
-    isOpen: false,
-    taskName: '',
-    summary: null
-  });
-
   // First, get all cranes to find the matching crane by name or ID
   const { data: allCranes = [] } = useQuery({
     queryKey: ['/api/cranes'],
@@ -92,49 +80,6 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
     },
     enabled: !!actualCraneId && actualCraneId !== 'all'
   });
-
-  // Work standard AI summary mutation
-  const workStandardSummaryMutation = useMutation({
-    mutationFn: async (taskName: string) => {
-      const response = await fetch("/api/ai/work-standard-summary", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ taskName }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "작업표준 AI 요약 생성에 실패했습니다");
-      }
-
-      const data = await response.json();
-      return data.summary;
-    },
-    onSuccess: (summary) => {
-      setWorkStandardDialog(prev => ({
-        ...prev,
-        summary
-      }));
-    },
-    onError: (error) => {
-      console.error("작업표준 AI 요약 생성 오류:", error);
-      setWorkStandardDialog(prev => ({
-        ...prev,
-        summary: "작업표준 AI 요약 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
-      }));
-    },
-  });
-
-  const handleWorkStandardClick = (taskName: string) => {
-    setWorkStandardDialog({
-      isOpen: true,
-      taskName,
-      summary: null
-    });
-    workStandardSummaryMutation.mutate(taskName);
-  };
 
   if (craneLoading) {
     return (
@@ -535,10 +480,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <div className="font-medium text-sm">{record.taskName || '작업명 없음'}</div>
-                        <button 
-                          onClick={() => handleWorkStandardClick(record.taskName || '작업명 없음')}
-                          className="ml-2 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border transition-colors"
-                        >
+                        <button className="ml-2 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border transition-colors">
                           작업표준
                         </button>
                       </div>
@@ -650,49 +592,6 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Work Standard AI Summary Dialog */}
-      <Dialog open={workStandardDialog.isOpen} onOpenChange={(open) => setWorkStandardDialog(prev => ({ ...prev, isOpen: open }))}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <FileText className="w-5 h-5 mr-2 text-blue-600" />
-              작업표준서 AI 요약 - {workStandardDialog.taskName}
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="mt-4">
-            {workStandardSummaryMutation.isPending ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                <span className="ml-3 text-gray-600">AI가 작업표준서를 분석하고 있습니다...</span>
-              </div>
-            ) : workStandardDialog.summary ? (
-              <div className="prose max-w-none">
-                <div className="whitespace-pre-wrap text-sm leading-relaxed bg-gray-50 p-6 rounded-lg border">
-                  {workStandardDialog.summary}
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                작업표준서를 불러오는 중입니다...
-              </div>
-            )}
-            
-            {workStandardDialog.summary && (
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-center text-blue-800 text-sm">
-                  <Brain className="w-4 h-4 mr-2" />
-                  <span className="font-medium">AI 요약 정보</span>
-                </div>
-                <p className="text-blue-700 text-xs mt-1">
-                  이 요약은 AI가 작업표준서를 분석하여 생성한 것입니다. 실제 작업 시에는 반드시 원본 작업표준서를 참조하시기 바랍니다.
-                </p>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
