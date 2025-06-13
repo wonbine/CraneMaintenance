@@ -592,14 +592,10 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                           {/* D-Day 중앙 표시 */}
                           <div className="absolute inset-0 flex items-end justify-center pb-8">
                             <div className="text-center">
-                              <div className={`text-3xl font-bold ${
-                                sampleDDay <= 0 ? 'text-blue-800' : 
-                                sampleDDay <= 7 ? 'text-blue-700' : 
-                                sampleDDay <= 15 ? 'text-blue-600' : 'text-blue-500'
-                              }`}>
+                              <div className="text-3xl font-bold text-black">
                                 {sampleDDay <= 0 ? `D+${Math.abs(sampleDDay)}` : `D-${sampleDDay}`}
                               </div>
-                              <div className="text-sm text-blue-600 mt-1">
+                              <div className="text-sm text-black mt-1">
                                 {sampleDDay <= 0 ? '점검 지연' : '점검까지'}
                               </div>
                             </div>
