@@ -1184,7 +1184,10 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </CardContent>
-              </Card></old_str>
+              </Card>
+
+              {/* Failure Cause Distribution Chart */}
+              {failureCauseChartData.length > 0 && (</old_str>
 
               {/* Failure Cause Distribution Chart */}
               {failureCauseChartData.length > 0 && (
