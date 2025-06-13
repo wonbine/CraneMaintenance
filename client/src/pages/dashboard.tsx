@@ -1043,7 +1043,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Show factory overview when no specific crane is selected */}
         {showOverview ? (
           <div className="space-y-6">
             {/* System Summary */}
