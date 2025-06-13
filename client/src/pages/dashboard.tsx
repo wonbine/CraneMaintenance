@@ -1152,8 +1152,22 @@ export default function Dashboard() {
                           formatter={(value: any, name: string) => [value, name]}
                           labelFormatter={(label) => `${label}`}
                         />
-                        <Bar dataKey="돌발작업" stackId="a" fill="#ef4444" />
-                        <Bar dataKey="일상수리" stackId="a" fill="#22c55e">
+                        <Bar 
+                          dataKey="돌발작업" 
+                          stackId="a" 
+                          fill={({ payload }: any) => {
+                            const maxTotal = Math.max(...maintenanceChartData.map(d => d.total));
+                            return payload?.total === maxTotal ? "#3b82f6" : "#6b7280";
+                          }}
+                        />
+                        <Bar 
+                          dataKey="일상수리" 
+                          stackId="a" 
+                          fill={({ payload }: any) => {
+                            const maxTotal = Math.max(...maintenanceChartData.map(d => d.total));
+                            return payload?.total === maxTotal ? "#3b82f6" : "#6b7280";
+                          }}
+                        >
                           <LabelList dataKey="total" position="top" />
                         </Bar>
                       </BarChart>
@@ -1161,16 +1175,16 @@ export default function Dashboard() {
                   </div>
                   <div className="mt-4 flex justify-center space-x-6">
                     <div className="flex items-center">
-                      <div className="w-3 h-3 bg-red-500 rounded mr-2"></div>
-                      <span className="text-sm text-gray-600">돌발작업</span>
+                      <div className="w-3 h-3 bg-blue-500 rounded mr-2"></div>
+                      <span className="text-sm text-gray-600">최고값 (블루)</span>
                     </div>
                     <div className="flex items-center">
-                      <div className="w-3 h-3 bg-green-500 rounded mr-2"></div>
-                      <span className="text-sm text-gray-600">일상수리</span>
+                      <div className="w-3 h-3 bg-gray-500 rounded mr-2"></div>
+                      <span className="text-sm text-gray-600">일반값 (그레이)</span>
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </Card></old_str>
 
               {/* Failure Cause Distribution Chart */}
               {failureCauseChartData.length > 0 && (
