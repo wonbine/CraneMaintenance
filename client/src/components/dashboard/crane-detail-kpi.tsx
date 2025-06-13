@@ -140,7 +140,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
 
   // Calculate inspection schedule data
   const inspectionScheduleData = useMemo(() => {
-    if (!craneData.inspectionCycle || !craneData.inspectionReferenceDate) {
+    if (!craneData?.inspectionCycle || !craneData?.inspectionReferenceDate) {
       return [];
     }
 
@@ -167,7 +167,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
     }
     
     return scheduleData;
-  }, [craneData.inspectionCycle, craneData.inspectionReferenceDate]);
+  }, [craneData?.inspectionCycle, craneData?.inspectionReferenceDate]);
 
   // Calculate operational status and health score
   const getOperationalStatus = () => {
