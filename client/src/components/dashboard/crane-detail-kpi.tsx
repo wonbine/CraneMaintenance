@@ -517,44 +517,112 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
           <CardContent>
             {craneData.inspectionCycle && craneData.inspectionReferenceDate ? (
               <div className="space-y-6">
-                {/* 게이지 차트 */}
+                {/* D-Day 게이지 차트 */}
                 <div className="flex justify-center">
-                  <div className="relative w-64 h-32">
+                  <div className="relative w-80 h-40">
                     {(() => {
                       const referenceDate = new Date(craneData.inspectionReferenceDate);
                       const currentDate = new Date();
                       const cycleDays = craneData.inspectionCycle;
-                      const daysSinceReference = Math.floor((currentDate.getTime() - referenceDate.getTime()) / (24 * 60 * 60 * 1000));
-                      const progress = Math.min((daysSinceReference / cycleDays) * 100, 100);
                       const nextInspectionDate = new Date(referenceDate.getTime() + cycleDays * 24 * 60 * 60 * 1000);
                       const daysUntilInspection = Math.ceil((nextInspectionDate.getTime() - currentDate.getTime()) / (24 * 60 * 60 * 1000));
+                      const daysSinceReference = Math.floor((currentDate.getTime() - referenceDate.getTime()) / (24 * 60 * 60 * 1000));
+                      
+                      // D-Day 계산 (음수면 지남, 양수면 남음)
+                      const dDayValue = daysUntilInspection;
+                      const isOverdue = dDayValue <= 0;
+                      const progress = Math.min(Math.max((daysSinceReference / cycleDays) * 180, 0), 180);
+                      
+                      // 게이지 색상 결정
+                      const getGaugeColor = () => {
+                        if (isOverdue) return '#ef4444'; // 빨간색 - 점검 필요
+                        if (dDayValue <= 7) return '#f59e0b'; // 주황색 - 임박
+                        if (dDayValue <= 30) return '#eab308'; // 노란색 - 주의
+                        return '#10b981'; // 초록색 - 안전
+                      };
                       
                       return (
                         <>
-                          {/* 반원 게이지 배경 */}
+                          {/* 게이지 배경 */}
                           <div className="absolute inset-0 flex items-end justify-center">
-                            <div className="w-56 h-28 rounded-t-full border-8 border-gray-200 relative overflow-hidden">
-                              {/* 진행률 표시 */}
-                              <div 
-                                className="absolute bottom-0 left-0 h-full rounded-t-full transition-all duration-1000"
-                                style={{
-                                  width: `${progress}%`,
-                                  background: progress >= 100 ? '#ef4444' : progress >= 80 ? '#f59e0b' : '#10b981'
-                                }}
-                              />
+                            <div className="relative">
+                              {/* 외부 테두리 */}
+                              <div className="w-72 h-36 border-8 border-gray-200 rounded-t-full relative">
+                                {/* 진행률 게이지 */}
+                                <div 
+                                  className="absolute inset-0 rounded-t-full transition-all duration-1000 ease-out"
+                                  style={{
+                                    background: `conic-gradient(
+                                      ${getGaugeColor()} 0deg ${progress}deg,
+                                      transparent ${progress}deg 180deg
+                                    )`,
+                                    mask: 'conic-gradient(black 0deg 180deg, transparent 180deg)',
+                                    WebkitMask: 'conic-gradient(black 0deg 180deg, transparent 180deg)'
+                                  }}
+                                />
+                                
+                                {/* 게이지 눈금 */}
+                                <div className="absolute inset-2 rounded-t-full border-2 border-gray-100">
+                                  {[0, 30, 60, 90, 120, 150, 180].map((degree) => (
+                                    <div
+                                      key={degree}
+                                      className="absolute w-1 h-4 bg-gray-300"
+                                      style={{
+                                        bottom: '0',
+                                        left: '50%',
+                                        transformOrigin: 'bottom center',
+                                        transform: `translateX(-50%) rotate(${degree - 90}deg)`
+                                      }}
+                                    />
+                                  ))}
+                                </div>
+                                
+                                {/* 게이지 바늘 */}
+                                <div
+                                  className="absolute w-1 bg-gray-800 shadow-lg"
+                                  style={{
+                                    height: '120px',
+                                    bottom: '0',
+                                    left: '50%',
+                                    transformOrigin: 'bottom center',
+                                    transform: `translateX(-50%) rotate(${progress - 90}deg)`,
+                                    transition: 'transform 1s ease-out'
+                                  }}
+                                >
+                                  <div className="absolute -bottom-2 -left-2 w-5 h-5 bg-gray-800 rounded-full"></div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                           
-                          {/* 게이지 중앙 정보 */}
-                          <div className="absolute inset-0 flex items-end justify-center pb-6">
+                          {/* D-Day 중앙 표시 */}
+                          <div className="absolute inset-0 flex items-end justify-center pb-8">
                             <div className="text-center">
-                              <div className="text-2xl font-bold text-gray-800">
-                                {Math.max(0, daysUntilInspection)}
+                              <div className={`text-3xl font-bold ${
+                                isOverdue ? 'text-red-600' : 
+                                dDayValue <= 7 ? 'text-orange-600' : 
+                                dDayValue <= 30 ? 'text-yellow-600' : 'text-green-600'
+                              }`}>
+                                {isOverdue ? `D+${Math.abs(dDayValue)}` : `D-${dDayValue}`}
                               </div>
-                              <div className="text-sm text-gray-600">
-                                {daysUntilInspection <= 0 ? '점검 필요' : '일 남음'}
+                              <div className="text-sm text-gray-600 mt-1">
+                                {isOverdue ? '점검 지연' : '점검까지'}
                               </div>
                             </div>
+                          </div>
+                          
+                          {/* 상태 라벨들 */}
+                          <div className="absolute bottom-0 left-0 text-xs text-green-600 font-medium">
+                            안전
+                          </div>
+                          <div className="absolute bottom-0 left-1/4 text-xs text-yellow-600 font-medium">
+                            주의
+                          </div>
+                          <div className="absolute bottom-0 right-1/4 text-xs text-orange-600 font-medium">
+                            임박
+                          </div>
+                          <div className="absolute bottom-0 right-0 text-xs text-red-600 font-medium">
+                            지연
                           </div>
                         </>
                       );
