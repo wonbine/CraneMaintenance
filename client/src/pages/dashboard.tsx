@@ -1104,6 +1104,14 @@ export default function Dashboard() {
                               `${value}대 (${operationChartData.find(d => d.name === name)?.percentage}%)`,
                               name
                             ]}
+                            contentStyle={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                              border: '1px solid #e5e7eb',
+                              borderRadius: '8px',
+                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                              fontSize: '14px',
+                              color: '#000000'
+                            }}
                           />
                         </PieChart>
                       </ResponsiveContainer>
@@ -1150,7 +1158,8 @@ export default function Dashboard() {
                               border: '1px solid #e5e7eb',
                               borderRadius: '8px',
                               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                              fontSize: '14px'
+                              fontSize: '14px',
+                              color: '#000000'
                             }}
                           />
                           <Legend 
@@ -1163,7 +1172,7 @@ export default function Dashboard() {
                             iconType="circle"
                             formatter={(value: string) => (
                               <span style={{ 
-                                color: '#374151',
+                                color: '#000000',
                                 fontSize: '13px',
                                 fontWeight: '500'
                               }}>
@@ -1188,11 +1197,19 @@ export default function Dashboard() {
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={maintenanceChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
-                        <YAxis />
+                        <XAxis dataKey="month" tick={{ fill: '#000000' }} />
+                        <YAxis tick={{ fill: '#000000' }} />
                         <Tooltip 
                           formatter={(value: any, name: string) => [value, name]}
                           labelFormatter={(label) => `${label}`}
+                          contentStyle={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                            fontSize: '14px',
+                            color: '#000000'
+                          }}
                         />
                         <Bar dataKey="돌발작업" stackId="a" fill={CHART_COLORS.primary} />
                         <Bar dataKey="일상수리" stackId="a" fill={CHART_COLORS.secondary}>
@@ -1251,7 +1268,8 @@ export default function Dashboard() {
                               border: '1px solid #e5e7eb',
                               borderRadius: '8px',
                               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                              fontSize: '14px'
+                              fontSize: '14px',
+                              color: '#000000'
                             }}
                           />
                           <Legend 
@@ -1264,7 +1282,7 @@ export default function Dashboard() {
                             iconType="circle"
                             formatter={(value: string) => (
                               <span style={{ 
-                                color: '#374151',
+                                color: '#000000',
                                 fontSize: '13px',
                                 fontWeight: '500'
                               }}>
