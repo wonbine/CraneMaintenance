@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
@@ -13,12 +13,19 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Ba
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { AISummaryButton } from './ai-summary-button';
+import { WorkStandardPopup } from './work-standard-popup';
 
 interface CraneDetailKPIProps {
   selectedCraneId: string;
 }
 
 export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
+  const [selectedPeriod, setSelectedPeriod] = useState('6months');
+  const [workStandardPopup, setWorkStandardPopup] = useState({
+    isOpen: false,
+    taskName: ''
+  });
+
   // First, get all cranes to find the matching crane by name or ID
   const { data: allCranes = [] } = useQuery({
     queryKey: ['/api/cranes'],
@@ -34,7 +41,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
     crane.craneId === selectedCraneId || crane.craneName === selectedCraneId
   );
   const actualCraneId = actualCrane?.craneId;
-  
+
   // Check if selectedCraneId is a factory name
   const isFactoryView = !actualCrane && allCranes.some((crane: any) => crane.plantSection === selectedCraneId);
   const factoryName = isFactoryView ? selectedCraneId : actualCrane?.plantSection;
@@ -108,7 +115,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
 
   const totalFailures = failureRecords.length;
   const totalMaintenance = maintenanceRecords.length;
-  
+
   const recentFailures = failureRecords.filter((record: any) => {
     const recordDate = new Date(record.failureDate);
     return recordDate >= oneMonthAgo;
@@ -182,6 +189,10 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
       'D': 'bg-red-500'
     };
     return gradeColors[grade as keyof typeof gradeColors] || 'bg-gray-500';
+  };
+
+  const openWorkStandardPopup = (taskName: string) => {
+    setWorkStandardPopup({ isOpen: true, taskName: taskName });
   };
 
   return (
@@ -480,9 +491,12 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <div className="font-medium text-sm">{record.taskName || '작업명 없음'}</div>
-                        <button className="ml-2 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border transition-colors">
-                          작업표준
-                        </button>
+                        <button 
+                            className="ml-2 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border transition-colors"
+                            onClick={() => openWorkStandardPopup(record.taskName || '작업표준')}
+                          >
+                            작업표준
+                          </button>
                       </div>
                       <div className="text-xs text-gray-500">{formatDate(record.actualStartDateTime)}</div>
                     </div>
@@ -536,7 +550,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                       {failureRecords.map((record: any, index: number) => {
                         // Find crane name for this record
                         const recordCrane = allCranes.find((crane: any) => crane.craneId === record.craneId);
-                        
+
                         return (
                           <TableRow key={index} className="hover:bg-gray-50">
                             <TableCell className="text-center">
@@ -592,6 +606,13 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Work Standard Popup */}
+      <WorkStandardPopup
+        isOpen={workStandardPopup.isOpen}
+        onClose={() => setWorkStandardPopup({ isOpen: false, taskName: '' })}
+        taskName={workStandardPopup.taskName}
+      />
     </div>
   );
 }
