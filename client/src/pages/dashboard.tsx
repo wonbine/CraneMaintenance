@@ -199,17 +199,23 @@ export default function Dashboard() {
             {factoryOperationData && (
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="text-green-600">유인 {factoryOperationData.mannedPercentage}%</span>
-                  <span className="text-orange-600">무인 {factoryOperationData.unmannedPercentage}%</span>
+                  <span style={{ color: CHART_COLORS.primary }}>유인 {factoryOperationData.mannedPercentage}%</span>
+                  <span style={{ color: CHART_COLORS.secondary }}>무인 {factoryOperationData.unmannedPercentage}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3 flex overflow-hidden">
                   <div 
-                    className="bg-green-500 h-3 transition-all duration-300" 
-                    style={{ width: `${factoryOperationData.mannedPercentage}%` }}
+                    className="h-3 transition-all duration-300" 
+                    style={{ 
+                      width: `${factoryOperationData.mannedPercentage}%`,
+                      backgroundColor: CHART_COLORS.primary
+                    }}
                   ></div>
                   <div 
-                    className="bg-orange-500 h-3 transition-all duration-300" 
-                    style={{ width: `${factoryOperationData.unmannedPercentage}%` }}
+                    className="h-3 transition-all duration-300" 
+                    style={{ 
+                      width: `${factoryOperationData.unmannedPercentage}%`,
+                      backgroundColor: CHART_COLORS.secondary
+                    }}
                   ></div>
                 </div>
               </div>
