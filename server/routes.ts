@@ -612,6 +612,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get failure records by factory
+  app.get("/api/failure-records/factory/:factoryName", async (req, res) => {
+    try {
+      const { factoryName } = req.params;
+      const allCranes = await storage.getCranes();
+      const allFailureRecords = await storage.getFailureRecords();
+      
+      // Filter cranes by factory (plantSection)
+      const factoryCranes = allCranes.filter(crane => 
+        crane.plantSection === decodeURIComponent(factoryName)
+      );
+      
+      // Get all crane IDs for this factory
+      const factoryCraneIds = factoryCranes.map(crane => crane.craneId);
+      
+      // Filter failure records to only include those from factory cranes
+      const factoryFailureRecords = allFailureRecords.filter(record => 
+        factoryCraneIds.includes(record.craneId)
+      );
+      
+      // Sort by date descending (most recent first)
+      const sortedRecords = factoryFailureRecords.sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      
+      res.json(sortedRecords);
+    } catch (error) {
+      console.error("Error fetching factory failure records:", error);
+      res.status(500).json({ message: "Failed to fetch factory failure records" });
+    }
+  });
+
   // Get crane details by crane name
   app.get("/api/crane-details", async (req, res) => {
     try {

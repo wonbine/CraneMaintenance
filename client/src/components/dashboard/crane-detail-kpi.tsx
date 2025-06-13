@@ -29,11 +29,15 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
     }
   });
 
-  // Find the actual crane ID - selectedCraneId might be a crane name
+  // Find the actual crane ID - selectedCraneId might be a crane name or factory name
   const actualCrane = allCranes.find((crane: any) => 
     crane.craneId === selectedCraneId || crane.craneName === selectedCraneId
   );
   const actualCraneId = actualCrane?.craneId;
+  
+  // Check if selectedCraneId is a factory name
+  const isFactoryView = !actualCrane && allCranes.some((crane: any) => crane.plantSection === selectedCraneId);
+  const factoryName = isFactoryView ? selectedCraneId : actualCrane?.plantSection;
 
   // Fetch crane details using the actual crane ID
   const { data: craneData, isLoading: craneLoading } = useQuery({
@@ -46,15 +50,24 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
     enabled: !!actualCraneId && actualCraneId !== 'all'
   });
 
-  // Fetch failure records
+  // Fetch failure records - if specific crane selected, get crane records, otherwise get factory records
   const { data: failureRecords = [] } = useQuery({
-    queryKey: ['/api/failure-records', actualCraneId],
+    queryKey: ['/api/failure-records', actualCraneId, factoryName, isFactoryView],
     queryFn: async () => {
-      const response = await fetch(`/api/failure-records/${actualCraneId}`);
-      if (!response.ok) throw new Error('Failed to fetch failure records');
-      return response.json();
+      if (actualCraneId && actualCraneId !== 'all' && !isFactoryView) {
+        // Get records for specific crane
+        const response = await fetch(`/api/failure-records/${actualCraneId}`);
+        if (!response.ok) throw new Error('Failed to fetch failure records');
+        return response.json();
+      } else if (factoryName) {
+        // Get all records for the factory
+        const response = await fetch(`/api/failure-records/factory/${encodeURIComponent(factoryName)}`);
+        if (!response.ok) throw new Error('Failed to fetch factory failure records');
+        return response.json();
+      }
+      return [];
     },
-    enabled: !!actualCraneId && actualCraneId !== 'all'
+    enabled: (!!actualCraneId && !isFactoryView) || !!factoryName
   });
 
   // Fetch maintenance records
