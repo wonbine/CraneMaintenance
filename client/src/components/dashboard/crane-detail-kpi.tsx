@@ -523,8 +523,8 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                     {(() => {
                       // 샘플 데이터
                       const sampleDDay = 5; // D-5 (5일 남음)
-                      const cycleDays = 30; // 30일 주기
-                      const daysSinceStart = 25; // 25일 경과
+                      const cycleDays = 14; // 14일 주기
+                      const daysSinceStart = 9; // 9일 경과
                       const progress = Math.min(Math.max((daysSinceStart / cycleDays) * 180, 0), 180);
                       
                       // 게이지 색상 결정
@@ -625,30 +625,23 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                 </div>
 
                 {/* 점검 정보 카드들 (샘플 데이터) */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 bg-blue-50 rounded-lg text-center">
                     <div className="text-sm text-blue-600 font-medium">점검 주기</div>
-                    <div className="text-lg font-bold text-blue-800">30일</div>
+                    <div className="text-lg font-bold text-blue-800">14일</div>
                   </div>
                   
                   <div className="p-4 bg-green-50 rounded-lg text-center">
                     <div className="text-sm text-green-600 font-medium">기준일</div>
                     <div className="text-sm font-bold text-green-800">
-                      2024. 12. 15.
+                      2025. 6. 4.
                     </div>
                   </div>
                   
                   <div className="p-4 bg-orange-50 rounded-lg text-center">
                     <div className="text-sm text-orange-600 font-medium">다음 점검일</div>
                     <div className="text-sm font-bold text-orange-800">
-                      2025. 1. 14.
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 bg-red-50 rounded-lg text-center">
-                    <div className="text-sm text-red-600 font-medium">경과 일수</div>
-                    <div className="text-lg font-bold text-red-800">
-                      25일
+                      2025. 6. 18.
                     </div>
                   </div>
                 </div>
