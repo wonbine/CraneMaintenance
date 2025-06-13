@@ -90,7 +90,7 @@ export default function Dashboard() {
   });
 
   // Chart colors
-  const OPERATION_COLORS = ['#22c55e', '#ef4444']; // Green for manned, Red for unmanned
+  const OPERATION_COLORS = ['#3b82f6', '#6b7280']; // Blue for manned, Gray for unmanned
   const GRADE_COLORS = {
     'A': '#22c55e', // Bright green for A grade (best)
     'B': '#3b82f6', // Blue for B grade  
