@@ -506,40 +506,40 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                       <TableRow className="bg-gray-50">
                         <TableHead className="text-center">발생일자</TableHead>
                         <TableHead className="text-center">고장부위</TableHead>
-                        <TableHead className="text-center">고장원인</TableHead>
-                        <TableHead className="text-center">수리내용</TableHead>
+                        <TableHead className="text-center">고장유형</TableHead>
+                        <TableHead className="text-center">고장설명</TableHead>
                         <TableHead className="text-center">작업자</TableHead>
-                        <TableHead className="text-center">소요시간</TableHead>
-                        <TableHead className="text-center">상태</TableHead>
+                        <TableHead className="text-center">다운타임(시간)</TableHead>
+                        <TableHead className="text-center">심각도</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {failureRecords.map((record: any, index: number) => (
                         <TableRow key={index} className="hover:bg-gray-50">
                           <TableCell className="text-center">
-                            {formatDate(record.failureDate)}
+                            {formatDate(record.date)}
                           </TableCell>
                           <TableCell className="text-center">
                             {record.byDevice || '정보없음'}
                           </TableCell>
                           <TableCell className="text-center">
-                            {record.failureCause || '정보없음'}
+                            {record.failureType || '정보없음'}
                           </TableCell>
                           <TableCell className="text-center">
-                            {record.repairContent || '정보없음'}
+                            {record.description || '정보없음'}
                           </TableCell>
                           <TableCell className="text-center">
-                            {record.technician || '정보없음'}
+                            {record.reportedBy || '정보없음'}
                           </TableCell>
                           <TableCell className="text-center">
-                            {record.repairTime ? `${record.repairTime}시간` : '정보없음'}
+                            {record.downtime ? `${record.downtime}시간` : '정보없음'}
                           </TableCell>
                           <TableCell className="text-center">
                             <Badge 
-                              variant={record.status === 'completed' ? 'default' : 'destructive'}
+                              variant={record.severity === 'high' ? 'destructive' : record.severity === 'medium' ? 'secondary' : 'default'}
                               className="text-xs"
                             >
-                              {record.status === 'completed' ? '완료' : '진행중'}
+                              {record.severity === 'high' ? '높음' : record.severity === 'medium' ? '중간' : '낮음'}
                             </Badge>
                           </TableCell>
                         </TableRow>
