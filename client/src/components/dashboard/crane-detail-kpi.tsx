@@ -527,12 +527,12 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                       const daysSinceStart = cycleDays - sampleDDay; // 9일 경과 (14 - 5 = 9)
                       const progress = Math.min(Math.max((daysSinceStart / cycleDays) * 180, 0), 180);
                       
-                      // 게이지 색상 결정
+                      // 게이지 색상 결정 (블루 계열)
                       const getGaugeColor = () => {
-                        if (sampleDDay <= 0) return '#ef4444'; // 빨간색 - 점검 필요
-                        if (sampleDDay <= 7) return '#f59e0b'; // 주황색 - 임박
-                        if (sampleDDay <= 15) return '#eab308'; // 노란색 - 주의
-                        return '#10b981'; // 초록색 - 안전
+                        if (sampleDDay <= 0) return '#1e40af'; // 진한 파랑 - 점검 필요
+                        if (sampleDDay <= 7) return '#2563eb'; // 파랑 - 임박
+                        if (sampleDDay <= 15) return '#3b82f6'; // 밝은 파랑 - 주의
+                        return '#60a5fa'; // 연한 파랑 - 안전
                       };
                       
                       return (
@@ -593,29 +593,29 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
                           <div className="absolute inset-0 flex items-end justify-center pb-8">
                             <div className="text-center">
                               <div className={`text-3xl font-bold ${
-                                sampleDDay <= 0 ? 'text-red-600' : 
-                                sampleDDay <= 7 ? 'text-orange-600' : 
-                                sampleDDay <= 15 ? 'text-yellow-600' : 'text-green-600'
+                                sampleDDay <= 0 ? 'text-blue-800' : 
+                                sampleDDay <= 7 ? 'text-blue-700' : 
+                                sampleDDay <= 15 ? 'text-blue-600' : 'text-blue-500'
                               }`}>
                                 {sampleDDay <= 0 ? `D+${Math.abs(sampleDDay)}` : `D-${sampleDDay}`}
                               </div>
-                              <div className="text-sm text-gray-600 mt-1">
+                              <div className="text-sm text-blue-600 mt-1">
                                 {sampleDDay <= 0 ? '점검 지연' : '점검까지'}
                               </div>
                             </div>
                           </div>
                           
                           {/* 상태 라벨들 */}
-                          <div className="absolute bottom-0 left-0 text-xs text-green-600 font-medium">
+                          <div className="absolute bottom-0 left-0 text-xs text-blue-400 font-medium">
                             안전
                           </div>
-                          <div className="absolute bottom-0 left-1/4 text-xs text-yellow-600 font-medium">
+                          <div className="absolute bottom-0 left-1/4 text-xs text-blue-500 font-medium">
                             주의
                           </div>
-                          <div className="absolute bottom-0 right-1/4 text-xs text-orange-600 font-medium">
+                          <div className="absolute bottom-0 right-1/4 text-xs text-blue-600 font-medium">
                             임박
                           </div>
-                          <div className="absolute bottom-0 right-0 text-xs text-red-600 font-medium">
+                          <div className="absolute bottom-0 right-0 text-xs text-blue-800 font-medium">
                             지연
                           </div>
                         </>
@@ -648,7 +648,7 @@ export function CraneDetailKPI({ selectedCraneId }: CraneDetailKPIProps) {
 
                 {/* 점검 상태 표시 */}
                 <div className="flex justify-center">
-                  <div className="px-4 py-2 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                  <div className="px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                     점검 예정
                   </div>
                 </div>
